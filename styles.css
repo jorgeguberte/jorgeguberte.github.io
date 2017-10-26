@@ -1,0 +1,94 @@
+h1, h2, h3, h4, h5{
+    font-family: 'Noto Serif', serif;
+    color: #424242;
+}
+.Sidebar{
+    height: 100vh;
+    
+    text-align: center;
+    font-family: 'Noto Serif';
+    color: #424242;
+}
+
+.Sidebar h1{
+    font-size: 1.5em;
+    margin: 0.1em;
+}
+.Sidebar p{
+    font-size: 0.9em;
+    color: #424242;
+}
+
+.Content{
+    clear: left;
+    padding: 80px;
+}
+
+.Infolet{
+    padding-top: 128px;
+    color: #424242;
+}
+
+.Infolet a{
+    margin-right: 10px;
+    color: #424242;
+}
+
+.Infolet a:hover{
+    color: black;
+}
+
+
+
+.Logo{
+    margin-bottom: 10px;
+}
+
+.Skills{
+
+
+}
+
+.Menu{
+}
+
+
+.IndexPostContainer a{
+    color: #424242;
+    transition-property: color;
+    transition-duration: 0.2s;
+}
+
+.IndexPostContainer a:hover{
+    color: #007bff;
+    text-decoration: none;
+}
+
+
+
+@media(max-width: 575px){
+    .Sidebar{
+        height: auto;
+        position: relative;
+    }
+
+    .Infolet{
+        padding-top: 20px;
+    }
+
+    .Logo{
+        float: left;
+    }
+
+    .Infolet h1, .Infolet p, .SocialLinks{
+        display: none;
+    }
+
+    .Content{
+        padding: 30px;
+    }
+
+    .Menu{
+        margin-top: 20px;
+    }
+}
