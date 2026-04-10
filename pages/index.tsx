@@ -25,6 +25,7 @@ const projects = [
 ];
 
 const socials = [
+  { label: "Blog", href: "/blog" },
   { label: "GitHub", href: "https://github.com/jorgeguberte" },
   { label: "Email", href: "mailto:jorgeguberte@gmail.com" },
 ];
