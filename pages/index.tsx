@@ -16,11 +16,11 @@ const projects = [
     tags: ["DevOps", "Infrastructure"],
   },
   {
-    name: "newsite",
+    name: "ayvu-talian-base",
     description:
-      "Este site! Portfolio, tutoriais e blog. Astro + TanStack + Mastra com área secreta para recruiters.",
-    href: "https://github.com/jorgeguberte/newsite",
-    tags: ["Astro", "TypeScript", "React"],
+      "Custom language model for the Talian dialect. 5.39M parameter architecture trained from scratch to explore NLP in low-resource linguistic contexts.",
+    href: "https://github.com/jorgeguberte/ayvu-talian-base",
+    tags: ["NLP", "PyTorch", "Language Model"],
   },
 ];
 
