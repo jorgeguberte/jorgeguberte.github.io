@@ -1,22 +1,13 @@
 {
-  "name": "nextra-docs-template",
-  "version": "0.0.1",
-  "description": "Nextra docs template",
+  "name": "jorgeguberte.github.io",
+  "version": "1.0.0",
+  "description": "Personal site and blog",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/shuding/nextra-docs-template.git"
-  },
-  "author": "Shu Ding <g@shud.in>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/shuding/nextra-docs-template/issues"
-  },
-  "homepage": "https://github.com/shuding/nextra-docs-template#readme",
   "dependencies": {
     "@tailwindcss/postcss": "^4.2.2",
     "@types/react": "^19.2.14",
@@ -25,7 +16,8 @@
     "postcss": "^8.5.9",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "tailwindcss": "^4.2.2"
+    "tailwindcss": "^4.2.2",
+    "velite": "^0.3.1"
   },
   "devDependencies": {
     "@types/node": "^18.11.10",
