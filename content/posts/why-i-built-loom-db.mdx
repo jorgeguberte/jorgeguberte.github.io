@@ -1,0 +1,56 @@
+---
+title: Why I Built loom-db
+slug: why-i-built-loom-db
+date: 2026-04-10
+description: On graph memory engines, biological inspiration, and why AI agents need better memory systems.
+tags: [loom-db, rust, ai-agents]
+---
+
+# Why I Built loom-db
+
+Most AI agents have the memory of a goldfish. They process tokens, generate responses, and forget everything the moment the context window slides forward. That's not how brains work, and it's not how useful agents should work either.
+
+## The Problem
+
+Traditional databases give you storage, not **memory**. There's a difference:
+
+- **Storage** is passive — data sits there until you query it
+- **Memory** is active — it decays, gets reinforced, and surfaces context automatically
+
+When an AI agent needs to remember a user's preferences, a previous conversation, or a learned behavior, it shouldn't need a complex retrieval pipeline. The memory should just... be there. Relevant. Timely. Alive.
+
+## The Biology
+
+I got obsessed with the **Ebbinghaus forgetting curve**. It's a formula from 1885 that models how memories fade over time:
+
+```
+A(t) = A(t-1) × (DecayRate)^(Δt)
+```
+
+Simple, elegant, and surprisingly effective when applied to a graph database. Memories decay naturally unless reinforced — just like synapses in your brain.
+
+## The Design
+
+loom-db has three types of nodes:
+
+1. **Concepts** — semantic knowledge ("Rust is a systems language")
+2. **Episodes** — temporal experiences ("User asked about deployment at 3pm")
+3. **States** — emotional context ("User was frustrated")
+
+Nodes connect via weighted edges, and activation spreads through the graph like a ripple. Stimulate one node, and its neighbors get a boost too. This creates **intuition** — surfacing relevant context without explicit queries.
+
+## The Edge
+
+The whole thing is pure Rust, no OS dependencies. That means it compiles to **WebAssembly** and runs in the browser. Your AI agent's memory lives client-side, no server round-trips, no privacy concerns.
+
+> "What if your agent's brain was just a WASM binary in the browser?"
+
+That's loom-db.
+
+## What's Next
+
+- **Dream Protocol** — consolidation cycles that reinforce stable memories and prune weak ones
+- **Instruction tuning** for the ayvu-talian model using loom-db as context
+- **Multi-agent memory sharing** — agents that learn from each other's experiences
+
+Check it out on [GitHub](https://github.com/jorgeguberte/loom-db). Stars welcome, PRs even more.
