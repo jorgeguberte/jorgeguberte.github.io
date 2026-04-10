@@ -4,23 +4,23 @@ const projects = [
   {
     name: "loom-db",
     description:
-      "Database reativo e performático focado em AI agents. Suporte a triggers, streams e padrões de memória persistente.",
+      "A strict-schema, bio-inspired graph memory engine for AI agents. Engineered in Rust. WASM-ready. Optimized for the Edge.",
     href: "https://github.com/jorgeguberte/loom-db",
-    tags: ["Rust", "Database", "AI Agents"],
+    tags: ["Rust", "Graph Database", "AI Agents"],
   },
   {
     name: "multiverse",
     description:
-      "Ferramenta de orquestração para múltiplos ambientes de desenvolvimento e deploy.",
+      "State management library with Git-style branching semantics. Fork, merge, and discard state timelines with O(K) copy-on-write performance.",
     href: "https://github.com/jorgeguberte/multiverse",
-    tags: ["DevOps", "Infrastructure"],
+    tags: ["TypeScript", "State Management", "React"],
   },
   {
     name: "ayvu-talian-base",
     description:
-      "Custom language model for the Talian dialect. 5.39M parameter architecture trained from scratch to explore NLP in low-resource linguistic contexts.",
+      "Character-level transformer trained to generate text in Talian (Brazilian Venetian), a minority language spoken in southern Brazil. 5.39M parameters for linguistic preservation.",
     href: "https://github.com/jorgeguberte/ayvu-talian-base",
-    tags: ["NLP", "PyTorch", "Language Model"],
+    tags: ["NLP", "PyTorch", "Transformer"],
   },
 ];
 
@@ -63,11 +63,11 @@ export default function Home() {
             About
           </h2>
           <p className="text-neutral-300 leading-relaxed">
-            42 anos, desenvolvedor, e dono de um cérebro que funciona melhor com
-            computadores do que sem eles. Trabalho com sistemas de AI/ML,
-            ferramentas open source, e qualquer coisa que me faça aprender algo
-            novo. Fanático por performance e por encontrar a solução elegante
-            para problemas que ninguém pediu pra resolver.
+            Developer from São Paulo with a brain that works better with
+            computers than without them. I build AI/ML systems, open source
+            tools, and anything that forces me to learn something new. Obsessed
+            with performance and finding elegant solutions to problems nobody
+            asked to solve.
           </p>
         </section>
 
