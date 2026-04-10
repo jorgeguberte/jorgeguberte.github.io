@@ -12,7 +12,7 @@ export default defineConfig({
         date: s.isodate(),
         description: s.string(),
         tags: s.array(s.string()).optional(),
-        content: s.mdx(),
+        content: s.markdown(),
       }),
     },
   },
