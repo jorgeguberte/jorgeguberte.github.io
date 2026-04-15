@@ -1,4 +1,3 @@
-import Head from "next/head";
 import Link from "next/link";
 import { posts } from "#site/content";
 import {
@@ -9,6 +8,7 @@ import {
   writingIntro,
   isPublicPost,
 } from "../data/site-content";
+import { SeoHead } from "../components/SeoHead";
 
 const featuredPosts = [...posts]
   .filter(isPublicPost)
@@ -18,18 +18,11 @@ const featuredPosts = [...posts]
 export default function Home() {
   return (
     <>
-      <Head>
-        <title>Jorge Guberte — AI Engineer & Agent Systems Architect</title>
-        <meta
-          name="description"
-          content="Memory-driven AI systems, agent architecture, open-source experiments, and writing by Jorge Guberte."
-        />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
-          rel="stylesheet"
-        />
-      </Head>
+      <SeoHead
+        title="Jorge Guberte — AI Engineer & Agent Systems Architect"
+        description="Memory-driven AI systems, agent architecture, open-source experiments, and writing by Jorge Guberte."
+        path="/"
+      />
 
       <main className="min-h-screen px-6 py-12 md:py-16 max-w-5xl mx-auto">
         <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between mb-18">
