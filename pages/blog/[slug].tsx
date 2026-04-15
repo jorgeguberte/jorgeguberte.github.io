@@ -1,8 +1,8 @@
-import Head from "next/head";
 import Link from "next/link";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { posts } from "#site/content";
 import type { Post } from "#site/content";
+import { SeoHead } from "../../components/SeoHead";
 
 interface PostPageProps {
   post: Post;
@@ -11,10 +11,13 @@ interface PostPageProps {
 export default function PostPage({ post }: PostPageProps) {
   return (
     <>
-      <Head>
-        <title>{post.title} — Jorge Guberte</title>
-        <meta name="description" content={post.description} />
-      </Head>
+      <SeoHead
+        title={`${post.title} — Jorge Guberte`}
+        description={post.description}
+        path={`/blog/${post.slug}`}
+        type="article"
+        publishedTime={new Date(post.date).toISOString()}
+      />
 
       <main className="min-h-screen px-6 py-16 max-w-3xl mx-auto">
         <div className="mb-12">

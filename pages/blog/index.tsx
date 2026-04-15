@@ -1,7 +1,7 @@
-import Head from "next/head";
 import Link from "next/link";
 import { posts } from "#site/content";
 import { isPublicPost, writingIntro } from "../../data/site-content";
+import { SeoHead } from "../../components/SeoHead";
 
 export default function BlogIndex() {
   const sortedPosts = [...posts]
@@ -10,13 +10,11 @@ export default function BlogIndex() {
 
   return (
     <>
-      <Head>
-        <title>Blog — Jorge Guberte</title>
-        <meta
-          name="description"
-          content="Writing on memory, context engineering, infrastructure, and AI systems by Jorge Guberte."
-        />
-      </Head>
+      <SeoHead
+        title="Blog — Jorge Guberte"
+        description="Writing on memory, context engineering, infrastructure, and AI systems by Jorge Guberte."
+        path="/blog"
+      />
 
       <main className="min-h-screen px-6 py-16 max-w-4xl mx-auto">
         <div className="mb-12 flex items-center justify-between gap-4">

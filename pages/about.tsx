@@ -1,17 +1,15 @@
-import Head from "next/head";
 import Link from "next/link";
 import { aboutPage, profile } from "../data/site-content";
+import { SeoHead } from "../components/SeoHead";
 
 export default function AboutPage() {
   return (
     <>
-      <Head>
-        <title>About — Jorge Guberte</title>
-        <meta
-          name="description"
-          content="About Jorge Guberte: AI engineer, agent systems architect, and builder of memory-driven software."
-        />
-      </Head>
+      <SeoHead
+        title="About — Jorge Guberte"
+        description="About Jorge Guberte: AI engineer, agent systems architect, and builder of memory-driven software."
+        path="/about"
+      />
 
       <main className="min-h-screen px-6 py-16 max-w-4xl mx-auto">
         <div className="mb-10">
