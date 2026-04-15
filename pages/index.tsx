@@ -159,6 +159,27 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="mb-18 rounded-3xl border border-neutral-900 bg-neutral-950/70 p-7 md:p-8">
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-emerald-400 mb-3">
+                Labs
+              </p>
+              <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-3">
+                A playground for experiments, interfaces, and useful weirdness.
+              </h2>
+              <p className="max-w-2xl text-neutral-400 leading-relaxed">
+                Static, fast, and intentionally scrappy. This is where prototypes can exist before they deserve a product page.
+              </p>
+            </div>
+            <div>
+              <Link href="/labs/" className="font-mono text-sm text-emerald-300 hover:text-emerald-200">
+                Visit Labs →
+              </Link>
+            </div>
+          </div>
+        </section>
+
         <section className="mb-18">
           <div className="mb-6">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-emerald-400 mb-3">
