@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Labs — Jorge Guberte</title>
+    <meta
+      name="description"
+      content="A static playground for experiments, prototypes, interfaces, and weird ideas by Jorge Guberte."
+    />
+    <link rel="canonical" href="https://jorgeguberte.com/labs/" />
+    <meta property="og:site_name" content="Jorge Guberte" />
+    <meta property="og:title" content="Labs — Jorge Guberte" />
+    <meta
+      property="og:description"
+      content="A static playground for experiments, prototypes, interfaces, and weird ideas by Jorge Guberte."
+    />
+    <meta property="og:url" content="https://jorgeguberte.com/labs/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://jorgeguberte.com/og-card.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Labs — Jorge Guberte" />
+    <meta
+      name="twitter:description"
+      content="A static playground for experiments, prototypes, interfaces, and weird ideas by Jorge Guberte."
+    />
+    <meta name="twitter:image" content="https://jorgeguberte.com/og-card.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <a href="/" class="back-link">← home</a>
+        <div class="top-links">
+          <a href="/about">about</a>
+          <a href="/blog">blog</a>
+          <a href="https://github.com/jorgeguberte" target="_blank" rel="noopener noreferrer">github</a>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero panel glow">
+          <p class="eyebrow">LABS</p>
+          <h1>Experiments, prototypes, interfaces, and other useful weirdness.</h1>
+          <p class="lead">
+            This is the corner for things that are too early, too strange, or too exploratory for the main site.
+            Some ideas become products. Some become posts. Some just teach me something valuable.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#experiments">browse experiments</a>
+            <a class="button" href="/blog">read the writing</a>
+          </div>
+        </section>
+
+        <section class="grid two-up">
+          <article class="panel">
+            <p class="eyebrow">What belongs here</p>
+            <ul class="bullet-list">
+              <li>Generative interfaces and interaction experiments</li>
+              <li>Agent UX and memory-driven product sketches</li>
+              <li>Small tools, utilities, and visual tests</li>
+              <li>Concept pages that may later graduate into real projects</li>
+            </ul>
+          </article>
+
+          <article class="panel panel-muted">
+            <p class="eyebrow">Status</p>
+            <div class="status-stack">
+              <div>
+                <span class="status-dot live"></span>
+                <strong>Live now</strong>
+                <p>Static GitHub Pages playground, zero framework in the Labs layer.</p>
+              </div>
+              <div>
+                <span class="status-dot building"></span>
+                <strong>Building next</strong>
+                <p>First interactive experiments and a better taxonomy for prototypes.</p>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section id="experiments" class="section-header">
+          <div>
+            <p class="eyebrow">Experiment board</p>
+            <h2>Things I want to explore here</h2>
+          </div>
+          <p class="section-copy">
+            Seed concepts first. Real artifacts later. This page is intentionally lightweight so it can evolve fast.
+          </p>
+        </section>
+
+        <section class="grid card-grid" id="card-grid"></section>
+
+        <section class="section-header">
+          <div>
+            <p class="eyebrow">Principles</p>
+            <h2>How the Labs differs from the main site</h2>
+          </div>
+        </section>
+
+        <section class="grid three-up principles">
+          <article class="panel">
+            <h3>Fast to publish</h3>
+            <p>No build complexity in the Labs surface itself. Just static files and ideas that can move quickly.</p>
+          </article>
+          <article class="panel">
+            <h3>Allowed to be unfinished</h3>
+            <p>Not everything here needs a product-shaped ending. Exploration is a valid output.</p>
+          </article>
+          <article class="panel">
+            <h3>Meant to cross-pollinate</h3>
+            <p>Good experiments can become posts, product concepts, project pages, or better questions.</p>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

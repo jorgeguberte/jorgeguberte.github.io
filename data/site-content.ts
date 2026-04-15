@@ -12,6 +12,7 @@ export const profile = {
 export const navLinks = [
   { label: "About", href: "/about" },
   { label: "Blog", href: "/blog" },
+  { label: "Labs", href: "/labs/" },
   { label: "GitHub", href: "https://github.com/jorgeguberte", external: true },
   { label: "Email", href: "mailto:jorgeguberte@gmail.com", external: true },
 ];
