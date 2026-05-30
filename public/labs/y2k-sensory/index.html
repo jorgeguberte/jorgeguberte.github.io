@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-sensory="balanced">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Y2K Brutalist & Neurodivergent Sensory Lab — Jorge Guberte</title>
+    
+    <!-- Premium Fonts Link -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <!-- LAYER 1: CHAOS LAYER (z-index: 0, completely un-interactive) -->
+    <div class="chaos-layer" aria-hidden="true">
+      <!-- Glow Orbs -->
+      <div class="orb orb-green"></div>
+      <div class="orb orb-blue"></div>
+      
+      <!-- CRT Scanlines and CRT screen filter -->
+      <div class="scanlines"></div>
+      
+      <!-- Noise texture overlay (Vanguard / film-grain) -->
+      <div class="noise-overlay"></div>
+      
+      <!-- High-stim ticker vertical barcode stream -->
+      <div class="barcode-ticker" id="ticker-bar">
+        SYS_STIMULUS_STREAM_OK // 0101011001 // LAT_4333_MS // STABLE_CONVERGENCE_CONTR_MAPPING
+      </div>
+    </div>
+
+    <!-- LAYER 2: FUNCTIONAL LAYER (z-index: 100+, pointer events enabled) -->
+    <div class="functional-layer">
+      <!-- Lab Header -->
+      <header class="lab-header">
+        <a href="/labs/" class="back-link transition-spring">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4" style="width: 16px; height: 16px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          retornar para os labs
+        </a>
+        <div class="brand-capsule">
+          <span>SENSORY LAB V1.0 // ACTIVE</span>
+        </div>
+      </header>
+
+      <!-- SENSORY CONTROL DOCK (Floating Glass Capsule) -->
+      <div class="sensory-dock transition-spring" id="sensory-dock">
+        <button class="dock-btn transition-spring" data-target="high-stim" title="TDAH: Movimento sutil para ancorar atenção dispersa">
+          High-Stim
+        </button>
+        <button class="dock-btn transition-spring active" data-target="balanced" title="Padrão: Equilíbrio translúcido e foco focado">
+          Balanced
+        </button>
+        <button class="dock-btn transition-spring" data-target="calm" title="Autismo: Movimento zero e cores descansadas">
+          Calm Mode
+        </button>
+      </div>
+
+      <!-- MAIN BENTO BOX GRID -->
+      <main class="bento-grid">
+        <!-- Hero Card (span-8) -->
+        <article class="bento-card col-8 transition-spring">
+          <div class="bento-card-inner">
+            <div>
+              <p class="eyebrow">Experimento 01 // Atenção Guiada</p>
+              <h1>Física Sensorial & Design de Atenção.</h1>
+              <p style="margin-bottom: 1.5rem;">
+                Este laboratório mescla a acidez e o contraste tátil do <strong>Y2K Brutalismo</strong> com o framework <strong>AttentionGuard</strong> (pedagogia e acessibilidade focadas em neurodivergência). O sistema separa a decoração caótica da interface funcional em camadas independentes, regulando estímulos em tempo real de acordo com as necessidades sensoriais do usuário.
+              </p>
+            </div>
+            <div>
+              <button class="btn-pill transition-spring" id="trigger-diagnostic">
+                Rodar Diagnóstico Cognitivo
+                <span class="arrow-circle">↗</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Dynamic Attention Anchor Card (span-4) -->
+        <article class="bento-card col-4 transition-spring">
+          <div class="bento-card-inner">
+            <div>
+              <p class="eyebrow">Âncora de Foco (ADHD)</p>
+              <h2>Estímulo Focado</h2>
+              <p>
+                Mova o mouse sobre a tela abaixo. O ponto de alta densidade visual (Focus-Dot) ancora a visão central, reduzindo a flutuação do olhar para quem tem TDAH.
+              </p>
+            </div>
+            
+            <div class="visual-anchor" id="anchor-canvas">
+              <div class="focus-dot transition-spring" id="focus-dot"></div>
+            </div>
+
+            <p class="eyebrow" style="font-size: 9px; margin-top: 0.5rem; text-align: center;">
+              Interativo: passe o cursor para guiar a âncora
+            </p>
+          </div>
+        </article>
+
+        <!-- Real-time Telemetry Monitor Console (span-4) -->
+        <article class="bento-card col-4 transition-spring">
+          <div class="bento-card-inner">
+            <div>
+              <p class="eyebrow">Monitor de Sinais // Telemetria</p>
+              <h2>Filtro de Estado</h2>
+              <p style="margin-bottom: 1rem;">
+                Leitura do motor físico de renderização baseado nas restrições de modulação sensorial ativas.
+              </p>
+            </div>
+
+            <div class="diagnostic-console" id="console-output">
+              <!-- Logs will be appended here via JS -->
+            </div>
+          </div>
+        </article>
+
+        <!-- Control and Inputs Card (span-8) -->
+        <article class="bento-card col-8 transition-spring">
+          <div class="bento-card-inner">
+            <div>
+              <p class="eyebrow">Controles Funcionais</p>
+              <h2>Parâmetros e Variabilidade</h2>
+              <p style="margin-bottom: 1.5rem;">
+                Teste a resposta da interface. Os botões mudam sutilmente a densidade do texto (font-variation) e usam focagem em anel-duplo para máxima acessibilidade em telas estroboscópicas.
+              </p>
+              
+              <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                <button class="btn-pill transition-spring" style="padding: 0.6rem 1.2rem; font-size: 12px;" id="btn-intensity">
+                  Simular Shock de Grafo
+                </button>
+                <button class="btn-pill transition-spring" style="padding: 0.6rem 1.2rem; font-size: 12px;" id="btn-contrast">
+                  Otimizar Contraste (WCAG 2.2)
+                </button>
+                <button class="btn-pill transition-spring" style="padding: 0.6rem 1.2rem; font-size: 12px;" id="btn-clear-logs">
+                  Limpar Telemetria
+                </button>
+              </div>
+            </div>
+            
+            <div style="border-t: 1px solid var(--border-color); pt-4 flex justify-between items-center text-xs text-zinc-500">
+              <span>Sinal de saída: Estável</span>
+              <span>WCAG AA Compliance</span>
+            </div>
+          </div>
+        </article>
+      </main>
+    </div>
+
+    <!-- Script Application Logic -->
+    <script src="./app.js"></script>
+  </body>
+</html>

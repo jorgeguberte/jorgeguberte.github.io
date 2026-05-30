@@ -1,0 +1,446 @@
+/* Y2K Brutalist & Neurodivergent Design System */
+
+:root {
+  /* Default: Balanced Mode */
+  --sensory-saturation: 1.0;
+  --sensory-motion: 0.5;
+  --sensory-blur: 12px;
+  --sensory-contrast: 1.0;
+  
+  --primary: #00ff66; /* Acid green */
+  --primary-glow: rgba(0, 255, 102, 0.15);
+  --secondary: #00e5ff; /* Cyber blue */
+  --secondary-glow: rgba(0, 229, 255, 0.15);
+  --accent: #ff0077; /* Neon pink */
+  
+  --bg-color: #050505;
+  --card-bg: rgba(12, 12, 12, 0.7);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* Sensory State Overrides (AttentionGuard) */
+:root[data-sensory="high-stim"] {
+  --sensory-saturation: 1.35;
+  --sensory-motion: 1.0;
+  --sensory-blur: 3px; /* Allow movement through slightly clearer glass */
+  --primary: #00ff88;
+  --secondary: #00ffff;
+  --card-bg: rgba(8, 8, 8, 0.45);
+}
+
+:root[data-sensory="calm"] {
+  --sensory-saturation: 0.25;
+  --sensory-motion: 0.0; /* Completely freeze any visual distraction */
+  --sensory-blur: 24px;  /* Heavy blur to isolate background noise */
+  --primary: #52a370;    /* Muted sage */
+  --secondary: #4a8a96;  /* Muted steel blue */
+  --accent: #9e4368;     /* Muted rose */
+  --bg-color: #0a0a0c;
+  --card-bg: #0f0f12;    /* Solid cards */
+  --border-color: rgba(255, 255, 255, 0.12);
+  --text-secondary: #8c8c9e;
+}
+
+/* Base reset to avoid slop */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-sans);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  transition: background-color 0.5s ease;
+}
+
+/* DUAL-LAYER ARCHITECTURE */
+
+/* Layer 1: Chaos Layer (z-index: 0, non-interactive decoration) */
+.chaos-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: var(--sensory-saturation);
+  filter: saturate(var(--sensory-saturation));
+}
+
+/* Acid glow orbs in chaos layer */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.12;
+  transition: transform 5s ease, opacity 0.5s ease;
+}
+
+.orb-green {
+  top: 10%;
+  left: 15%;
+  width: 35vw;
+  height: 35vw;
+  background: var(--primary);
+  animation: floatGreen 25s infinite alternate linear;
+}
+
+.orb-blue {
+  bottom: 15%;
+  right: 10%;
+  width: 40vw;
+  height: 40vw;
+  background: var(--secondary);
+  animation: floatBlue 30s infinite alternate linear;
+}
+
+@keyframes floatGreen {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(8vw, 6vh) scale(1.15); }
+}
+
+@keyframes floatBlue {
+  0% { transform: translate(0, 0) scale(1.1); }
+  100% { transform: translate(-6vw, -8vh) scale(0.9); }
+}
+
+/* Scanlines and screen noise */
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.2) 50%
+  ), linear-gradient(
+    90deg, 
+    rgba(255, 0, 0, 0.04), 
+    rgba(0, 255, 0, 0.01), 
+    rgba(0, 0, 255, 0.04)
+  );
+  background-size: 100% 4px, 6px 100%;
+  pointer-events: none;
+  opacity: calc(0.3 * var(--sensory-saturation));
+}
+
+/* Film-grain texture (Leonxlnx style) */
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Rotating matrix/barcode stream on high-stim */
+.barcode-ticker {
+  position: absolute;
+  right: 4rem;
+  top: 10%;
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--primary);
+  opacity: calc(0.15 * var(--sensory-motion));
+  letter-spacing: 0.4em;
+  line-height: 1;
+  text-transform: uppercase;
+  animation: tickBar 40s linear infinite;
+}
+
+@keyframes tickBar {
+  from { transform: translateY(-50%); }
+  to { transform: translateY(100%); }
+}
+
+
+/* Layer 2: Functional Layer (z-index: 100+, floats with blur) */
+.functional-layer {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  flex-col: column;
+  padding: 2.5rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Micro-animations and spring transitions */
+.transition-spring {
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* HEADER STYLE */
+.lab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.back-link {
+  font-family: var(--font-mono);
+  text-decoration: none;
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.back-link:hover {
+  color: var(--primary);
+}
+
+.brand-capsule {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* COMPONENT: SENSORY CONTROLS BAR (Floating Glass) */
+.sensory-dock {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(var(--sensory-blur));
+  -webkit-backdrop-filter: blur(var(--sensory-blur));
+  padding: 0.5rem;
+  border-radius: 9999px;
+  display: flex;
+  gap: 0.25rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  margin-bottom: 4rem;
+  width: fit-content;
+  align-self: center;
+}
+
+.dock-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 0.65rem 1.5rem;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+.dock-btn:hover {
+  color: var(--text-primary);
+}
+
+.dock-btn.active {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* DOUBLE-RING KEYBOARD FOCUS ACCESSIBILITY */
+.dock-btn:focus-visible, .btn:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px #000000;
+}
+
+/* MAIN LAYOUT: Bento Grid Asymmetrical */
+.bento-grid {
+  display: grid;
+  grid-template-cols: repeat(12, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+
+/* Double Bezel Card Construction (Vanguard + Soft Skill) */
+.bento-card {
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 2rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.bento-card-inner {
+  background-color: var(--card-bg);
+  backdrop-filter: blur(var(--sensory-blur));
+  -webkit-backdrop-filter: blur(var(--sensory-blur));
+  border-radius: calc(2rem - 0.5rem);
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06);
+}
+
+.col-12 { grid-column: span 12; }
+.col-8 { grid-column: span 8; }
+.col-6 { grid-column: span 6; }
+.col-4 { grid-column: span 4; }
+
+/* Bento Typography */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 2.75rem;
+  font-weight: 700;
+  tracking: -0.02em;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* INTERACTIVE LAB ELEMENTS */
+.visual-anchor {
+  width: 100%;
+  height: 200px;
+  background: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 70%);
+  border: 1px dashed var(--border-color);
+  border-radius: 1rem;
+  margin: 1.5rem 0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.focus-dot {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 20px var(--primary);
+  position: absolute;
+}
+
+/* Variable Font simulation and micro-animations on interactive items */
+.btn-pill {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0.75rem 1.75rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: fit-content;
+  text-decoration: none;
+}
+
+/* Smooth variable font hover simulation */
+.btn-pill:hover {
+  border-color: var(--primary);
+  font-weight: 700; /* Simulated variable weight shift */
+  box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.arrow-circle {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-pill:hover .arrow-circle {
+  background: var(--primary);
+  color: #000000;
+}
+
+/* Simulated diagnostic telemetry display (mono geek feel) */
+.diagnostic-console {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background-color: #010101;
+  border: 1px solid var(--border-color);
+  padding: 1rem;
+  border-radius: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  width: 100%;
+  height: 120px;
+  overflow-y: auto;
+}
+
+.diag-green { color: var(--primary); }
+.diag-blue { color: var(--secondary); }
+
+/* MOBILE RESPONSIVENESS (Universal Overrides) */
+@media (max-width: 768px) {
+  .bento-grid {
+    grid-template-cols: 1fr;
+  }
+  
+  .col-12, .col-8, .col-6, .col-4 {
+    grid-column: span 12 / span 12;
+  }
+  
+  .functional-layer {
+    padding: 1.5rem 1rem;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  .bento-card-inner {
+    padding: 1.5rem;
+  }
+  
+  .orb {
+    opacity: 0.06;
+  }
+  
+  .barcode-ticker {
+    display: none;
+  }
+}

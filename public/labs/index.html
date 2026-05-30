@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR" data-sensory="balanced">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -27,103 +27,124 @@
       content="A static playground for experiments, prototypes, interfaces, and weird ideas by Jorge Guberte."
     />
     <meta name="twitter:image" content="https://jorgeguberte.com/og-card.svg" />
+    
+    <!-- Premium Fonts Google link -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div class="shell">
+    <!-- LAYER 1: CHAOS LAYER (z-index: 0, pointer-events none, hidden from assistants) -->
+    <div class="chaos-layer" aria-hidden="true">
+      <!-- High-End Radial Orbs -->
+      <div class="orb orb-green"></div>
+      <div class="orb orb-blue"></div>
+      
+      <!-- Scanlines & Noise Texture -->
+      <div class="scanlines"></div>
+      <div class="noise-overlay"></div>
+    </div>
+
+    <!-- LAYER 2: FUNCTIONAL LAYER (z-index: 100+) -->
+    <div class="functional-layer">
+      <!-- Floating Header -->
       <header class="topbar">
         <a href="/" class="back-link">← home</a>
-        <div class="top-links">
+        <nav class="top-links">
           <a href="/about">about</a>
           <a href="/blog">blog</a>
           <a href="https://github.com/jorgeguberte" target="_blank" rel="noopener noreferrer">github</a>
-        </div>
+        </nav>
       </header>
 
+      <!-- Sensory Control Dock (Floating glass capsule matching the design skills) -->
+      <div class="sensory-dock transition-spring" id="sensory-dock">
+        <button class="dock-btn transition-spring" data-target="high-stim" title="TDAH: Movimento sutil para ancorar atenção dispersa">
+          High-Stim
+        </button>
+        <button class="dock-btn transition-spring active" data-target="balanced" title="Padrão: Equilíbrio translúcido e foco focado">
+          Balanced
+        </button>
+        <button class="dock-btn transition-spring" data-target="calm" title="Autismo: Movimento zero e cores descansadas">
+          Calm Mode
+        </button>
+      </div>
+
+      <!-- Main Layout -->
       <main>
-        <section class="hero panel glow">
-          <p class="eyebrow">LABS</p>
-          <h1>Experiments, prototypes, interfaces, and other useful weirdness.</h1>
+        <!-- Hero Section (Variable Serif + Spacious whitespace) -->
+        <section class="hero transition-spring">
+          <p class="eyebrow">Plataforma de Protótipos // Labs</p>
+          <h1>Ideias brutas, simulações e outras utilidades estranhas.</h1>
           <p class="lead">
-            This is the corner for things that are too early, too strange, or too exploratory for the main site.
-            Some ideas become products. Some become posts. Some just teach me something valuable.
+            Este é o canto para conceitos que estão no início do ciclo de vida cognitivo. Um playground estático e focado onde ideias de cognição, memória de agentes e interações humanas ganham vida.
           </p>
-          <div class="hero-actions">
-            <a class="button primary" href="#experiments">browse experiments</a>
-            <a class="button" href="/blog">read the writing</a>
-          </div>
         </section>
 
-        <section class="grid two-up">
-          <article class="panel">
-            <p class="eyebrow">What belongs here</p>
-            <ul class="bullet-list">
-              <li>Generative interfaces and interaction experiments</li>
-              <li>Agent UX and memory-driven product sketches</li>
-              <li>Small tools, utilities, and visual tests</li>
-              <li>Concept pages that may later graduate into real projects</li>
-            </ul>
-          </article>
-
-          <article class="panel panel-muted">
-            <p class="eyebrow">Status</p>
-            <div class="status-stack">
+        <!-- Bento Two-Up Section -->
+        <section class="grid two-up" style="margin-bottom: 4rem;">
+          <!-- Left Bento (span-8) -->
+          <div class="double-bezel col-8 transition-spring">
+            <div class="double-bezel-inner">
               <div>
-                <span class="status-dot live"></span>
-                <strong>Live now</strong>
-                <p>Static GitHub Pages playground, zero framework in the Labs layer.</p>
-              </div>
-              <div>
-                <span class="status-dot building"></span>
-                <strong>Building next</strong>
-                <p>First interactive experiments and a better taxonomy for prototypes.</p>
+                <p class="eyebrow">Manifesto Sensorial // Acessibilidade</p>
+                <h2>Design Cognitivo Integrado</h2>
+                <p style="margin-bottom: 1.5rem; font-size: 13px; font-weight: 300;">
+                  Acreditamos que a interface do usuário deve se adaptar à mente, e não o contrário. Ao unificar estética de alto padrão e modulações sensoriais ativas, criamos ambientes digitais que confortam o cérebro:
+                </p>
+                <ul class="bullet-list">
+                  <li><strong>Arquitetura de Dupla Camada:</strong> Separação estrita de decoração (chaos) e ação (functional).</li>
+                  <li><strong>AttentionGuard Presets:</strong> Modulação instantânea de saturação e motion para ADHD/Autismo.</li>
+                  <li><strong>Âncoras de Atenção Física:</strong> Redução do desvio do olhar através de micro-interações calmas.</li>
+                </ul>
               </div>
             </div>
-          </article>
-        </section>
-
-        <section id="experiments" class="section-header">
-          <div>
-            <p class="eyebrow">Experiment board</p>
-            <h2>Things I want to explore here</h2>
           </div>
-          <p class="section-copy">
-            Seed concepts first. Real artifacts later. This page is intentionally lightweight so it can evolve fast.
-          </p>
-        </section>
 
-        <section class="grid card-grid" id="card-grid"></section>
-
-        <section class="section-header">
-          <div>
-            <p class="eyebrow">Principles</p>
-            <h2>How the Labs differs from the main site</h2>
+          <!-- Right Bento (span-4) -->
+          <div class="double-bezel col-4 transition-spring">
+            <div class="double-bezel-inner" style="justify-content: space-between; height: 100%;">
+              <div>
+                <p class="eyebrow">Status do Sistema</p>
+                <h2>Sinais Ativos</h2>
+              </div>
+              
+              <div class="status-stack">
+                <div class="status-item">
+                  <span class="status-dot live"></span>
+                  <div class="status-text">
+                    <h4>Sensory-Reactive Grid</h4>
+                    <p>O layout desta página reage dinamicamente aos comandos do Sensory Dock acima.</p>
+                  </div>
+                </div>
+                <div class="status-item">
+                  <span class="status-dot building"></span>
+                  <div class="status-text">
+                    <h4>Mônada de Orquestração</h4>
+                    <p>Próximas simulações integrarão o loop de percepção multimodal do cérebro Jairo.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section class="grid three-up principles">
-          <article class="panel">
-            <h3>Fast to publish</h3>
-            <p>No build complexity in the Labs surface itself. Just static files and ideas that can move quickly.</p>
-          </article>
-          <article class="panel">
-            <h3>Allowed to be unfinished</h3>
-            <p>Not everything here needs a product-shaped ending. Exploration is a valid output.</p>
-          </article>
-          <article class="panel">
-            <h3>Meant to cross-pollinate</h3>
-            <p>Good experiments can become posts, product concepts, project pages, or better questions.</p>
-          </article>
+        <!-- Section Header for Experiments -->
+        <section class="section-header" id="experiments">
+          <p class="eyebrow">Quadro de Experimentos // Ativo</p>
+          <h2>O Laboratório de Atenção</h2>
+        </section>
+
+        <!-- Grid of Experiments (Only our sensory lab featured) -->
+        <section class="grid card-grid" id="card-grid">
+          <!-- Populated dynamically via app.js -->
         </section>
       </main>
     </div>
 
+    <!-- Application Script -->
     <script src="./app.js"></script>
   </body>
 </html>
