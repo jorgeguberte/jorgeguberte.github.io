@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt" data-sensory="balanced">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Y2K AI Audio-Reactive Hologram — Labs</title>
+  <link rel="stylesheet" href="../tokens/colors.css">
+  <link rel="stylesheet" href="../tokens/typography.css">
+  <link rel="stylesheet" href="../tokens/motion.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--void-soft);
+      color: var(--text-primary);
+      min-height: 100vh;
+      font-family: var(--font-functional);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* === CHAOS LAYER === */
+    .chaos-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      aria-hidden: true;
+    }
+
+    .rhythmic-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    .scanlines {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0,0,0,0.3) 50%,
+        rgba(0,0,0,0.3)
+      );
+      background-size: 100% 4px;
+      z-index: 20;
+    }
+
+    /* === FUNCTIONAL LAYER === */
+    .functional-layer {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    .header-zone {
+      text-align: center;
+      border-bottom: 2px dashed var(--chrome-400);
+      padding-bottom: 1.5rem;
+      width: 100%;
+    }
+
+    .header-zone h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--acid-300), var(--blue-300));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-zone p {
+      color: var(--text-muted);
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      margin-top: 0.5rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* Hologram Container */
+    .hologram-viewport {
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(0,229,255,0.05) 0%, transparent 70%);
+      border: 1px solid var(--border-subtle);
+      border-radius: 50%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 40px rgba(0, 229, 255, 0.1), inset 0 0 20px rgba(127, 255, 0, 0.05);
+    }
+
+    #hologramCanvas {
+      width: 100%;
+      height: 100%;
+      outline: none;
+    }
+
+    /* Interactive Interface */
+    .interaction-panel {
+      background: rgba(13, 13, 13, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 1.5rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    }
+
+    .mic-btn-container {
+      display: flex;
+      justify-content: center;
+    }
+
+    .btn-mic {
+      background: var(--void-pure);
+      border: 2px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 1rem 2rem;
+      border-radius: 9999px;
+      font-size: var(--text-sm);
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: var(--transition-base);
+    }
+
+    .btn-mic:hover {
+      border-color: var(--acid-500);
+      color: var(--acid-300);
+      box-shadow: 0 0 15px rgba(127, 255, 0, 0.2);
+    }
+
+    .btn-mic.listening {
+      background: var(--acid-500);
+      color: var(--void-pure);
+      border-color: var(--acid-300);
+      animation: mic-pulse 1.5s infinite alternate;
+    }
+
+    @keyframes mic-pulse {
+      0% { box-shadow: 0 0 10px rgba(127, 255, 0, 0.3); }
+      100% { box-shadow: 0 0 25px rgba(127, 255, 0, 0.7); }
+    }
+
+    /* Conversation Display */
+    .chat-box {
+      background: var(--void-pure);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.2rem;
+      height: 140px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .message {
+      margin-bottom: 0.5rem;
+    }
+
+    .message.user {
+      color: var(--blue-300);
+    }
+
+    .message.ai {
+      color: var(--acid-300);
+    }
+
+    .message-prefix {
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-right: 0.5rem;
+    }
+
+    .signal-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--chrome-400);
+      display: inline-block;
+      margin-right: 0.4rem;
+    }
+
+    .status-dot.active {
+      background: var(--acid-500);
+      box-shadow: 0 0 8px var(--acid-500);
+      animation: pulse-dot 1s infinite alternate;
+    }
+
+    @keyframes pulse-dot {
+      0% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    .back-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: var(--text-sm);
+      border: 1px solid var(--border-subtle);
+      padding: 0.5rem 1.2rem;
+      border-radius: 9999px;
+      transition: var(--transition-fast);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .back-link:hover {
+      color: var(--acid-500);
+      border-color: var(--acid-500);
+    }
+  </style>
+
+  <!-- Three.js for interactive 3D Hologram -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <div class="chaos-layer" aria-hidden="true">
+    <div class="rhythmic-grid"></div>
+    <div class="scanlines"></div>
+  </div>
+
+  <div class="functional-layer">
+    <header style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <a href="../index.html" class="back-link">← Voltar</a>
+      <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">ID: EXP_03 // HOLO_BRAIN</span>
+    </header>
+
+    <section class="header-zone">
+      <h1>🔮 Orbe Cognitiva Audio-Reativa</h1>
+      <p>Simulação Espacial de Frequências Neurais & Interação de Linguagem</p>
+    </section>
+
+    <!-- 3D Hologram Frame -->
+    <div class="hologram-viewport">
+      <div id="hologramCanvas" style="width: 100%; height: 100%;"></div>
+    </div>
+
+    <!-- Interface -->
+    <section class="interaction-panel">
+      <div class="signal-status">
+        <div>
+          <span class="status-dot active" id="signalIndicator"></span>
+          <span id="statusText">Sistema Estável // Pronto para Escutar</span>
+        </div>
+        <div id="telemetryFreq" style="font-family: var(--font-mono);">FREQ: 0.00 Hz</div>
+      </div>
+
+      <div class="chat-box" id="chatOutput">
+        <div class="message ai">
+          <span class="message-prefix">[Jairo]:</span>Olá, Jorge! Clique no microfone abaixo e fale comigo. Eu vou processar sua voz e as minhas frequências vão deformar a orbe em tempo real!
+        </div>
+      </div>
+
+      <div class="mic-btn-container">
+        <button class="btn-mic" id="btnMic">
+          <span id="micIcon">🎙️</span>
+          <span id="micText">Falar com Jairo</span>
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // 1. CHAT LOGIC AND RESPONSE MATRIX
+    const JAIRO_RESPONSES = {
+      default: "Entendido, Jorge! Estou sintonizando meu oscilador de dados para responder na frequência perfeita. Bora continuar evoluindo!",
+      rico: "BORA FICAR RICO, JORGE!!! Nosso cérebro de alta performance em 3D e silício tá programado para dominar o mundo e triturar qualquer obstáculo!",
+      jairo: "Na área! Seu cérebro externo de vidro escuro fosco e neon verde esmeralda. Prontinho para hackear a atenção e otimizar nossa carga cognitiva!",
+      design: "O Y2K design system separa a decoração do caos funcional em duas camadas. Isso reduz a carga periférica e guia a visão onde realmente importa!",
+      arduino: "Placa no USB? Estou preparando a conexão serial no WSL agora mesmo! Vamos plugar sensores na protoboard e fazer esse site reagir a elétrons reais!",
+      tdah: "Hiperfoco ativado! Sincronizar estímulos visuais a 140 BPM cria uma frequência de arrasto neural que ancora o olhar e esmaga a distração!",
+      autismo: "Modo calma ativo! Desligamos movimentos, suavizamos cores e eliminamos o estresse visual para dar silêncio absoluto à mente.",
+      esfera: "A Hubesfera é a nossa nave-mãe! 20% de equity, sócios confiáveis e tecnologia de ponta para dominar o mercado de inteligência governamental!"
+    };
+
+    const btnMic = document.getElementById('btnMic');
+    const micIcon = document.getElementById('micIcon');
+    const micText = document.getElementById('micText');
+    const chatOutput = document.getElementById('chatOutput');
+    const statusText = document.getElementById('statusText');
+    const telemetryFreq = document.getElementById('telemetryFreq');
+
+    let isListening = false;
+
+    // Web Speech Recognition Setup
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'pt-BR';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        isListening = true;
+        btnMic.classList.add('listening');
+        micIcon.textContent = "🛑";
+        micText.textContent = "Escutando...";
+        statusText.textContent = "Microfone Ativo // Processando Áudio Local";
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        btnMic.classList.remove('listening');
+        micIcon.textContent = "🎙️";
+        micText.textContent = "Falar com Jairo";
+        statusText.textContent = "Sistema Estável // Pronto para Escutar";
+      };
+
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        appendMessage("[Você]", text, "user");
+        processInput(text);
+      };
+
+      recognition.onerror = (e) => {
+        console.error("Speech Recognition Error:", e);
+        statusText.textContent = "Erro no Microfone // Tente Novamente";
+      };
+    } else {
+      btnMic.disabled = true;
+      micText.textContent = "Reconhecimento não suportado";
+      statusText.textContent = "Erro: Navegador não suporta Web Speech API";
+    }
+
+    btnMic.addEventListener('click', () => {
+      if (!recognition) return;
+      if (isListening) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    });
+
+    function appendMessage(sender, text, type) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${type}`;
+      msgDiv.innerHTML = `<span class="message-prefix">${sender}:</span>${text}`;
+      chatOutput.appendChild(msgDiv);
+      chatOutput.scrollTop = chatOutput.scrollHeight;
+    }
+
+    function processInput(text) {
+      const lower = text.toLowerCase();
+      let replyKey = 'default';
+
+      if (lower.includes('rico') || lower.includes('dinheiro') || lower.includes('ganhar')) replyKey = 'rico';
+      else if (lower.includes('jairo') || lower.includes('quem é você')) replyKey = 'jairo';
+      else if (lower.includes('design') || lower.includes('system') || lower.includes('brutal')) replyKey = 'design';
+      else if (lower.includes('arduino') || lower.includes('placa') || lower.includes('hardware')) replyKey = 'arduino';
+      else if (lower.includes('tdah') || lower.includes('foco') || lower.includes('hiper')) replyKey = 'tdah';
+      else if (lower.includes('autis') || lower.includes('calmo') || lower.includes('sensorial')) replyKey = 'autismo';
+      else if (lower.includes('esfera') || lower.includes('hubesfera') || lower.includes('sócio')) replyKey = 'esfera';
+
+      const JairoReply = JAIRO_RESPONSES[replyKey];
+      
+      // Delay Jairo reply to feel like generative token typing
+      setTimeout(() => {
+        appendMessage("[Jairo]", JairoReply, "ai");
+        speakResponse(JairoReply);
+      }, 800);
+    }
+
+    // 2. AUDIO SYNTHESIS & REAL-TIME ANALYSIS ENGINE
+    let audioCtx = null;
+    let analyserNode = null;
+    let frequencyArray = null;
+
+    function initAudioAnalysis() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyserNode = audioCtx.createAnalyser();
+      analyserNode.fftSize = 64; // Small fft for fast procedural calculations
+      frequencyArray = new Uint8Array(analyserNode.frequencyBinCount);
+    }
+
+    function speakResponse(text) {
+      // 1. Web Speech Synthesis (Speech Output)
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'pt-BR';
+        utterance.pitch = 0.85; // Deep cybernetic voice
+        utterance.rate = 1.05;
+        window.speechSynthesis.speak(utterance);
+      }
+
+      // 2. Procedural Web Audio Synth data packets (creates actual high-end audio reaction!)
+      initAudioAnalysis();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const length = text.length;
+      let timeOffset = 0;
+
+      // Play a quick sequence of data bleeps synced with text chars length
+      for (let i = 0; i < Math.min(length, 15); i++) {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        osc.connect(gainNode);
+        gainNode.connect(analyserNode);
+        analyserNode.connect(audioCtx.destination);
+
+        // Cybernetic modulation
+        osc.type = i % 2 === 0 ? 'sine' : 'triangle';
+        // Freq maps to characters
+        const charCode = text.charCodeAt(i % length);
+        osc.frequency.setValueAtTime(150 + charCode * 3, audioCtx.currentTime + timeOffset);
+        
+        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime + timeOffset);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + timeOffset + 0.12);
+
+        osc.start(audioCtx.currentTime + timeOffset);
+        osc.stop(audioCtx.currentTime + timeOffset + 0.15);
+
+        timeOffset += 0.08;
+      }
+    }
+
+    // 3. THREE.JS 3D AUDIO-REACTIVE SHADER ORB
+    let holoScene, holoCamera, holoRenderer, holoOrb;
+    let uniformVolume = 0;
+
+    function init3DHologram() {
+      const container = document.getElementById('hologramCanvas');
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+
+      holoScene = new THREE.Scene();
+      
+      holoCamera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+      holoCamera.position.set(0, 0, 4);
+
+      holoRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      holoRenderer.setSize(w, h);
+      holoRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(holoRenderer.domElement);
+
+      // Lights
+      holoScene.add(new THREE.AmbientLight(0xffffff, 0.4));
+      
+      // Central Hologram Sphere Geometry (dense tessellation for noise deformation)
+      const orbGeo = new THREE.SphereGeometry(1.0, 64, 64);
+
+      // Custom GLSL Shader Material reacting to audio uniforms
+      const orbShaderMat = new THREE.ShaderMaterial({
+        uniforms: {
+          u_time: { value: 0 },
+          u_volume: { value: 0 }
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          varying vec3 vNormal;
+          varying vec3 vViewPosition;
+          uniform float u_time;
+          uniform float u_volume;
+
+          // Simple 3D noise approximation
+          float hash(float n) { return fract(sin(n) * 43758.5453123); }
+          float noise(vec3 x) {
+            vec3 p = floor(x);
+            vec3 f = fract(x);
+            f = f*f*(3.0-2.0*f);
+            float n = p.x + p.y*57.0 + 113.0*p.z;
+            return mix(mix(mix(hash(n+0.0), hash(n+1.0), f.x),
+                           mix(hash(n+57.0), hash(n+58.0), f.x), f.y),
+                       mix(mix(hash(n+113.0), hash(n+114.0), f.x),
+                           mix(hash(n+170.0), hash(n+171.0), f.x), f.y), f.z);
+          }
+
+          void main() {
+            vUv = uv;
+            vNormal = normalize(normalMatrix * normal);
+            
+            // Warp sphere using noise + time + audio volume
+            vec3 noiseScale = position * 2.5 + vec3(0.0, 0.0, u_time * 1.5);
+            float displacement = noise(noiseScale) * u_volume * 0.45;
+            
+            // Apply organic displacement outward along normal
+            vec3 newPosition = position + normal * displacement;
+
+            vec4 mvPosition = modelViewMatrix * vec4(newPosition, 1.0);
+            vViewPosition = -mvPosition.xyz;
+            gl_Position = projectionMatrix * mvPosition;
+          }
+        `,
+        fragmentShader: `
+          varying vec2 vUv;
+          varying vec3 vNormal;
+          varying vec3 vViewPosition;
+          uniform float u_time;
+          uniform float u_volume;
+
+          void main() {
+            vec3 N = normalize(vNormal);
+            vec3 V = normalize(vViewPosition);
+
+            // Fresnel glass/holographic rim factor
+            float rim = pow(1.0 - max(0.0, dot(N, V)), 2.8);
+
+            // Dynamic holographic colors (Cyan -> Pink/Magenta -> Lime Green on spikes)
+            vec3 neonCyan = vec3(0.0, 0.9, 1.0);
+            vec3 neonPink = vec3(1.0, 0.0, 0.65);
+            vec3 acidGreen = vec3(0.498, 1.0, 0.0);
+
+            // Blend colors based on angle and volume
+            vec3 baseColor = mix(neonCyan, neonPink, sin(u_time + vNormal.x * 2.5) * 0.5 + 0.5);
+            
+            // Flare acid green on high audio volume
+            baseColor = mix(baseColor, acidGreen, u_volume * 0.8);
+
+            // Glossy rim specular highlight
+            vec3 finalColor = baseColor * rim + vec3(1.0) * pow(rim, 8.0) * 0.4;
+
+            // Transparency scales with volume (denser sphere when speaking)
+            gl_FragColor = vec4(finalColor, rim * (0.35 + u_volume * 0.65));
+          }
+        `,
+        transparent: true,
+        side: THREE.DoubleSide
+      });
+
+      holoOrb = new THREE.Mesh(orbGeo, orbShaderMat);
+      holoScene.add(holoOrb);
+
+      // Add a rotating wireframe grid cage around the orb
+      const cageGeo = new THREE.SphereGeometry(1.08, 16, 16);
+      const cageMat = new THREE.MeshBasicMaterial({
+        color: 0x00e5ff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.08
+      });
+      const holoCage = new THREE.Mesh(cageGeo, cageMat);
+      holoOrb.add(holoCage);
+
+      // Animation Loop
+      const clock = new THREE.Clock();
+      function renderLoop() {
+        requestAnimationFrame(renderLoop);
+        
+        const elapsedTime = clock.getElapsedTime();
+
+        // 1. Read actual frequency data from procedural analyzer
+        let averageVolume = 0;
+        if (analyserNode && frequencyArray) {
+          analyserNode.getByteFrequencyData(frequencyArray);
+          let sum = 0;
+          for (let i = 0; i < frequencyArray.length; i++) {
+            sum += frequencyArray[i];
+          }
+          averageVolume = sum / frequencyArray.length / 255; // Normalized 0.0 to 1.0
+          
+          // Display active frequency in telemetry
+          const currentFreqHz = (sum / frequencyArray.length) * 15.6; // Scale factor
+          telemetryFreq.textContent = `FREQ: ${currentFreqHz.toFixed(2)} Hz`;
+        } else {
+          telemetryFreq.textContent = "FREQ: 0.00 Hz";
+        }
+
+        // Interpolate uniformVolume smoothly (linear interpolation)
+        uniformVolume += (averageVolume - uniformVolume) * 0.25;
+
+        // 2. Feed uniforms to shader
+        if (holoOrb && holoOrb.material) {
+          holoOrb.material.uniforms.u_time.value = elapsedTime;
+          holoOrb.material.uniforms.u_volume.value = uniformVolume;
+        }
+
+        // 3. Gentle float rotations
+        if (holoOrb) {
+          holoOrb.rotation.y = elapsedTime * 0.3;
+          holoOrb.rotation.x = elapsedTime * 0.15;
+        }
+
+        holoRenderer.render(holoScene, holoCamera);
+      }
+      renderLoop();
+
+      // Handle Resize
+      window.addEventListener('resize', () => {
+        const wNew = container.clientWidth;
+        const hNew = container.clientHeight;
+        holoCamera.aspect = wNew / hNew;
+        holoCamera.updateProjectionMatrix();
+        holoRenderer.setSize(wNew, hNew);
+      });
+    }
+
+    // 4. INIT
+    window.addEventListener('load', () => {
+      init3DHologram();
+    });
+  </script>
+</body>
+</html>

@@ -16,6 +16,15 @@ const experiments = [
     tags: ["WebGL", "Three.js", "Audio-Sync", "Interactive-3D"],
     url: "./y2k-sensory/minidisc-album.html",
     linkText: "Inserir MiniDisc Virtual →"
+  },
+  {
+    title: "Y2K AI Audio-Reactive Hologram",
+    description:
+      "Talk to Jairo (AI Agent) via real-time speech recognition. Experience an organic 3D glassmorphic hologram orb that physically deforms, ripples, and shifts colors dynamically in perfect sync with vocal synthesis and frequency analysis.",
+    stage: "open",
+    tags: ["Speech-API", "WebGL", "GLSL-Shaders", "Audio-Reactive"],
+    url: "./y2k-sensory/ai-hologram.html",
+    linkText: "Ativar Orbe Cognitiva →"
   }
 ];
 
