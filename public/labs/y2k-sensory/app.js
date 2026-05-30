@@ -108,14 +108,14 @@ document.addEventListener("DOMContentLoaded", () => {
         logDiag(`Sensory state check: ${mode.toUpperCase()} profile verified.`, "success");
         logDiag("Acessibilidade WCAG 2.2: Conforme (AA).", "success");
         logDiag("Análise de contraste: 4.85:1 (Estável).", "success");
-        logDiag("Sinais e âncoras cognitivas ativas.", "success");
+        logDiag("Sinais e âncoras sensoriais ativas.", "success");
       }, 600);
     });
   }
 
   if (btnIntensity) {
     btnIntensity.addEventListener("click", () => {
-      logDiag("Disparando: GRAPH_SHOCK contra o subgrafo ativo...", "warn");
+      logDiag("Disparando: Estímulo de alta intensidade contra a tela...", "warn");
       
       // Flash screen red briefly to simulate shock
       const body = document.body;
@@ -124,8 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
       
       setTimeout(() => {
         body.style.backgroundColor = "";
-        logDiag("Impacto do choque calculado. Ativação redistribuída de forma conservativa.", "success");
-        logDiag("Morfismo estocástico validado: Contração estável (λ <= 1.0).", "success");
+        logDiag("Pico de estímulo processado. Controles de animação respondendo.", "success");
+        logDiag("Sinal de renderização limpo: Estabilidade de viewport confirmada.", "success");
       }, 250);
     });
   }
@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Genesis boot logs
-  logDiag("Cérebro Jairo ativado. Mapeamento de sinais pronto.", "success");
-  logDiag("Acessando diretrizes de design: y2k-design-system + high-end-visual-design.", "info");
+  logDiag("Motor de inferência local ativado. Mapeamento de sinais pronto.", "success");
+  logDiag("Acessando diretrizes de design: y2k-design-system.", "info");
   logDiag("Use os botões de Sensory Dock para modular a intensidade.", "info");
 });
