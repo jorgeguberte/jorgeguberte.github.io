@@ -34,10 +34,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     
     <link rel="stylesheet" href="./styles.css" />
+    <!-- Three.js for immersive 3D background grid on Labs Portal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   </head>
   <body>
     <!-- LAYER 1: CHAOS LAYER (z-index: 0, pointer-events none, hidden from assistants) -->
     <div class="chaos-layer" aria-hidden="true">
+      <!-- 3D Interactive Background Canvas -->
+      <div id="canvas3d-container" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 1; transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1);"></div>
+
       <!-- High-End Radial Orbs -->
       <div class="orb orb-green"></div>
       <div class="orb orb-blue"></div>

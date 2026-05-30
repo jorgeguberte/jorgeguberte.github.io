@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="pt" data-sensory="balanced">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brochacho MiniDisc Virtual Player — ALL-ACCESS</title>
+  <link rel="stylesheet" href="../tokens/colors.css">
+  <link rel="stylesheet" href="../tokens/typography.css">
+  <link rel="stylesheet" href="../tokens/motion.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--void-soft);
+      color: var(--text-primary);
+      min-height: 100vh;
+      font-family: var(--font-functional);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* === DUAL-LAYER: CHAOS LAYER === */
+    .chaos-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      aria-hidden: true;
+    }
+
+    .rhythmic-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 229, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.25;
+    }
+    .orb-fuchsia { width: 400px; height: 400px; background: var(--pink-500); top: -100px; right: -100px; }
+    .orb-acid { width: 350px; height: 350px; background: var(--acid-500); bottom: -100px; left: -100px; }
+
+    /* === FUNCTIONAL LAYER === */
+    .functional-layer {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px dashed var(--chrome-400);
+      padding-bottom: 1.5rem;
+    }
+
+    .header h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--acid-300), var(--blue-300));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .back-btn {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: var(--text-sm);
+      transition: var(--transition-fast);
+      border: 1px solid var(--border-subtle);
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.02);
+    }
+    .back-btn:hover {
+      border-color: var(--acid-500);
+      color: var(--acid-500);
+    }
+
+    /* Player Main Grid */
+    .player-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 2.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .player-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Left Panel: 3D and Cover */
+    .deck-panel {
+      background: rgba(13, 13, 13, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      text-align: center;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    }
+
+    /* Right Panel: Playlist and Lyrics */
+    .control-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .panel-box {
+      background: rgba(20, 20, 20, 0.7);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 1.5rem;
+    }
+
+    /* Tracklist Styles */
+    .track-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      list-style: none;
+    }
+
+    .track-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.2rem;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: rgba(255,255,255,0.02);
+      cursor: pointer;
+      transition: var(--transition-base);
+    }
+
+    .track-item:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: var(--border-subtle);
+    }
+
+    .track-item.active {
+      background: rgba(127, 255, 0, 0.08);
+      border-color: var(--acid-500);
+      color: var(--acid-300);
+    }
+
+    .track-num {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-right: 1rem;
+    }
+
+    /* Sync Lyrics Box */
+    .lyrics-container {
+      height: 220px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      padding: 1rem;
+      border-radius: 12px;
+      background: var(--void-pure);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .lyric-line {
+      font-size: var(--text-sm);
+      line-height: var(--leading-relaxed);
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      transition: color var(--transition-fast), transform var(--transition-fast);
+      transform-origin: left;
+    }
+
+    .lyric-line.active {
+      color: var(--text-primary);
+      font-weight: 600;
+      transform: scale(1.03);
+    }
+
+    .lyric-word {
+      display: inline-block;
+      margin-right: 0.25rem;
+      transition: color var(--transition-fast);
+    }
+
+    .lyric-word.highlight {
+      color: var(--acid-500);
+      text-shadow: 0 0 10px rgba(127, 255, 0, 0.4);
+    }
+
+    /* Media Player Buttons */
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .btn-media {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-subtle);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: var(--transition-base);
+    }
+
+    .btn-media:hover {
+      border-color: var(--acid-500);
+      color: var(--acid-500);
+      box-shadow: 0 0 15px rgba(127,255,0,0.15);
+    }
+
+    .btn-media.play-pause {
+      width: 60px;
+      height: 60px;
+      background: var(--acid-500);
+      color: var(--void-pure);
+      border: none;
+    }
+
+    .btn-media.play-pause:hover {
+      transform: scale(1.05);
+      background: var(--acid-300);
+      box-shadow: 0 0 20px rgba(127,255,0,0.3);
+    }
+
+    /* Cover Info */
+    .album-meta h2 {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      margin-bottom: 0.25rem;
+    }
+    .album-meta p {
+      color: var(--text-muted);
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* QR Share Widget */
+    .share-widget {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: auto;
+    }
+
+    .qr-box {
+      width: 80px;
+      height: 80px;
+      background: white;
+      border: 3px solid var(--chrome-400);
+      border-radius: 8px;
+      padding: 0.25rem;
+    }
+
+    .qr-box img {
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+    }
+  </style>
+  
+  <!-- Loading Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <div class="chaos-layer" aria-hidden="true">
+    <div class="rhythmic-grid"></div>
+    <div class="orb orb-fuchsia"></div>
+    <div class="orb orb-acid"></div>
+  </div>
+
+  <div class="functional-layer">
+    <header class="header">
+      <h1>💽 MiniDisc Virtual // Brochacho Records</h1>
+      <a href="../index.html" class="back-btn">← Sair</a>
+    </header>
+
+    <main class="player-grid">
+      <!-- 3D MiniDisc Deck -->
+      <section class="deck-panel">
+        <div id="miniDiscContainer" style="width: 250px; height: 250px; position: relative; cursor: grab;"></div>
+        
+        <div class="album-meta">
+          <h2 id="currentTrackTitle">Carregando Faixa...</h2>
+          <p id="currentAlbumArtist">Brochacho Records — Edição Limitada</p>
+        </div>
+
+        <div class="controls">
+          <button class="btn-media" id="btnPrev">⏮</button>
+          <button class="btn-media play-pause" id="btnPlayPause">▶</button>
+          <button class="btn-media" id="btnNext">⏭</button>
+        </div>
+
+        <!-- Share & QR -->
+        <div class="share-widget">
+          <div class="qr-box">
+            <!-- Simulated retro Y2K QR Code (we can generate dynamically or use placeholder) -->
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29' shape-rendering='crispEdges'><rect width='29' height='29' fill='white'/><rect x='0' y='0' width='7' height='7' fill='black'/><rect x='1' y='1' width='5' height='5' fill='white'/><rect x='2' y='2' width='3' height='3' fill='black'/><rect x='22' y='0' width='7' height='7' fill='black'/><rect x='23' y='1' width='5' height='5' fill='white'/><rect x='24' y='2' width='3' height='3' fill='black'/><rect x='0' y='22' width='7' height='7' fill='black'/><rect x='1' y='22' width='5' height='5' fill='white'/><rect x='2' y='22' width='3' height='3' fill='black'/><rect x='10' y='10' width='9' height='9' fill='black'/><rect x='12' y='12' width='5' height='5' fill='white'/><rect x='13' y='13' width='3' height='3' fill='black'/></svg>" alt="Album QR Code">
+          </div>
+          <div style="text-align: left;">
+            <h4 style="font-size: var(--text-xs); text-transform: uppercase;">Acesso Físico Virtual</h4>
+            <p style="font-size: 11px; color: var(--text-muted);">Aponte a câmera para carregar este MiniDisc em outro player.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Track List & Lyrics Panel -->
+      <section class="control-panel">
+        <div class="panel-box">
+          <h3 style="margin-bottom: 1rem; font-family: var(--font-display); font-size: var(--text-md); border-bottom: 1px dashed var(--border-subtle); padding-bottom: 0.5rem; color: var(--blue-300);">Alinhamento de Faixas</h3>
+          <ul class="track-list" id="tracklistContainer">
+            <!-- Rendered dynamically -->
+          </ul>
+        </div>
+
+        <div class="panel-box" style="flex: 1; display: flex; flex-direction: column;">
+          <h3 style="margin-bottom: 1rem; font-family: var(--font-display); font-size: var(--text-md); border-bottom: 1px dashed var(--border-subtle); padding-bottom: 0.5rem; color: var(--acid-500);">Letras Sincronizadas</h3>
+          <div class="lyrics-container" id="lyricsBox">
+            <!-- Lyrics rendered dynamically -->
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // 1. ALBUM METADATA & TRACKS
+    const album = {
+      artist: "BROCHACHO & SÓCIOS",
+      albumName: "HOLOGRAPHIC CHROME (2026)",
+      tracks: [
+        {
+          title: "Bora Ficar Rico (Intro)",
+          duration: "1:05",
+          src: "./speech.mp3", // Local audio
+          lyrics: [
+            { time: 0.0, word: "BORA" },
+            { time: 0.4, word: "FICAR" },
+            { time: 0.8, word: "RICO!" },
+            { time: 1.5, word: "Cérebro" },
+            { time: 1.9, word: "externo" },
+            { time: 2.2, word: "estável," },
+            { time: 2.6, word: "rodando" },
+            { time: 3.0, word: "no" },
+            { time: 3.2, word: "limiar" },
+            { time: 3.6, word: "do" },
+            { time: 3.9, word: "futuro!" },
+            { time: 4.5, word: "O" },
+            { time: 4.8, word: "seu" },
+            { time: 5.1, word: "MiniDisc" },
+            { time: 5.5, word: "carregou" },
+            { time: 6.0, word: "com" },
+            { time: 6.3, word: "sucesso." }
+          ]
+        },
+        {
+          title: "Ancoragem Sensorial",
+          duration: "2:45",
+          src: "./speech.mp3",
+          lyrics: [
+            { time: 0.0, word: "Mova" },
+            { time: 0.4, word: "seu" },
+            { time: 0.8, word: "olhar." },
+            { time: 1.5, word: "Encontre" },
+            { time: 2.0, word: "o" },
+            { time: 2.3, word: "foco." },
+            { time: 3.0, word: "A" },
+            { time: 3.3, word: "frequência" },
+            { time: 3.7, word: "rítmica" },
+            { time: 4.2, word: "arrasta" },
+            { time: 4.6, word: "a" },
+            { time: 4.9, word: "atenção." }
+          ]
+        }
+      ]
+    };
+
+    let currentTrackIndex = 0;
+    let isPlaying = false;
+    let audio = new Audio();
+    let lyricsAnimationFrame = null;
+
+    // UI Elements
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const currentTrackTitle = document.getElementById('currentTrackTitle');
+    const tracklistContainer = document.getElementById('tracklistContainer');
+    const lyricsBox = document.getElementById('lyricsBox');
+
+    // 2. INITIALIZE TRACKLIST UI
+    function renderTracklist() {
+      tracklistContainer.innerHTML = album.tracks.map((track, idx) => `
+        <li class="track-item ${idx === currentTrackIndex ? 'active' : ''}" onclick="selectTrack(${idx})">
+          <div>
+            <span class="track-num">${String(idx + 1).padStart(2, '0')}</span>
+            <strong>${track.title}</strong>
+          </div>
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">${track.duration}</span>
+        </li>
+      `).join('');
+    }
+
+    function renderLyrics() {
+      const track = album.tracks[currentTrackIndex];
+      lyricsBox.innerHTML = '';
+      
+      // Group words into lines for clean reading
+      const wordsPerLine = 4;
+      let lineDiv = document.createElement('div');
+      lineDiv.className = 'lyric-line active';
+      lyricsBox.appendChild(lineDiv);
+
+      track.lyrics.forEach((item, wordIdx) => {
+        if (wordIdx > 0 && wordIdx % wordsPerLine === 0) {
+          lineDiv = document.createElement('div');
+          lineDiv.className = 'lyric-line';
+          lyricsBox.appendChild(lineDiv);
+        }
+
+        const span = document.createElement('span');
+        span.className = 'lyric-word';
+        span.id = `word-${wordIdx}`;
+        span.textContent = item.word;
+        lineDiv.appendChild(span);
+        lineDiv.appendChild(document.createTextNode(' '));
+      });
+    }
+
+    function selectTrack(idx) {
+      currentTrackIndex = idx;
+      renderTracklist();
+      renderLyrics();
+      loadTrack();
+      
+      // Update dynamic 3D MiniDisc label text
+      updateMiniDiscLabel(album.tracks[idx].title);
+
+      if (isPlaying) {
+        audio.play();
+      }
+    }
+
+    function loadTrack() {
+      const track = album.tracks[currentTrackIndex];
+      audio.src = track.src;
+      currentTrackTitle.textContent = track.title;
+    }
+
+    // 3. LYRIC SYNC ENGINE
+    function syncLyrics() {
+      if (!isPlaying) return;
+
+      const track = album.tracks[currentTrackIndex];
+      const currentTime = audio.currentTime;
+
+      track.lyrics.forEach((item, idx) => {
+        const wordEl = document.getElementById(`word-${idx}`);
+        if (!wordEl) return;
+
+        // Active lyric highlighting based on timestamp
+        if (currentTime >= item.time && (idx === track.lyrics.length - 1 || currentTime < track.lyrics[idx + 1].time)) {
+          if (!wordEl.classList.contains('highlight')) {
+            wordEl.classList.add('highlight');
+            
+            // Pulse the 3D MiniDisc in sync with the lyrics word trigger!
+            if (discGroup) {
+              discGroup.scale.set(1.14, 1.14, 1.14);
+            }
+          }
+          
+          // Set parent lyric line as active
+          document.querySelectorAll('.lyric-line').forEach(l => l.classList.remove('active'));
+          wordEl.parentElement.classList.add('active');
+
+          // Auto scroll to active lyric line
+          const containerHeight = lyricsBox.clientHeight;
+          const lineOffset = wordEl.parentElement.offsetTop;
+          lyricsBox.scrollTop = lineOffset - containerHeight / 2 + 20;
+        } else if (currentTime < item.time) {
+          wordEl.classList.remove('highlight');
+        }
+      });
+
+      lyricsAnimationFrame = requestAnimationFrame(syncLyrics);
+    }
+
+    // 4. AUDIO CONTROLS
+    btnPlayPause.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        btnPlayPause.textContent = "⏸";
+        audio.play().then(() => {
+          syncLyrics();
+        });
+      } else {
+        btnPlayPause.textContent = "▶";
+        audio.pause();
+        cancelAnimationFrame(lyricsAnimationFrame);
+      }
+    });
+
+    btnNext.addEventListener('click', () => {
+      let next = (currentTrackIndex + 1) % album.tracks.length;
+      selectTrack(next);
+    });
+
+    btnPrev.addEventListener('click', () => {
+      let prev = currentTrackIndex - 1;
+      if (prev < 0) prev = album.tracks.length - 1;
+      selectTrack(prev);
+    });
+
+    audio.addEventListener('ended', () => {
+      let next = (currentTrackIndex + 1) % album.tracks.length;
+      selectTrack(next);
+    });
+
+    // 5. THREE.JS MINIDISC RENDERING
+    let miniScene, miniCamera, miniRenderer;
+    let discGroup, rotatingDisc, shutterMesh;
+    let labelMesh = null;
+
+    // Canvas-drawn retro paper label texture generator
+    function createLabelTexture(trackTitle) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+
+      // Matte paper white background
+      ctx.fillStyle = '#f6f6f6';
+      ctx.fillRect(0, 0, 512, 128);
+
+      // Acid green left accent bar
+      ctx.fillStyle = '#7fff00';
+      ctx.fillRect(0, 0, 24, 128);
+
+      // Fuchsia thin bar
+      ctx.fillStyle = '#ff00aa';
+      ctx.fillRect(24, 0, 6, 128);
+
+      // Grid background effect
+      ctx.strokeStyle = '#e8e8e8';
+      ctx.lineWidth = 1;
+      for (let i = 35; i < 512; i += 20) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, 128);
+        ctx.stroke();
+      }
+
+      // Metadata & Title drawing
+      ctx.fillStyle = '#0a0a0a';
+      ctx.font = 'bold 22px "Courier New", monospace';
+      ctx.fillText("BROCHACHO RECORDS // MD-74", 45, 45);
+
+      ctx.fillStyle = '#ff007f';
+      ctx.font = 'bold 16px "Courier New", monospace';
+      ctx.fillText("TRACK: " + trackTitle.toUpperCase(), 45, 78);
+
+      ctx.fillStyle = '#555555';
+      ctx.font = '12px "Courier New", monospace';
+      ctx.fillText("Y2K SENSORY DESIGN // COGNITIVE LABS", 45, 108);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.needsUpdate = true;
+      return texture;
+    }
+
+    function updateMiniDiscLabel(trackTitle) {
+      if (labelMesh && labelMesh.material) {
+        if (labelMesh.material.map) {
+          labelMesh.material.map.dispose();
+        }
+        labelMesh.material.map = createLabelTexture(trackTitle);
+        labelMesh.material.needsUpdate = true;
+      }
+    }
+
+    function init3DDeck() {
+      const container = document.getElementById('miniDiscContainer');
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+
+      miniScene = new THREE.Scene();
+      miniCamera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
+      miniCamera.position.set(0, 0, 4.8);
+
+      miniRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      miniRenderer.setSize(w, h);
+      miniRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(miniRenderer.domElement);
+
+      // Lights
+      miniScene.add(new THREE.AmbientLight(0xffffff, 0.4));
+      const light = new THREE.DirectionalLight(0xffffff, 0.9);
+      light.position.set(3, 4, 3);
+      miniScene.add(light);
+
+      // Tech Neon glow points
+      const neonGreenFill = new THREE.PointLight(0x7fff00, 1.4, 10);
+      neonGreenFill.position.set(-2.5, -2, 1);
+      miniScene.add(neonGreenFill);
+
+      const blueFill = new THREE.PointLight(0x00e5ff, 1.5, 10);
+      blueFill.position.set(2.5, 2, 1);
+      miniScene.add(blueFill);
+
+      // Model groups
+      discGroup = new THREE.Group();
+      miniScene.add(discGroup);
+
+      // Glassmorphic translucent acid green casing
+      const shellGeo = new THREE.BoxGeometry(2.1, 2.1, 0.12);
+      const shellMat = new THREE.MeshStandardMaterial({
+        color: 0x7fff00, // Acid green translucent plastic
+        transparent: true,
+        opacity: 0.55,
+        roughness: 0.1,
+        metalness: 0.15,
+        side: THREE.DoubleSide
+      });
+      const shell = new THREE.Mesh(shellGeo, shellMat);
+      discGroup.add(shell);
+
+      // Thin futuristic wireframe border to highlight shape edges
+      const borderGeo = new THREE.BoxGeometry(2.12, 2.12, 0.13);
+      const borderMat = new THREE.MeshBasicMaterial({
+        color: 0x00e5ff, // Cyber cyan
+        wireframe: true,
+        transparent: true,
+        opacity: 0.25
+      });
+      const border = new THREE.Mesh(borderGeo, borderMat);
+      discGroup.add(border);
+
+      // Metal Sliding Shutter (Left edge)
+      const shutterGeo = new THREE.BoxGeometry(0.75, 1.25, 0.14);
+      const shutterMat = new THREE.MeshStandardMaterial({
+        color: 0xcccccc,
+        metalness: 0.9,
+        roughness: 0.15
+      });
+      shutterMesh = new THREE.Mesh(shutterGeo, shutterMat);
+      shutterMesh.position.set(-0.6, 0.25, 0);
+      discGroup.add(shutterMesh);
+
+      // Sticker Paper Label (Right bottom face)
+      const labelGeo = new THREE.PlaneGeometry(1.2, 0.38);
+      const initialTitle = album.tracks[currentTrackIndex].title;
+      const labelMat = new THREE.MeshBasicMaterial({
+        map: createLabelTexture(initialTitle),
+        transparent: true,
+        side: THREE.DoubleSide
+      });
+      labelMesh = new THREE.Mesh(labelGeo, labelMat);
+      labelMesh.position.set(0.35, -0.35, 0.065); // Avoid Z-fighting
+      discGroup.add(labelMesh);
+
+      // Spinning Internal Magneto-Optical Disc
+      const discGeo = new THREE.CylinderGeometry(0.8, 0.8, 0.02, 32);
+      
+      // Iridescent shader material
+      const discShaderMat = new THREE.ShaderMaterial({
+        uniforms: { u_time: { value: 0 } },
+        vertexShader: `
+          varying vec2 vUv;
+          varying vec3 vNormal;
+          void main() {
+            vUv = uv;
+            vNormal = normalize(normalMatrix * normal);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          varying vec2 vUv;
+          uniform float u_time;
+          
+          vec3 spectral_color(float w) {
+            vec3 c;
+            c.r = sin(w * 6.2831) * 0.5 + 0.5;
+            c.g = sin((w + 0.33) * 6.2831) * 0.5 + 0.5;
+            c.b = sin((w + 0.66) * 6.2831) * 0.5 + 0.5;
+            return c;
+          }
+
+          void main() {
+            vec2 uv = vUv - vec2(0.5);
+            float dist = length(uv);
+            if (dist > 0.48 || dist < 0.12) discard;
+
+            float angle = atan(uv.y, uv.x);
+            float grooves = sin(dist * 600.0) * 0.05 + 0.95;
+
+            // Shift spectrum
+            float hue = fract(angle / 3.14159 * 1.5 + u_time * 0.5 + dist * 1.0);
+            vec3 rainbow = spectral_color(hue);
+
+            vec3 baseMetal = vec3(0.85, 0.88, 0.9) * grooves;
+            gl_FragColor = vec4(mix(baseMetal, rainbow, 0.45), 0.95);
+          }
+        `,
+        side: THREE.DoubleSide
+      });
+
+      rotatingDisc = new THREE.Mesh(discGeo, discShaderMat);
+      rotatingDisc.rotation.x = Math.PI / 2;
+      discGroup.add(rotatingDisc);
+
+      // Metal Center Spindle Ring
+      const ringGeo = new THREE.CylinderGeometry(0.24, 0.24, 0.04, 16);
+      const ringMat = new THREE.MeshStandardMaterial({ color: 0x999999, metalness: 1, roughness: 0.1 });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.PI / 2;
+      ring.position.z = 0.02;
+      discGroup.add(ring);
+
+      // Raycaster for click play/pause interaction directly on the MiniDisc
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      container.addEventListener('click', (e) => {
+        // Calculate mouse position in normalized device coordinates (-1 to +1)
+        const rect = container.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, miniCamera);
+        
+        // Check intersections with any child meshes of our MiniDisc
+        const intersects = raycaster.intersectObjects(discGroup.children);
+        if (intersects.length > 0) {
+          // Trigger play/pause programmatically on click!
+          btnPlayPause.click();
+          
+          // Satisfying physical bounce on direct tactile click!
+          discGroup.scale.set(1.22, 1.22, 1.22);
+        }
+      });
+
+      // Animation
+      const clock = new THREE.Clock();
+      function tick() {
+        requestAnimationFrame(tick);
+        const elapsedTime = clock.getElapsedTime();
+
+        // Pass time to shader and rotate disc on play
+        if (rotatingDisc) {
+          rotatingDisc.material.uniforms.u_time.value = elapsedTime;
+          if (isPlaying) {
+            rotatingDisc.rotation.y += 0.06; // Spin inner disc
+          }
+        }
+
+        // Slide metal shutter open when playing, shut when paused!
+        const targetShutterX = isPlaying ? -1.15 : -0.6;
+        if (shutterMesh) {
+          shutterMesh.position.x += (targetShutterX - shutterMesh.position.x) * 0.15;
+        }
+
+        // Floating rotation of the whole MiniDisc unit
+        discGroup.rotation.y = Math.sin(elapsedTime * 1.2) * 0.25;
+        discGroup.rotation.x = 0.35 + Math.cos(elapsedTime * 0.8) * 0.12;
+
+        // Spring scale decay animation on lyric sync beat bounce
+        discGroup.scale.x += (1.0 - discGroup.scale.x) * 0.12;
+        discGroup.scale.y = discGroup.scale.x;
+        discGroup.scale.z = discGroup.scale.x;
+
+        miniRenderer.render(miniScene, miniCamera);
+      }
+      tick();
+    }
+
+    // Interactive Drag Rotation
+    let isDragging = false;
+    let prevMouseX = 0;
+    const container = document.getElementById('miniDiscContainer');
+    container.addEventListener('mousedown', (e) => { isDragging = true; prevMouseX = e.clientX; });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging || !discGroup) return;
+      const deltaX = e.clientX - prevMouseX;
+      discGroup.rotation.y += deltaX * 0.01;
+      prevMouseX = e.clientX;
+    });
+
+    // 6. INIT
+    window.addEventListener('load', () => {
+      renderTracklist();
+      renderLyrics();
+      loadTrack();
+      init3DDeck();
+    });
+  </script>
+</body>
+</html>

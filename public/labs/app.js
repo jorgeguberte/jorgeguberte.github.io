@@ -7,6 +7,15 @@ const experiments = [
     tags: ["design-system", "accessibility", "y2k-brutalist", "attention-guard"],
     url: "./y2k-sensory/index.html",
     linkText: "Abrir Laboratório Sensorial →"
+  },
+  {
+    title: "Brochacho Virtual MiniDisc Player",
+    description:
+      "Fully interactive 3D virtual MiniDisc console. Click and drag the hardware in 3D space, hit play to slide the protective metal shutter open and spin the iridescent optical disc, and see lyrics scroll in perfect word-by-word synchronicity.",
+    stage: "open",
+    tags: ["WebGL", "Three.js", "Audio-Sync", "Interactive-3D"],
+    url: "./y2k-sensory/minidisc-album.html",
+    linkText: "Inserir MiniDisc Virtual →"
   }
 ];
 
@@ -65,6 +74,169 @@ if (docBtn.length > 0) {
       btn.classList.add("active");
       const mode = btn.dataset.target;
       document.documentElement.setAttribute("data-sensory", mode);
+      
+      // Update Three.js background mode dynamically
+      updateThreeSensoryMode(mode);
     });
   });
 }
+
+// ==========================================
+// THREE.JS SPATIAL 3D BACKGROUND SYSTEM
+// ==========================================
+let scene, camera, renderer, particles, wireframeSphere;
+let mouseX = 0, mouseY = 0;
+let targetX = 0, targetY = 0;
+let windowHalfX = window.innerWidth / 2;
+let windowHalfY = window.innerHeight / 2;
+let rotationSpeed = 0.001;
+let currentMode = "balanced";
+
+function initThreeBackground() {
+  const container = document.getElementById('canvas3d-container');
+  if (!container) return;
+
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+
+  // 1. Scene setup
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x000000, 0.002);
+
+  // 2. Camera
+  camera = new THREE.PerspectiveCamera(60, width / height, 1, 1000);
+  camera.position.z = 250;
+
+  // 3. Renderer with absolute transparency and high quality
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  container.appendChild(renderer.domElement);
+
+  // 4. Create a 3D Particle Constellation (stars)
+  const particleGeo = new THREE.BufferGeometry();
+  const particleCount = 200;
+  const positions = new Float32Array(particleCount * 3);
+
+  for (let i = 0; i < particleCount * 3; i += 3) {
+    positions[i] = (Math.random() - 0.5) * 800;     // X
+    positions[i + 1] = (Math.random() - 0.5) * 800; // Y
+    positions[i + 2] = (Math.random() - 0.5) * 800; // Z
+  }
+
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+  // Particle Material using standard glowing square points
+  const particleMat = new THREE.PointsMaterial({
+    color: 0x00ff66, // Acid green
+    size: 2.5,
+    transparent: true,
+    opacity: 0.4,
+    sizeAttenuation: true
+  });
+
+  particles = new THREE.Points(particleGeo, particleMat);
+  scene.add(particles);
+
+  // 5. Create a slowly spinning central Wireframe Geodesic Sphere
+  const sphereGeo = new THREE.IcosahedronGeometry(75, 2); // Geodesic sphere
+  const sphereMat = new THREE.MeshBasicMaterial({
+    color: 0x00e5ff, // Cyber cyan
+    wireframe: true,
+    transparent: true,
+    opacity: 0.15
+  });
+  wireframeSphere = new THREE.Mesh(sphereGeo, sphereMat);
+  scene.add(wireframeSphere);
+
+  // 6. Track mouse movements for parallax tilting
+  document.addEventListener('mousemove', (event) => {
+    mouseX = (event.clientX - windowHalfX);
+    mouseY = (event.clientY - windowHalfY);
+  });
+
+  // Handle window resizing
+  window.addEventListener('resize', () => {
+    windowHalfX = window.innerWidth / 2;
+    windowHalfY = window.innerHeight / 2;
+    if (camera && renderer) {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+  });
+
+  // 7. Animation Loop
+  function animate() {
+    requestAnimationFrame(animate);
+
+    // Camera targets based on mouse position (smooth easing)
+    targetX = mouseX * 0.15;
+    targetY = mouseY * 0.15;
+
+    // Smoothly ease the camera angle towards mouse target (Parallax!)
+    camera.position.x += (targetX - camera.position.x) * 0.05;
+    camera.position.y += (-targetY - camera.position.y) * 0.05;
+    camera.lookAt(scene.position);
+
+    // Rotate particles and wireframe sphere
+    if (particles && currentMode !== "calm") {
+      particles.rotation.y += rotationSpeed;
+      particles.rotation.x += rotationSpeed * 0.5;
+    }
+    if (wireframeSphere && currentMode !== "calm") {
+      wireframeSphere.rotation.y -= rotationSpeed * 1.5;
+      wireframeSphere.rotation.x += rotationSpeed * 0.8;
+      
+      // Let the sphere pulse gently
+      const time = performance.now() * 0.001;
+      const scale = 1.0 + Math.sin(time * 2.0) * 0.05;
+      wireframeSphere.scale.set(scale, scale, scale);
+    }
+
+    renderer.render(scene, camera);
+  }
+  animate();
+}
+
+// Update the 3D canvas state based on sensory preset
+function updateThreeSensoryMode(mode) {
+  currentMode = mode;
+  const container = document.getElementById('canvas3d-container');
+  if (!container) return;
+
+  if (mode === "high-stim") {
+    // Vivid, highly kinetic pink particles with green grid
+    container.style.opacity = "1";
+    rotationSpeed = 0.004; // 4x faster!
+    if (particles && particles.material) {
+      particles.material.color.setHex(0xff0055); // Fuchsia points!
+      particles.material.opacity = 0.7;
+    }
+    if (wireframeSphere && wireframeSphere.material) {
+      wireframeSphere.material.color.setHex(0x00ff66); // Acid green grid!
+      wireframeSphere.material.opacity = 0.25;
+    }
+  } else if (mode === "balanced") {
+    // Normal, smooth cyan/green
+    container.style.opacity = "1";
+    rotationSpeed = 0.001;
+    if (particles && particles.material) {
+      particles.material.color.setHex(0x00ff66); // Acid green points
+      particles.material.opacity = 0.4;
+    }
+    if (wireframeSphere && wireframeSphere.material) {
+      wireframeSphere.material.color.setHex(0x00e5ff); // Cyber cyan grid
+      wireframeSphere.material.opacity = 0.15;
+    }
+  } else if (mode === "calm") {
+    // Autism profile: completely fade out 3D elements for a quiet background!
+    container.style.opacity = "0"; // Smooth fade to black via CSS!
+    rotationSpeed = 0.0; // Stop moving to save CPU
+  }
+}
+
+// Auto-run Three.js setup on load
+window.addEventListener('load', () => {
+  initThreeBackground();
+});

@@ -1,0 +1,72 @@
+/* ===========================================
+   Y2K DESIGN SYSTEM — COLOR TOKENS
+   Palette: Chrome, Acid, Neon, Deep
+   =========================================== */
+
+:root {
+  /* --- Primary: Chrome & Metal --- */
+  --chrome-100: #f0f0f0;
+  --chrome-200: #d4d4d4;
+  --chrome-300: #a8a8a8;
+  --chrome-400: #6b6b6b;
+  --chrome-500: #3d3d3d;
+  --chrome-900: #0a0a0a;
+
+  /* --- Accent: Acid Green --- */
+  --acid-100: #e8ffd4;
+  --acid-300: #b8ff6b;
+  --acid-500: #7fff00; /* chartreuse */
+  --acid-700: #4db800;
+  --acid-900: #1a5c00;
+
+  /* --- Accent: Hot Pink / Fuchsia --- */
+  --pink-100: #ffe4f7;
+  --pink-300: #ff6bcb;
+  --pink-500: #ff00aa;
+  --pink-700: #b8007a;
+  --pink-900: #5c003d;
+
+  /* --- Accent: Electric Blue --- */
+  --blue-100: #d4f4ff;
+  --blue-300: #6bdfff;
+  --blue-500: #00bfff; /* deep sky blue */
+  --blue-700: #0080aa;
+  --blue-900: #003d55;
+
+  /* --- Accent: UV Purple --- */
+  --purple-100: #f0d4ff;
+  --purple-300: #c96bff;
+  --purple-500: #9b00ff;
+  --purple-700: #6b00b8;
+  --purple-900: #35005c;
+
+  /* --- Accent: Warning/Chaos Orange --- */
+  --orange-100: #fff0d4;
+  --orange-300: #ffc46b;
+  --orange-500: #ff8c00;
+  --orange-700: #b86200;
+  --orange-900: #5c3100;
+
+  /* --- Neutrals: Deep Space --- */
+  --void-pure: #000000;
+  --void-soft: #0d0d0d;
+  --void-mid: #1a1a1a;
+  --void-light: #2a2a2a;
+
+  /* --- Functional --- */
+  --text-primary: #f0f0f0;
+  --text-secondary: #a8a8a8;
+  --text-muted: #6b6b6b;
+  --surface-base: #0d0d0d;
+  --surface-elevated: #1a1a1a;
+  --surface-overlay: rgba(0, 0, 0, 0.85);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-accent: rgba(127, 255, 0, 0.4);
+
+  /* --- Decorative Layer (chaos) --- */
+  --chaos-glow-1: rgba(255, 0, 170, 0.3);
+  --chaos-glow-2: rgba(127, 255, 0, 0.2);
+  --chaos-glow-3: rgba(0, 191, 255, 0.25);
+  --chaos-noise-opacity: 0.04;
+  --chaos-grain-blend: overlay;
+}
