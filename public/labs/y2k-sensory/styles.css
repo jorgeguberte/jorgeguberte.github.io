@@ -266,7 +266,7 @@ html, body {
 /* MAIN LAYOUT: Bento Grid Asymmetrical */
 .bento-grid {
   display: grid;
-  grid-template-cols: repeat(12, 1fr);
+  grid-template-columns: repeat(12, 1fr);
   gap: 1.5rem;
   margin-bottom: 4rem;
 }
@@ -417,7 +417,7 @@ p {
 /* MOBILE RESPONSIVENESS (Universal Overrides) */
 @media (max-width: 768px) {
   .bento-grid {
-    grid-template-cols: 1fr;
+    grid-template-columns: 1fr;
   }
   
   .col-12, .col-8, .col-6, .col-4 {

@@ -19,22 +19,22 @@ export default function PostPage({ post }: PostPageProps) {
         publishedTime={new Date(post.date).toISOString()}
       />
 
-      <main className="min-h-screen px-6 py-16 max-w-3xl mx-auto">
-        <div className="mb-12">
-          <Link
-            href="/blog"
-            className="font-mono text-sm text-neutral-500 hover:text-emerald-400 transition-colors"
-          >
+      <main className="page-shell max-w-3xl">
+        <nav className="mb-12 flex items-center justify-between gap-4">
+          <Link href="/blog" className="nav-pill">
             ← blog
           </Link>
-        </div>
+          <Link href="/" className="nav-pill">
+            home →
+          </Link>
+        </nav>
 
-        <article>
-          <header className="mb-10">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+        <article className="glass-card p-7 md:p-10">
+          <header className="mb-10 border-b border-white/10 pb-8">
+            <h1 className="gradient-text mb-4 text-4xl font-bold tracking-[-0.04em] md:text-5xl">
               {post.title}
             </h1>
-            <div className="flex items-center gap-4 text-sm text-neutral-500">
+            <div className="flex flex-wrap items-center gap-3 text-sm text-neutral-500">
               <time className="font-mono">
                 {new Date(post.date).toLocaleDateString("en-US", {
                   year: "numeric",
@@ -43,12 +43,9 @@ export default function PostPage({ post }: PostPageProps) {
                 })}
               </time>
               {post.tags && post.tags.length > 0 && (
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="font-mono px-2 py-0.5 rounded bg-neutral-800 text-neutral-500"
-                    >
+                    <span key={tag} className="chip">
                       {tag}
                     </span>
                   ))}
@@ -59,16 +56,16 @@ export default function PostPage({ post }: PostPageProps) {
 
           <div
             className="prose prose-invert prose-neutral max-w-none
-              prose-headings:font-bold prose-headings:tracking-tight
+              prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-white
               prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
               prose-p:text-neutral-300 prose-p:leading-relaxed
-              prose-a:text-emerald-400 prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-neutral-200
-              prose-code:text-emerald-300 prose-code:bg-neutral-800/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']
-              prose-pre:bg-neutral-900 prose-pre:border prose-pre:border-neutral-800
+              prose-a:text-emerald-300 prose-a:no-underline hover:prose-a:underline
+              prose-strong:text-neutral-100
+              prose-code:text-emerald-200 prose-code:bg-neutral-900/80 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']
+              prose-pre:bg-neutral-950/80 prose-pre:border prose-pre:border-white/10
               prose-li:text-neutral-300
-              prose-blockquote:border-emerald-500/30 prose-blockquote:text-neutral-400
-              prose-hr:border-neutral-800"
+              prose-blockquote:border-emerald-400/40 prose-blockquote:text-neutral-300 prose-blockquote:bg-emerald-300/[0.04] prose-blockquote:px-5 prose-blockquote:py-1 prose-blockquote:rounded-r-2xl
+              prose-hr:border-white/10"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
         </article>

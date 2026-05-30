@@ -11,77 +11,70 @@ export default function AboutPage() {
         path="/about"
       />
 
-      <main className="min-h-screen px-6 py-16 max-w-4xl mx-auto">
-        <div className="mb-10">
-          <Link
-            href="/"
-            className="font-mono text-sm text-neutral-500 hover:text-emerald-400 transition-colors"
-          >
+      <main className="page-shell">
+        <nav className="mb-12 flex items-center justify-between gap-4">
+          <Link href="/" className="nav-pill">
             ← home
           </Link>
-        </div>
+          <Link href="/blog" className="nav-pill">
+            writing →
+          </Link>
+        </nav>
 
-        <header className="mb-16">
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-emerald-400 mb-4">
-            About
-          </p>
-          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-4">
+        <header className="glass-card mb-12 p-7 md:p-10">
+          <p className="eyebrow mb-5">About</p>
+          <h1 className="gradient-text mb-5 text-5xl font-semibold tracking-[-0.05em] md:text-6xl">
             {profile.name}
           </h1>
-          <p className="text-lg text-neutral-300 leading-relaxed max-w-3xl">
+          <p className="max-w-3xl text-lg leading-8 text-neutral-300 md:text-xl">
             {aboutPage.intro}
           </p>
         </header>
 
-        <section className="mb-14">
-          <h2 className="text-2xl font-semibold tracking-tight mb-5">What I care about</h2>
-          <ul className="grid gap-4 md:grid-cols-2">
+        <section className="mb-12">
+          <div className="section-kicker">
+            <p className="eyebrow">What I care about</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
             {aboutPage.careAbout.map((item) => (
-              <li
-                key={item}
-                className="rounded-2xl border border-neutral-900 bg-neutral-950/70 p-5 text-neutral-300 leading-relaxed"
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="mb-14">
-          <h2 className="text-2xl font-semibold tracking-tight mb-5">Selected experience</h2>
-          <div className="grid gap-4">
-            {aboutPage.work.map((item) => (
-              <article
-                key={item.title}
-                className="rounded-2xl border border-neutral-900 bg-neutral-950/70 p-6"
-              >
-                <div className="flex flex-col gap-2 md:flex-row md:items-baseline md:justify-between mb-3">
-                  <h3 className="text-xl font-semibold tracking-tight">{item.title}</h3>
-                  <p className="font-mono text-sm text-emerald-300">{item.role}</p>
+              <article key={item} className="glass-card card-hover p-5">
+                <div className="flex gap-3 leading-7 text-neutral-200">
+                  <span className="dot" />
+                  <span>{item}</span>
                 </div>
-                <p className="text-neutral-400 leading-relaxed">{item.description}</p>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="mb-14">
-          <h2 className="text-2xl font-semibold tracking-tight mb-5">Stack</h2>
+        <section className="mb-12">
+          <div className="section-kicker">
+            <p className="eyebrow">Selected experience</p>
+          </div>
+          <div className="grid gap-4">
+            {aboutPage.work.map((item) => (
+              <article key={item.title} className="glass-card card-hover p-6">
+                <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-baseline md:justify-between">
+                  <h2 className="text-2xl font-semibold tracking-tight text-white">{item.title}</h2>
+                  <p className="font-mono text-sm text-emerald-300">{item.role}</p>
+                </div>
+                <p className="leading-7 text-neutral-400">{item.description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-12">
+          <div className="section-kicker">
+            <p className="eyebrow">Stack</p>
+          </div>
           <div className="grid gap-4 md:grid-cols-2">
             {aboutPage.stackGroups.map((group) => (
-              <article
-                key={group.title}
-                className="rounded-2xl border border-neutral-900 bg-neutral-950/70 p-6"
-              >
-                <h3 className="font-mono text-xs uppercase tracking-[0.3em] text-emerald-400 mb-4">
-                  {group.title}
-                </h3>
+              <article key={group.title} className="glass-card p-6">
+                <h2 className="eyebrow mb-4">{group.title}</h2>
                 <div className="flex flex-wrap gap-2">
                   {group.items.map((item) => (
-                    <span
-                      key={item}
-                      className="text-sm px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300"
-                    >
+                    <span key={item} className="chip">
                       {item}
                     </span>
                   ))}
@@ -91,20 +84,13 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-emerald-500/20 bg-emerald-500/[0.04] p-7 md:p-8">
-          <p className="text-lg text-neutral-200 leading-relaxed max-w-3xl">
-            {aboutPage.closing}
-          </p>
-          <div className="mt-6 flex flex-wrap gap-4">
-            <Link href="/blog" className="font-mono text-sm text-emerald-300 hover:text-emerald-200">
+        <section className="glass-card-strong p-7 md:p-8">
+          <p className="max-w-3xl text-xl leading-8 text-neutral-100">{aboutPage.closing}</p>
+          <div className="mt-7 flex flex-wrap gap-4">
+            <Link href="/blog" className="link-arrow">
               Read the blog →
             </Link>
-            <a
-              href="https://github.com/jorgeguberte"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-sm text-emerald-300 hover:text-emerald-200"
-            >
+            <a href="https://github.com/jorgeguberte" target="_blank" rel="noopener noreferrer" className="link-arrow">
               Visit GitHub →
             </a>
           </div>

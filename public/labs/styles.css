@@ -280,7 +280,7 @@ h1 {
 }
 
 .two-up {
-  grid-template-cols: repeat(12, 1fr);
+  grid-template-columns: repeat(12, 1fr);
 }
 
 .col-8 { grid-column: span 8; }

@@ -15,6 +15,8 @@ const featuredPosts = [...posts]
   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   .slice(0, 3);
 
+const signals = ["Memory", "Agents", "Retrieval", "Inference"];
+
 export default function Home() {
   return (
     <>
@@ -24,131 +26,142 @@ export default function Home() {
         path="/"
       />
 
-      <main className="min-h-screen px-6 py-12 md:py-16 max-w-5xl mx-auto">
-        <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between mb-18">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-emerald-400 mb-3">
-              {profile.title}
-            </p>
-            <h1 className="text-4xl md:text-6xl font-semibold tracking-tight max-w-3xl text-balance">
-              {profile.hero}
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-neutral-400">
-              {profile.intro}
-            </p>
-          </div>
+      <main className="site-shell overflow-hidden">
+        <div className="hero-orb" />
 
-          <nav className="flex flex-wrap gap-3 md:max-w-xs md:justify-end">
-            {navLinks.map((link) => {
-              const common =
-                "font-mono text-sm text-neutral-300 hover:text-emerald-300 transition-colors border border-neutral-800 rounded-full px-4 py-2 hover:border-emerald-500/50";
-
-              return link.external ? (
+        <nav className="top-nav">
+          <Link href="/" className="font-mono text-xs uppercase tracking-[0.24em] text-neutral-200">
+            Jorge Guberte
+          </Link>
+          <div className="flex flex-wrap gap-2">
+            {navLinks.map((link) =>
+              link.external ? (
                 <a
                   key={link.label}
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={common}
+                  className="nav-pill"
                 >
                   {link.label}
                 </a>
               ) : (
-                <Link key={link.label} href={link.href} className={common}>
+                <Link key={link.label} href={link.href} className="nav-pill">
                   {link.label}
                 </Link>
-              );
-            })}
-          </nav>
-        </header>
+              ),
+            )}
+          </div>
+        </nav>
 
-        <section className="grid gap-6 md:grid-cols-[1.2fr_0.8fr] mb-18">
-          <div className="rounded-3xl border border-neutral-900 bg-neutral-950/70 p-7 md:p-8">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-emerald-400 mb-4">
-              About
+        <header className="relative mb-16 grid gap-10 md:grid-cols-[1.15fr_0.85fr] md:items-end">
+          <div>
+            <p className="eyebrow mb-5">{profile.title}</p>
+            <h1 className="gradient-text max-w-4xl text-5xl font-semibold tracking-[-0.06em] text-balance sm:text-6xl md:text-7xl">
+              {profile.hero}
+            </h1>
+            <p className="mt-7 max-w-2xl text-lg leading-8 text-neutral-300 md:text-xl">
+              {profile.intro}
             </p>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-4">
-              {profile.name}
-            </h2>
-            <p className="text-neutral-300 leading-relaxed text-base md:text-lg">
-              {profile.aboutSnippet}
-            </p>
-            <Link
-              href="/about"
-              className="inline-flex mt-6 font-mono text-sm text-emerald-300 hover:text-emerald-200"
-            >
-              Read more about my work →
-            </Link>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/about" className="rounded-full bg-emerald-300 px-5 py-3 font-mono text-sm text-neutral-950 transition hover:bg-emerald-200">
+                About the work →
+              </Link>
+              <Link href="/blog" className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 font-mono text-sm text-neutral-200 transition hover:border-emerald-300/50 hover:text-emerald-200">
+                Read notes →
+              </Link>
+            </div>
           </div>
 
-          <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/[0.04] p-7 md:p-8">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-emerald-400 mb-4">
-              Now
+          <aside className="glass-card p-5 md:p-6">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <p className="eyebrow">System focus</p>
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-300 shadow-[0_0_24px_rgba(52,211,153,1)]" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {signals.map((signal) => (
+                <div key={signal} className="rounded-2xl border border-white/10 bg-neutral-950/60 p-4">
+                  <p className="font-mono text-sm text-neutral-200">{signal}</p>
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-neutral-800">
+                    <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-200" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-5 text-sm leading-6 text-neutral-400">
+              Designing AI systems as living infrastructure: context flows, memory decays, tools compose, and interfaces stay human.
             </p>
-            <ul className="space-y-4 text-neutral-300 leading-relaxed">
+          </aside>
+        </header>
+
+        <section className="mb-16 grid gap-5 md:grid-cols-[1.05fr_0.95fr]">
+          <article className="glass-card card-hover p-7 md:p-8">
+            <div className="section-kicker">
+              <p className="eyebrow">About</p>
+            </div>
+            <h2 className="mb-4 text-3xl font-semibold tracking-tight text-white">{profile.name}</h2>
+            <p className="text-lg leading-8 text-neutral-300">{profile.aboutSnippet}</p>
+            <Link href="/about" className="link-arrow mt-7 inline-flex">
+              Read more about my work →
+            </Link>
+          </article>
+
+          <article className="glass-card-strong p-7 md:p-8">
+            <div className="section-kicker">
+              <p className="eyebrow">Now</p>
+            </div>
+            <ul className="space-y-4 text-neutral-200">
               {nowItems.map((item) => (
-                <li key={item} className="flex gap-3">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                <li key={item} className="flex gap-3 leading-7">
+                  <span className="dot" />
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
-          </div>
+          </article>
         </section>
 
-        <section className="mb-18">
-          <div className="flex items-end justify-between gap-4 mb-6">
-            <div>
-              <p className="font-mono text-xs uppercase tracking-[0.3em] text-emerald-400 mb-3">
-                Selected Work
-              </p>
-              <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-                Projects with a strong point of view.
-              </h2>
+        <section className="mb-16">
+          <div className="mb-6 max-w-2xl">
+            <div className="section-kicker">
+              <p className="eyebrow">Selected Work</p>
             </div>
+            <h2 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
+              Projects with a strong point of view.
+            </h2>
           </div>
 
           <div className="grid gap-5 md:grid-cols-3">
-            {selectedWork.map((project) => (
-              <article
-                key={project.name}
-                className="rounded-3xl border border-neutral-900 bg-neutral-950/70 p-6 flex flex-col"
-              >
-                <div className="mb-5">
-                  <h3 className="text-xl font-semibold tracking-tight mb-3">{project.name}</h3>
-                  <p className="text-neutral-200 leading-relaxed mb-3">{project.primary}</p>
-                  <p className="text-sm text-neutral-400 leading-relaxed">{project.secondary}</p>
+            {selectedWork.map((project, index) => (
+              <article key={project.name} className="glass-card card-hover flex min-h-[24rem] flex-col p-6">
+                <div className="mb-6 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-mono text-xs text-emerald-300/80">0{index + 1}</p>
+                    <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white">{project.name}</h3>
+                  </div>
+                  <div className="h-12 w-12 rounded-2xl border border-emerald-300/20 bg-emerald-300/10" />
                 </div>
 
-                <div className="flex flex-wrap gap-2 mb-6">
+                <p className="mb-3 text-neutral-100 leading-7">{project.primary}</p>
+                <p className="mb-6 text-sm leading-6 text-neutral-400">{project.secondary}</p>
+
+                <div className="mb-7 flex flex-wrap gap-2">
                   {project.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-xs font-mono px-2.5 py-1 rounded-full bg-neutral-900 text-neutral-500 border border-neutral-800"
-                    >
+                    <span key={tag} className="chip">
                       {tag}
                     </span>
                   ))}
                 </div>
 
-                <div className="mt-auto flex flex-wrap gap-3">
+                <div className="mt-auto flex flex-wrap gap-4">
                   {project.links.map((link) => {
                     const external = link.href.startsWith("http");
-                    const cls =
-                      "font-mono text-sm text-neutral-300 hover:text-emerald-300 transition-colors";
-
                     return external ? (
-                      <a
-                        key={link.label}
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={cls}
-                      >
+                      <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className="link-arrow">
                         {link.label} →
                       </a>
                     ) : (
-                      <Link key={link.label} href={link.href} className={cls}>
+                      <Link key={link.label} href={link.href} className="link-arrow">
                         {link.label} →
                       </Link>
                     );
@@ -159,51 +172,45 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mb-18 rounded-3xl border border-neutral-900 bg-neutral-950/70 p-7 md:p-8">
-          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <section className="glass-card mb-16 p-7 md:p-8">
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="font-mono text-xs uppercase tracking-[0.3em] text-emerald-400 mb-3">
-                Labs
-              </p>
-              <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-3">
-                A playground for experiments, interfaces, and useful weirdness.
+              <div className="section-kicker">
+                <p className="eyebrow">Labs</p>
+              </div>
+              <h2 className="mb-3 text-3xl font-semibold tracking-tight text-white">
+                A playground for useful weirdness.
               </h2>
-              <p className="max-w-2xl text-neutral-400 leading-relaxed">
-                Static, fast, and intentionally scrappy. This is where prototypes can exist before they deserve a product page.
+              <p className="max-w-2xl leading-7 text-neutral-400">
+                Static, fast, and intentionally scrappy. Interfaces, experiments, tiny tools, and prototypes before they deserve a product page.
               </p>
             </div>
-            <div>
-              <Link href="/labs/" className="font-mono text-sm text-emerald-300 hover:text-emerald-200">
-                Visit Labs →
-              </Link>
-            </div>
+            <Link href="/labs/" className="link-arrow shrink-0">
+              Visit Labs →
+            </Link>
           </div>
         </section>
 
-        <section className="mb-18">
-          <div className="mb-6">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-emerald-400 mb-3">
-              Writing
-            </p>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-3">
+        <section className="mb-16">
+          <div className="mb-6 max-w-2xl">
+            <div className="section-kicker">
+              <p className="eyebrow">Writing</p>
+            </div>
+            <h2 className="mb-3 text-3xl font-semibold tracking-tight text-white md:text-4xl">
               Notes from the builder side of AI.
             </h2>
-            <p className="max-w-2xl text-neutral-400 leading-relaxed">{writingIntro}</p>
+            <p className="leading-7 text-neutral-400">{writingIntro}</p>
           </div>
 
           <div className="grid gap-4">
             {featuredPosts.map((post) => (
-              <Link
-                key={post.slug}
-                href={`/blog/${post.slug}`}
-                className="rounded-3xl border border-neutral-900 bg-neutral-950/70 p-6 hover:border-emerald-500/40 transition-colors"
-              >
-                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <Link key={post.slug} href={`/blog/${post.slug}`} className="glass-card card-hover block p-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div className="max-w-2xl">
-                    <h3 className="text-xl font-semibold tracking-tight mb-2">{post.title}</h3>
-                    <p className="text-neutral-400 leading-relaxed">{post.description}</p>
+                    <h3 className="mb-2 text-xl font-semibold tracking-tight text-white">{post.title}</h3>
+                    <p className="leading-7 text-neutral-400">{post.description}</p>
                   </div>
-                  <time className="font-mono text-xs text-neutral-500 shrink-0 pt-1">
+                  <time className="shrink-0 pt-1 font-mono text-xs text-neutral-500">
                     {new Date(post.date).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
@@ -215,16 +222,14 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="mt-6">
-            <Link href="/blog" className="font-mono text-sm text-emerald-300 hover:text-emerald-200">
-              Browse all writing →
-            </Link>
-          </div>
+          <Link href="/blog" className="link-arrow mt-6 inline-flex">
+            Browse all writing →
+          </Link>
         </section>
 
-        <footer className="pt-8 border-t border-neutral-900 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <p className="text-xs font-mono text-neutral-600">© {new Date().getFullYear()} Jorge Guberte</p>
-          <p className="text-sm text-neutral-500 max-w-2xl">
+        <footer className="border-t border-white/10 py-8 text-sm text-neutral-500 md:flex md:items-center md:justify-between md:gap-6">
+          <p className="font-mono text-xs">© {new Date().getFullYear()} Jorge Guberte</p>
+          <p className="mt-3 max-w-2xl md:mt-0">
             Building systems around memory, context, retrieval, and the weird places where software starts feeling cognitive.
           </p>
         </footer>
