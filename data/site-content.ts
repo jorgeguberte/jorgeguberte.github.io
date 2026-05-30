@@ -18,7 +18,7 @@ export const navLinks = [
 ];
 
 export const nowItems = [
-  "Building LoomDB, an experimental memory substrate for AI agents.",
+  "Designing and refining the Y2K Sensory Design System for neurodivergent accessibility.",
   "Exploring long-term memory, context engineering, and MCP workflows.",
   "Running and testing LLM inference systems on Modal.",
   "Designing AI products and agent workflows at Hub Esfera.",
@@ -26,16 +26,15 @@ export const nowItems = [
 
 export const selectedWork = [
   {
-    name: "LoomDB",
-    href: "https://github.com/jorgeguberte/loom-db",
+    name: "Y2K Sensory Design System",
+    href: "/labs/y2k-sensory/",
     primary:
-      "A graph-based memory substrate for AI agents, inspired by temporal decay and human memory models.",
+      "A brutalist-inspired design framework unifying maximalist Y2K aesthetics with strict neurodivergent accessibility (AttentionGuard).",
     secondary:
-      "Built to reduce context bloat and make long-running agents more relevant over time.",
-    tags: ["Rust", "Graph Memory", "AI Agents"],
+      "Built with a dual-layer CSS architecture to isolate decorative animations from functional UI, offering tailored cognitive presets for TDAH and Autism.",
+    tags: ["HTML/CSS", "Three.js", "Accessibility", "Design"],
     links: [
-      { label: "GitHub", href: "https://github.com/jorgeguberte/loom-db" },
-      { label: "Read the post", href: "/blog/why-i-built-loom-db" },
+      { label: "Open Lab", href: "/labs/y2k-sensory/" }
     ],
   },
   {
