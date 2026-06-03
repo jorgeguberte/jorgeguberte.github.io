@@ -18,6 +18,14 @@ const nextConfig = {
   },
 };
 
-buildVelite().catch(console.error);
+async function generateFeed() {
+  try {
+    require('./scripts/generate-feed');
+  } catch (err) {
+    console.warn('[feed] Could not generate RSS feed:', err.message);
+  }
+}
+
+buildVelite().then(() => generateFeed()).catch(console.error);
 
 module.exports = nextConfig;
