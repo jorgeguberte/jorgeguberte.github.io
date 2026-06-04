@@ -1,166 +1,89 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-sensory="balanced">
+<html lang="en" data-sensory="balanced">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Física Sensorial & Design de Atenção — Jorge Guberte</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-  <link rel="stylesheet" href="./styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sensory Lab v3 — Anti-Pasteurization</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- OS Frame: the entire viewport is a desktop environment -->
+  <div class="os-frame">
 
-  <!-- CHAOS LAYER -->
-  <div class="chaos-layer" aria-hidden="true">
-    <div class="orb orb--acid"></div>
-    <div class="orb orb--pink"></div>
-    <div class="orb orb--blue"></div>
-    <div class="grain-overlay"></div>
-  </div>
+    <!-- Chaos Layer: generative wallpaper, danmaku, particles — pointer-events: none -->
+    <div class="chaos-layer" aria-hidden="true">
+      <canvas id="wallpaper" class="wallpaper-canvas"></canvas>
+      <div id="danmaku" class="danmaku-stream" aria-hidden="true"></div>
+    </div>
 
-  <!-- FUNCTIONAL LAYER -->
-  <div class="functional-layer">
+    <!-- Desktop: content area, widgets live here -->
+    <main class="desktop" id="desktop" data-mode="balanced">
 
-    <!-- HEADER -->
-    <header class="lab-header">
-      <a href="/labs/" class="back-link" aria-label="Retornar para os labs">
-        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-        </svg>
-        labs
-      </a>
-      <div class="brand-badge">Sensory Lab v2</div>
-    </header>
-
-    <!-- HERO -->
-    <section class="hero">
-      <p class="hero-eyebrow">Y2K Brutalism &times; AttentionGuard</p>
-      <h1 class="hero-title">Física Sensorial<br><em>&amp; Design</em> de Atenção</h1>
-      <p class="hero-sub">
-        Um laboratório vivo de acessibilidade neurodivergente.
-        O sistema separa a decoração caótica da interface funcional
-        em camadas independentes, regulando estímulos em tempo real
-        conforme as necessidades sensoriais de cada cérebro.
-      </p>
-
-      <!-- SENSORY DOCK -->
-      <div class="sensory-dock" id="sensory-dock" role="radiogroup" aria-label="Controle de modulação sensorial">
-        <button class="dock-btn" data-target="high-stim" role="radio" aria-checked="false">
-          High-Stim
-        </button>
-        <button class="dock-btn active" data-target="balanced" role="radio" aria-checked="true">
-          Balanced
-        </button>
-        <button class="dock-btn" data-target="calm" role="radio" aria-checked="false">
-          Calm
-        </button>
-      </div>
-    </section>
-
-    <!-- ANATOMY -->
-    <section class="section">
-      <div class="section-label">── Anatomia do Sistema</div>
-
-      <div class="arch-grid">
-        <div class="arch-card">
-          <p class="arch-card-label">Camada 0</p>
-          <h3 class="arch-card-title">Caos Decorativo</h3>
-          <p class="arch-card-desc">
-            Orbs cromáticas, grão de filme e texturas não-interativas.
-            Esta camada responde ao perfil sensorial — satura e pulsa no
-            High-Stim, desaparece completamente no Calm.
-          </p>
-        </div>
-
-        <div class="arch-card">
-          <p class="arch-card-label">Camada 1</p>
-          <h3 class="arch-card-title">Interface Funcional</h3>
-          <p class="arch-card-desc">
-            Tipografia, controles e conteúdo isolados do caos por
-            z-index e backdrop-filter. Totalmente navegável por
-            teclado e screen reader.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ANCHOR -->
-    <section class="section">
-      <div class="section-label">── Âncora de Foco</div>
-
-      <p class="section-text">
-        Passe o cursor sobre a área abaixo. O ponto de alta densidade
-        visual ancora a visão central e reduz a flutuação do olhar —
-        uma ferramenta para cérebros com TDAH que buscam um ponto
-        fixo em meio ao ruído.
-      </p>
-
-      <div class="anchor-canvas" id="anchor-canvas">
-        <div class="anchor-dot" id="focus-dot"></div>
-        <span class="anchor-hint">passe o cursor para guiar a âncora</span>
-      </div>
-    </section>
-
-    <!-- TELEMETRY: VU METERS -->
-    <section class="section">
-      <div class="section-label">── Mesa de Sinais</div>
-
-      <div class="meter-rack" id="meter-rack">
-        <div class="meter-channel">
-          <p class="meter-label">Saturação</p>
-          <div class="meter-bar-wrap" id="meter-saturation">
-            <div class="meter-segments"></div>
+      <!-- Widget: Sensory Profile Card (the constructionist artifact) -->
+      <article class="widget profile-card" id="widget-profile"
+             aria-label="Sensory Profile Card — build your sensory signature">
+        <header class="widget-titlebar" data-drag-handle>
+          <span class="widget-title">Profile Card</span>
+          <div class="widget-actions">
+            <button class="widget-btn widget-capture" aria-label="Download PNG" title="Capture">⬇</button>
+            <button class="widget-btn widget-share" aria-label="Copy share URL" title="Share">🔗</button>
           </div>
-          <p class="meter-value" id="val-saturation">1.0</p>
-        </div>
-        <div class="meter-channel">
-          <p class="meter-label">Motion</p>
-          <div class="meter-bar-wrap" id="meter-motion">
-            <div class="meter-segments"></div>
+        </header>
+        <div class="widget-body">
+          <canvas id="profile-output" class="profile-canvas" aria-label="Generative visual output reacting to your parameters"></canvas>
+          <div class="profile-controls">
+            <label class="slider-row">
+              <span>Saturation</span>
+              <input type="range" id="param-saturation" min="0" max="2" step="0.01" value="1.0">
+            </label>
+            <label class="slider-row">
+              <span>Motion</span>
+              <input type="range" id="param-motion" min="0" max="2" step="0.01" value="0.5">
+            </label>
+            <label class="slider-row">
+              <span>Contrast</span>
+              <input type="range" id="param-contrast" min="0" max="2" step="0.01" value="1.0">
+            </label>
+            <label class="slider-row">
+              <span>Noise Grain</span>
+              <input type="range" id="param-noise" min="0" max="1" step="0.01" value="0.15">
+            </label>
+            <label class="slider-row">
+              <span>Beat Response</span>
+              <input type="range" id="param-beat" min="0" max="2" step="0.01" value="0.5">
+            </label>
+            <label class="slider-row">
+              <span>Cursor Trail</span>
+              <input type="range" id="param-trail" min="0" max="2" step="0.01" value="0.5">
+            </label>
           </div>
-          <p class="meter-value" id="val-motion">1.0</p>
         </div>
-        <div class="meter-channel">
-          <p class="meter-label">Contraste</p>
-          <div class="meter-bar-wrap" id="meter-contrast">
-            <div class="meter-segments"></div>
-          </div>
-          <p class="meter-value" id="val-contrast">1.0</p>
-        </div>
-      </div>
-    </section>
+      </article>
 
-    <!-- CONTROLS -->
-    <section class="section">
-      <div class="section-label">── Parâmetros</div>
+      <!-- Widget: Focus Anchor (disabled — MVP phase 3) -->
+      <!-- <article class="widget" id="widget-focus">...</article> -->
 
-      <div class="control-row">
-        <button class="btn" id="btn-intensity">Simular Pico</button>
-        <button class="btn" id="btn-contrast">WCAG Contraste</button>
-        <button class="btn" id="btn-reset">Reset Meters</button>
-      </div>
+      <!-- Widget: Signal Desk (disabled — MVP phase 3) -->
+      <!-- <article class="widget" id="widget-signals">...</article> -->
 
-      <div class="status-bar">
-        <div class="status-item">
-          <span class="status-dot"></span>
-          WCAG AA
-        </div>
-        <div class="status-item">
-          <span class="status-dot"></span>
-          Keyboard Nav
-        </div>
-        <div class="status-item">
-          <span class="status-dot"></span>
-          Screen Reader
-        </div>
+    </main>
+
+    <!-- Dock: floating action layer — mode controls, constructor, system -->
+    <nav class="dock" id="dock" aria-label="Sensory controls">
+      <div class="dock-group dock-modes">
+        <button class="dock-btn active" data-mode="high-stim" aria-label="High Stim mode" title="High Stim">⚡</button>
+        <button class="dock-btn" data-mode="balanced" aria-label="Balanced mode" title="Balanced">⚖️</button>
+        <button class="dock-btn" data-mode="calm" aria-label="Calm mode" title="Calm">🌿</button>
       </div>
-    </section>
+      <div class="dock-divider" aria-hidden="true"></div>
+      <div class="dock-group dock-actions">
+        <button class="dock-btn" id="btn-randomize" aria-label="Randomize parameters" title="Randomize">🎲</button>
+        <button class="dock-btn" id="btn-reset" aria-label="Reset to defaults" title="Reset">↺</button>
+      </div>
+    </nav>
 
   </div>
 
-  <script src="./app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
