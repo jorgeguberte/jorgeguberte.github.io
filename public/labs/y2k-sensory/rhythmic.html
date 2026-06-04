@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rhythmic Entrainment — Y2K Design System</title>
+  <link rel="stylesheet" href="./tokens/colors.css">
+  <link rel="stylesheet" href="./tokens/typography.css">
+  <link rel="stylesheet" href="./tokens/motion.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--void-soft);
+      color: var(--text-primary);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      font-family: var(--font-functional);
+      transition: background var(--transition-base);
+    }
+
+    /* === SENSORY CONTROLS (AttentionGuard variables) === */
+    :root {
+      --sensory-saturation: 1;
+      --sensory-motion: 1;
+      --sensory-blur: 12px;
+      --bpm: 140;
+      /* CSS beat timing is bound directly to the BPM */
+      --beat: calc(60s / var(--bpm));
+      --bar: calc(var(--beat) * 4);
+    }
+
+    /* === LAYER 0: CHAOS / METRONOME PATTERNS === */
+    .chaos-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      transition: opacity 0.5s ease;
+    }
+
+    /* Pulsing neon grid lines synced with beat */
+    .rhythmic-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
+      background-size: 80px 80px;
+      /* Grid pulses size on beat */
+      animation: grid-pulse var(--beat) ease-in-out infinite;
+      animation-play-state: running;
+      opacity: calc(0.8 * var(--sensory-motion));
+    }
+
+    @keyframes grid-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      10% { transform: scale(1.02); opacity: 0.8; }
+    }
+
+    /* Glowing lava lamp blobs pulsing in scale to the BPM */
+    .lava-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: calc(0.3 * var(--sensory-motion));
+      mix-blend-mode: screen;
+      transform-origin: center;
+    }
+
+    .orb-fuchsia {
+      width: 400px;
+      height: 400px;
+      background: var(--pink-500);
+      top: -100px;
+      right: -100px;
+      animation: orb-bounce var(--bar) ease-in-out infinite alternate;
+    }
+
+    .orb-acid {
+      width: 300px;
+      height: 300px;
+      background: var(--acid-500);
+      bottom: -50px;
+      left: -50px;
+      animation: orb-bounce calc(var(--bar) * 1.5) ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes orb-bounce {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(50px, 40px) scale(1.2); }
+    }
+
+    /* === LAYER 1: FUNCTIONAL INTERFACE === */
+    .functional-layer {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: var(--text-sm);
+      transition: var(--transition-fast);
+      align-self: flex-start;
+    }
+
+    .back-link:hover {
+      color: var(--acid-500);
+    }
+
+    /* Header */
+    .header-zone {
+      border-bottom: 2px dashed var(--chrome-400);
+      padding-bottom: 1.5rem;
+    }
+
+    .header-zone h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-tight);
+      background: linear-gradient(135deg, var(--acid-300), var(--blue-300));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-zone p {
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+      line-height: var(--leading-relaxed);
+    }
+
+    /* Laboratory Dashboard */
+    .dashboard {
+      background: rgba(13, 13, 13, 0.85);
+      border: 3px solid var(--chrome-300);
+      backdrop-filter: blur(var(--sensory-blur));
+      padding: 2rem;
+      position: relative;
+      box-shadow: 8px 8px 0px var(--void-pure);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: var(--text-md);
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      color: var(--blue-300);
+      border-left: 4px solid var(--acid-500);
+      padding-left: 0.75rem;
+    }
+
+    /* BPM Controls & Vinyl CD Metronome */
+    .metronome-visualizer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      border: 1px solid var(--border-subtle);
+      background: var(--void-mid);
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    /* Rotating Retro Compact Disc (CD) synced to beat */
+    .cd-record {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, 
+        var(--void-pure) 10%, 
+        var(--chrome-400) 12%, 
+        var(--chrome-500) 25%, 
+        var(--void-pure) 28%, 
+        var(--blue-500) 30%, 
+        var(--pink-500) 50%, 
+        var(--acid-500) 70%, 
+        var(--chrome-300) 90%, 
+        var(--chrome-200) 100%
+      );
+      position: relative;
+      box-shadow: 0px 8px 24px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: cd-spin calc(var(--bar) * 2) linear infinite, cd-beat var(--beat) var(--ease-bounce) infinite;
+      animation-play-state: running;
+      transform-origin: center;
+    }
+
+    .cd-record::after {
+      content: '';
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: var(--void-pure);
+      border: 3px solid var(--chrome-300);
+    }
+
+    @keyframes cd-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes cd-beat {
+      0%, 100% { transform: scale(1) rotate(inherit); }
+      10% { transform: scale(1.08) rotate(inherit); filter: brightness(1.2); }
+    }
+
+    /* Flashing Beat Bar indicator */
+    .beat-bar {
+      width: 100%;
+      height: 10px;
+      background: var(--void-pure);
+      border: 1px solid var(--border-subtle);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .beat-bar-indicator {
+      height: 100%;
+      width: 0%;
+      background: var(--acid-500);
+      box-shadow: 0 0 10px var(--acid-500);
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .beat-bar-indicator.flash {
+      width: 100%;
+      transition: none;
+    }
+
+    .beat-bar-indicator.fade {
+      width: 0%;
+      transition: width var(--beat) cubic-bezier(0.1, 0.8, 0.25, 1);
+    }
+
+    /* Audio Pluck synthesizer switch UI */
+    .synth-control-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .bpm-slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .bpm-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--text-sm);
+    }
+
+    .bpm-slider {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--chrome-400);
+      outline: none;
+      border: 1px solid var(--void-pure);
+    }
+
+    .bpm-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 24px;
+      background: var(--acid-500);
+      border: 2px solid var(--void-pure);
+      cursor: pointer;
+      box-shadow: 2px 2px 0px var(--void-pure);
+    }
+
+    .bpm-slider::-moz-range-thumb {
+      width: 16px;
+      height: 24px;
+      background: var(--acid-500);
+      border: 2px solid var(--void-pure);
+      cursor: pointer;
+      box-shadow: 2px 2px 0px var(--void-pure);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 0.75rem;
+      border: 2px solid var(--chrome-300);
+      background: transparent;
+      color: var(--text-primary);
+      font-family: var(--font-functional);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-bold);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-action:hover {
+      border-color: var(--acid-500);
+      background: rgba(127, 255, 0, 0.05);
+      color: var(--acid-500);
+    }
+
+    .btn-action.active {
+      background: var(--acid-700);
+      border-color: var(--acid-500);
+      color: var(--void-pure);
+    }
+
+    .btn-action:focus-visible {
+      outline: 3px solid var(--void-pure);
+      box-shadow: 0 0 0 6px var(--pink-300);
+    }
+
+    /* Comparison Area */
+    .comparison-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .comparison-section { grid-template-columns: 1fr; }
+    }
+
+    .comparison-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-subtle);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card-header-badge {
+      display: inline-block;
+      font-size: var(--text-xs);
+      padding: 0.2rem 0.5rem;
+      text-transform: uppercase;
+      border-radius: 4px;
+      font-weight: bold;
+      width: fit-content;
+    }
+
+    .badge-chaos {
+      background: var(--pink-900);
+      color: var(--pink-100);
+      border: 1px solid var(--pink-500);
+    }
+
+    .badge-rhythm {
+      background: var(--acid-900);
+      color: var(--acid-100);
+      border: 1px solid var(--acid-500);
+    }
+
+    /* Text block styles */
+    .reading-block {
+      font-size: var(--text-sm);
+      line-height: var(--leading-relaxed);
+      color: var(--text-secondary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Arrhythmic Chaos Block (Flickery, off-beat, distracting) */
+    .arrhythmic-text {
+      transition: filter var(--transition-fast), transform var(--transition-fast);
+      outline: none;
+    }
+
+    /* O ruído pavoroso só treme quando o usuário passa o mouse para comparar,
+       evitando desconforto visual constante na página */
+    .arrhythmic-text:hover,
+    .arrhythmic-text:focus-within {
+      animation: text-shake 0.3s steps(2) infinite;
+      animation-play-state: running;
+    }
+
+    @keyframes text-shake {
+      0%, 100% { transform: translate(0, 0); filter: drop-shadow(0px 0px rgba(0,0,0,0)); }
+      25% { transform: translate(-1px, 1px); filter: drop-shadow(1px 1px var(--pink-500)); }
+      75% { transform: translate(1px, -1px); filter: drop-shadow(-1px -1px var(--blue-500)); }
+    }
+
+    /* Rhythmic Text Block (Foco por linha sutil e tipografia elástica em foco) */
+    .rhythmic-block {
+      font-variation-settings: 'wght' 400, 'wdth' 100;
+      transition: font-variation-settings var(--transition-normal);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    /* Cada frase/linha do texto */
+    .reading-line {
+      display: block;
+      transition: opacity 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1), 
+                  color 0.3s ease, 
+                  font-variation-settings 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1),
+                  background 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1),
+                  border-color 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+      cursor: pointer;
+      padding: 0.4rem 0.6rem;
+      padding-left: calc(0.6rem - 3px);
+      border-left: 3px solid transparent;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      outline: none;
+    }
+
+    /* Efeito de Destaque por Linha (Foco Direcionado):
+       Ao passar o mouse ou dar foco, a linha se acende e as demais se apagam levemente */
+    .rhythmic-block:hover .reading-line {
+      opacity: 0.4;
+    }
+
+    .rhythmic-block .reading-line:hover,
+    .rhythmic-block .reading-line:focus-visible,
+    .rhythmic-block .reading-line.tts-active {
+      opacity: 1 !important;
+      color: var(--text-primary);
+      background: rgba(127, 255, 0, 0.04);
+      border-left-color: var(--acid-500);
+      /* Fonte variável expande elasticamente de forma estática */
+      font-variation-settings: 'wght' 600, 'wdth' 110;
+    }
+
+    /* Opcional: A pulsação de batida ativa no texto (LIGADA apenas pelo botão) */
+    .rhythmic-text-beat.active-pulse {
+      animation: font-beat var(--beat) ease-in-out infinite;
+      animation-play-state: running;
+      display: inline-block;
+    }
+
+    /* Animação de pulsação tipográfica suave e agradável */
+    @keyframes font-beat {
+      0%, 100% { 
+        font-variation-settings: 'wght' 400, 'wdth' 100; 
+        color: var(--text-secondary);
+        text-shadow: none;
+      }
+      40% { 
+        font-variation-settings: 'wght' 550, 'wdth' 105; 
+        color: var(--acid-100);
+        text-shadow: 0 0 6px rgba(127, 255, 0, 0.2);
+      }
+    }
+
+    /* Estilos para o Leitor de Áudio (TTS Word Highlight) */
+    .tts-word {
+      transition: background-color var(--transition-fast), color var(--transition-fast), border-radius var(--transition-fast), font-weight var(--transition-fast);
+      border-radius: 3px;
+      padding: 0 2px;
+      display: inline-block;
+    }
+
+    .tts-highlight {
+      background-color: var(--pink-500);
+      color: var(--void-pure) !important;
+      box-shadow: 0 0 10px var(--pink-500);
+      font-weight: bold;
+      transform: scale(1.05);
+    }
+
+    /* Halo Colapsável para Âncora Visual do Número */
+    .tts-number {
+      position: relative;
+    }
+
+    /* O anel que colapsa radialmente quando o número é destacado/pronunciado */
+    .tts-number.tts-highlight::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 60px;
+      height: 60px;
+      border: 3px solid var(--blue-300);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(1.8);
+      opacity: 0;
+      animation: halo-collapse 0.6s cubic-bezier(0.15, 0.85, 0.3, 1) forwards;
+    }
+
+    @keyframes halo-collapse {
+      0% {
+        transform: translate(-50%, -50%) scale(2.2);
+        opacity: 0.1;
+        border-color: var(--pink-500);
+        box-shadow: 0 0 15px var(--pink-500);
+      }
+      50% {
+        opacity: 0.9;
+        border-color: var(--blue-300);
+        box-shadow: 0 0 10px var(--blue-300);
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(0.65);
+        opacity: 0;
+        border-color: var(--acid-500);
+      }
+    }
+
+    /* Paused states for Accessibility */
+    .animations-paused .rhythmic-grid,
+    .animations-paused .cd-record,
+    .animations-paused .lava-orb,
+    .animations-paused .arrhythmic-text,
+    .animations-paused .rhythmic-text-beat.active-pulse,
+    .animations-paused .theory-box::before,
+    .animations-paused #playPauseBtn.active {
+      animation-play-state: paused !important;
+    }
+
+    /* Theory/Explanation Zone */
+    .theory-box {
+      border-left: 4px solid var(--pink-500);
+      background: var(--surface-elevated);
+      padding: 1.5rem;
+    }
+
+    .theory-box::before {
+      content: '';
+      display: block;
+      width: 8px;
+      height: 8px;
+      background: var(--acid-500);
+      border-radius: 50%;
+      margin-bottom: 1rem;
+      box-shadow: 0 0 12px var(--acid-500);
+      animation: heartbeat var(--beat) ease-in-out infinite;
+      animation-play-state: running;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.5); opacity: 1; }
+    }
+
+    #playPauseBtn.active {
+      background: linear-gradient(135deg, var(--pink-500), var(--acid-500)) !important;
+      border-color: transparent !important;
+      color: var(--void-pure) !important;
+      box-shadow: 0 0 20px rgba(127, 255, 0, 0.3) !important;
+      animation: btn-glow var(--beat) ease-in-out infinite;
+      animation-play-state: running;
+    }
+
+    @keyframes btn-glow {
+      0%, 100% { box-shadow: 0 0 15px rgba(127, 255, 0, 0.2); }
+      50% { box-shadow: 0 0 35px rgba(127, 255, 0, 0.6); }
+    }
+
+    .theory-box h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-sm);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      color: var(--pink-300);
+    }
+
+    .theory-box p {
+      font-size: var(--text-sm);
+      line-height: var(--leading-relaxed);
+      color: var(--text-secondary);
+    }
+
+    .theory-box code {
+      color: var(--acid-300);
+      background: var(--void-pure);
+      padding: 0.1rem 0.3rem;
+      font-size: var(--text-xs);
+    }
+  </style>
+  <!-- Three.js + GLTFLoader for high-performance Y2K MiniDisc 3D rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+<body>
+
+  <!-- LAYER 0: CHAOS METRONOME -->
+  <div class="chaos-layer" id="chaosLayer" aria-hidden="true">
+    <div class="rhythmic-grid"></div>
+    <div class="lava-orb orb-fuchsia"></div>
+    <div class="lava-orb orb-acid"></div>
+  </div>
+
+  <!-- LAYER 1: FUNCTIONAL LAYOUT -->
+  <div class="functional-layer" id="functionalLayer">
+    <a href="../index.html" class="back-link">← INDEX // SYSTEM</a>
+
+    <header class="header-zone">
+      <h1>🎵 Sincronização Rítmica (Entrainment)</h1>
+      <p>
+        O uso de estímulos rítmicos sincronizados (130-170 BPM) atua como um ancorador de atenção. 
+        Mentes com TDAH usam esse ritmo como uma frequência de arrasto neural, estabilizando o foco 
+        cognitivo periférico sem gerar sobrecarga na leitura do texto principal.
+      </p>
+    </header>
+
+    <!-- Lab Dashboard -->
+    <main class="dashboard">
+      <h2 class="section-title">Laboratório de Frequência Perceptual</h2>
+
+      <div class="dashboard-grid">
+        
+        <!-- CD & Flash Visual Metronome -->
+        <div class="metronome-visualizer">
+          <!-- 3D CD Container with Three.js canvas -->
+          <div id="cdContainer" style="width: 180px; height: 180px; position: relative; margin: 0 auto; outline: none;"></div>
+          <div class="beat-bar" aria-hidden="true">
+            <div class="beat-bar-indicator" id="beatIndicator"></div>
+          </div>
+          <div style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase; font-weight: bold;">
+            Metrônomo Brochacho Records v.02 (Three.js PRO CD)
+          </div>
+        </div>
+
+        <!-- Slider and Audio Settings -->
+        <div class="synth-control-panel">
+          
+          <div class="bpm-slider-container">
+            <div class="bpm-label-row">
+              <span style="text-transform: uppercase; font-size: var(--text-xs); color: var(--text-secondary)">Batidas por Minuto</span>
+              <span id="bpmValue" style="color: var(--acid-500); font-weight: bold; font-size: var(--text-md)">140 BPM</span>
+            </div>
+            <input type="range" min="60" max="180" value="140" class="bpm-slider" id="bpmSlider">
+          </div>
+
+          <div class="button-group">
+            <button class="btn-action active" id="playPauseBtn" title="Pausar todas as animações e metrônomos">
+              <span id="playIcon">⏸</span> <span id="playText">Pausa</span>
+            </button>
+            <button class="btn-action" id="audioToggleBtn" title="Ativar sintetizador de áudio">
+              🔊 Synth
+            </button>
+            <button class="btn-action" id="textPulseBtn" title="Ativar pulsação automática das palavras com o ritmo">
+              ✨ Pulsar
+            </button>
+          </div>
+
+          <div style="font-size: var(--text-xs); color: var(--text-muted); line-height: var(--leading-normal);">
+            * A <strong>Web Audio API</strong> gerará uma onda senoidal e um filtro passa-baixa analógico dinâmico direto no seu navegador, sincronizados de forma assíncrona ao metrônomo visual.
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Theory Card -->
+    <section class="theory-box">
+      <h3>Por que funciona? (NASA-TLX & CLT)</h3>
+      <p>
+        De acordo com a <strong>Teoria da Carga Cognitiva</strong>, o canal sensorial visual possui capacidade limitada. 
+        Contudo, a estimulação temporal rítmica (entrainment) cria um ritmo de facilitação pré-frontal: o cérebro 
+        prevê quando a batida (e o estímulo visual) irá ocorrer, agrupando informações de forma rítmica (chunking temporal). 
+        A variável CSS <code>--bpm</code> controla diretamente a duração das keyframes usando <code>calc(60s / var(--bpm))</code>, 
+        garantindo sincronia pixel-perfeita em todo o DOM.
+      </p>
+      <button class="btn-action" id="expandTheoryBtn" style="margin-top: 0.75rem; width: auto; padding: 0.3rem 0.8rem; font-size: var(--text-xs);">
+        📜 Expandir Sabedoria
+      </button>
+      <div id="theoryExtended" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--chrome-400);">
+        <p style="font-size: var(--text-sm); line-height: var(--leading-relaxed); color: var(--text-secondary); margin-bottom: 0.75rem;">
+          <span style="color: var(--acid-300); font-weight: bold;">🧠 Curiosidade Sino-Brasileira:</span> 
+          Na pedagogia chinesa, o conceito de <span style="color: var(--pink-300);">变式 (Biànshì)</span> — ou "variação progressiva" — 
+          aplica exatamente este princípio: o mesmo conceito é apresentado sob múltiplos ângulos rítmicos 
+          até que a mente o absorva por completo. Nosso metrônomo é uma homenagem a essa sabedoria milenar.
+        </p>
+        <p style="font-size: var(--text-sm); line-height: var(--leading-relaxed); color: var(--text-secondary);">
+          <span style="color: var(--acid-300); font-weight: bold;">🎵 Brochacho Records:</span> 
+          Este laboratório é parte do ecossistema <span style="color: var(--pink-300);">水陶Flow</span> — 
+          onde a matemática vira música, a música vira foco, e o foco vira aprendizado. 
+          <span style="color: var(--text-muted); font-style: italic;">杯中有水，请来两杯 🥂</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- Readability Experiment -->
+    <section class="comparison-section">
+      
+      <!-- Card 1: Arrhythmic Noise -->
+      <article class="comparison-card">
+        <span class="card-header-badge badge-chaos">Ruído Arrítmico (Desordenado)</span>
+        <div class="reading-block arrhythmic-text" tabindex="0">
+          <p>
+            Animações desordenadas e jittery operam de forma assíncrona e estocástica. 
+            Isso gera micro-interrupções atencionais frequentes no córtex visual pré-frontal. 
+            Sem uma grade rítmica previsível, os olhos saltam de forma errática pelas linhas e 
+            a energia de decodificação textual (leitura) é gasta filtrando o ruído periférico.
+          </p>
+        </div>
+      </article>
+
+      <!-- Card 2: Rhythmic Entrainment -->
+      <article class="comparison-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; width: 100%;">
+          <span class="card-header-badge badge-rhythm">Arrasto Rítmico (Sincronizado)</span>
+          <button class="btn-action" id="ttsPlayBtn" style="padding: 0.2rem 0.6rem; font-size: var(--text-xs); flex: 0 1 auto; margin-top: 0;" title="Ouvir texto narrado com marcação dinâmica">
+            🗣️ Ler com TTS
+          </button>
+        </div>
+        <div class="reading-block rhythmic-block" id="rhythmicBlock">
+          <span class="reading-line" tabindex="0">
+            1. Animações <span class="rhythmic-text-beat">sincronizadas</span> criam um compasso temporal previsível para a leitura.
+          </span>
+          <span class="reading-line" tabindex="0">
+            2. Ao passar o cursor ou dar foco a cada linha, ela se destaca <span class="rhythmic-text-beat">iluminando-se</span> instantaneamente.
+          </span>
+          <span class="reading-line" tabindex="0">
+            3. As outras frases do bloco apagam suavemente para diminuir a distração e a carga visual <span class="rhythmic-text-beat">periférica</span>.
+          </span>
+          <span class="reading-line" tabindex="0">
+            4. A fonte variável expande suas propriedades de peso de forma <span class="rhythmic-text-beat">elástica</span>, sem deslocar as linhas.
+          </span>
+        </div>
+      </article>
+
+    </section>
+
+  </div>
+
+  <script>
+    const bpmSlider = document.getElementById('bpmSlider');
+    const bpmValue = document.getElementById('bpmValue');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const audioToggleBtn = document.getElementById('audioToggleBtn');
+    const beatIndicator = document.getElementById('beatIndicator');
+    const body = document.body;
+    const playText = document.getElementById('playText');
+    const playIcon = document.getElementById('playIcon');
+
+    let currentBpm = 140;
+    let isPlaying = true;
+    let isAudioActive = false;
+
+    // Web Audio Synthesizer variables
+    let audioCtx = null;
+    let schedulerTimer = null;
+    let nextBeatTime = 0.0;
+    let beatIndex = 0; // Tracks beat index 0-3 in a 4/4 bar
+
+    // Three.js High-End Y2K CD variables
+    let cdScene, cdCamera, cdRenderer;
+    let cdGroup = null;
+    let cdDiscMesh = null;
+
+    function initThreeCD() {
+      const container = document.getElementById('cdContainer');
+      if (!container) return;
+
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      // 1. Scene setup
+      cdScene = new THREE.Scene();
+
+      // 2. Camera
+      cdCamera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+      cdCamera.position.set(0, 0, 4.0);
+
+      // 3. Renderer with absolute transparency and high quality
+      cdRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      cdRenderer.setSize(width, height);
+      cdRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(cdRenderer.domElement);
+
+      // 4. Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+      cdScene.add(ambientLight);
+
+      // Main reflection light
+      const mainLight = new THREE.DirectionalLight(0xffffff, 0.9);
+      mainLight.position.set(4, 5, 4);
+      cdScene.add(mainLight);
+
+      // Aesthetic Y2K accent neon lights
+      const greenFill = new THREE.PointLight(0x7fff00, 1.4, 10);
+      greenFill.position.set(-3, -2.5, 2);
+      cdScene.add(greenFill);
+
+      const cyanFill = new THREE.PointLight(0x00e5ff, 1.6, 10);
+      cyanFill.position.set(3, -2.5, 1.5);
+      cdScene.add(cyanFill);
+
+      // 5. Root Group for rotation/scaling
+      cdGroup = new THREE.Group();
+      cdScene.add(cdGroup);
+
+      // 6. CD Record (Cylinder geometry)
+      const cdGeo = new THREE.CylinderGeometry(1.1, 1.1, 0.02, 64);
+
+      // PRO Anisotropic Diffraction Grating GLSL Shader
+      const cdShaderMat = new THREE.ShaderMaterial({
+        uniforms: {
+          u_time: { value: 0 },
+          u_beat_flash: { value: 0 },
+          u_light_pos: { value: new THREE.Vector3(4, 5, 4) }
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          varying vec3 vNormal;
+          varying vec3 vViewPosition;
+          varying vec3 vWorldPosition;
+          
+          void main() {
+            vUv = uv;
+            vNormal = normalize(normalMatrix * normal);
+            vec4 worldPos = modelMatrix * vec4(position, 1.0);
+            vWorldPosition = worldPos.xyz;
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            vViewPosition = -mvPosition.xyz;
+            gl_Position = projectionMatrix * mvPosition;
+          }
+        `,
+        fragmentShader: `
+          varying vec2 vUv;
+          varying vec3 vNormal;
+          varying vec3 vViewPosition;
+          varying vec3 vWorldPosition;
+          
+          uniform float u_time;
+          uniform float u_beat_flash;
+          uniform vec3 u_light_pos;
+
+          // Highly vivid spectral color approximation
+          vec3 getSpectralColor(float w) {
+            vec3 c;
+            c.r = sin(w * 6.28318) * 0.5 + 0.5;
+            c.g = sin((w + 0.33) * 6.28318) * 0.5 + 0.5;
+            c.b = sin((w + 0.66) * 6.28318) * 0.5 + 0.5;
+            return c;
+          }
+
+          void main() {
+            vec2 uv = vUv - vec2(0.5);
+            float dist = length(uv);
+
+            // CD donut hole physical bounds (0.5 max radius, 0.11 inner hole)
+            if (dist > 0.49 || dist < 0.11) {
+              discard;
+            }
+
+            vec3 N = normalize(vNormal);
+            vec3 V = normalize(vViewPosition);
+            vec3 L = normalize(u_light_pos - vWorldPosition);
+            vec3 H = normalize(L + V);
+
+            // Tangent along circular tracks (CD grooves)
+            vec2 radial = normalize(uv);
+            vec3 T = vec3(-radial.y, radial.x, 0.0);
+
+            // Diffraction grating equation (T dot H projects onto track tangent)
+            float dotTH = dot(T, H);
+            
+            // Multiple orders of interference (butterfly wing patterns)
+            float diff1 = fract(dotTH * 1.8 + u_time * 0.15 + dist * 0.5);
+            float diff2 = fract(dotTH * 3.6 - u_time * 0.08);
+            float diff3 = fract(dotTH * 1.2 + dist * 1.5);
+
+            vec3 rainbow = getSpectralColor(diff1) * 0.45 + 
+                           getSpectralColor(diff2) * 0.35 + 
+                           getSpectralColor(diff3) * 0.20;
+
+            // Physical sound micro-grooves representation
+            float grooves = sin(dist * 1500.0) * 0.05 + 0.95;
+
+            // Aluminum reflective base layer
+            vec3 silverBase = vec3(0.85, 0.88, 0.92) * grooves;
+
+            // Combine silver chrome base and rainbow diffraction
+            vec3 finalColor = mix(silverBase, rainbow, 0.5);
+
+            // Specular highlighting from light source
+            float spec = max(0.0, dot(N, H));
+            float specPower = pow(spec, 45.0);
+            finalColor += vec3(1.0) * specPower * 0.6;
+
+            // Fresnel glass/edge reflection
+            float fresnel = pow(1.0 - max(0.0, dot(N, V)), 5.0);
+            finalColor += vec3(0.9, 0.95, 1.0) * fresnel * 0.3;
+
+            // Wave pulse reacting to beat (expanding glow)
+            float pulsePos = fract(u_time * 0.7 - dist * 1.5);
+            float pulseGlow = smoothstep(0.12, 0.0, abs(pulsePos - 0.2)) * u_beat_flash;
+            
+            vec3 neonGreen = vec3(0.498, 1.0, 0.0); // #7fff00 (acid green)
+            finalColor += neonGreen * pulseGlow * 0.75;
+
+            // Center glow on beat flash
+            finalColor += neonGreen * u_beat_flash * 0.2 * (1.0 - dist);
+
+            gl_FragColor = vec4(finalColor, 0.98);
+          }
+        `,
+        side: THREE.DoubleSide
+      });
+
+      cdDiscMesh = new THREE.Mesh(cdGeo, cdShaderMat);
+      cdDiscMesh.rotation.x = Math.PI / 2; // Lie flat
+      cdGroup.add(cdDiscMesh);
+
+      // 7. Clear Plastic Inner Ring of the CD
+      const clearRingGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.024, 32);
+      const clearRingMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.35,
+        roughness: 0.1,
+        metalness: 0.2,
+        side: THREE.DoubleSide
+      });
+      const clearRing = new THREE.Mesh(clearRingGeo, clearRingMat);
+      clearRing.rotation.x = Math.PI / 2;
+      clearRing.position.z = 0.001;
+      cdGroup.add(clearRing);
+
+      // 8. Silver Metal Spindle Center Ring (CD central clamp area)
+      const hubGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.04, 24);
+      const hubMat = new THREE.MeshStandardMaterial({
+        color: 0x999999,
+        metalness: 1.0,
+        roughness: 0.1
+      });
+      const hubMesh = new THREE.Mesh(hubGeo, hubMat);
+      hubMesh.rotation.x = Math.PI / 2;
+      hubMesh.position.z = 0.005;
+      cdGroup.add(hubMesh);
+
+      // 9. Animation Loop
+      let lastTime = 0;
+      function animate(time) {
+        requestAnimationFrame(animate);
+
+        const delta = (time - lastTime) / 1000;
+        lastTime = time;
+
+        const uTime = time / 1000;
+
+        // Update Shader uniforms
+        if (cdDiscMesh && cdDiscMesh.material && cdDiscMesh.material.uniforms) {
+          cdDiscMesh.material.uniforms.u_time.value = uTime;
+          // Decay beat flash glow
+          cdDiscMesh.material.uniforms.u_beat_flash.value *= 0.92;
+        }
+
+        // Gentle floating wobble
+        if (cdGroup) {
+          cdGroup.rotation.y = Math.sin(uTime * 1.4) * 0.25;
+          cdGroup.rotation.x = 0.35 + Math.cos(uTime * 0.8) * 0.12;
+
+          // No elastic rubber scaling. Keep it rock solid like real polycarbonate.
+          cdGroup.scale.set(1.1, 1.1, 1.1);
+        }
+
+        // Dynamically rotate and sweep the light source in space
+        if (cdDiscMesh && cdDiscMesh.material && cdDiscMesh.material.uniforms) {
+          const lightX = Math.sin(uTime * 1.3) * 5.0;
+          const lightY = Math.cos(uTime * 1.3) * 5.0;
+          const lightZ = 3.2 + Math.sin(uTime * 0.7) * 1.8;
+          cdDiscMesh.material.uniforms.u_light_pos.value.set(lightX, lightY, lightZ);
+        }
+
+        // Spin CD in sync with active BPM
+        if (isPlaying && cdDiscMesh) {
+          const revsPerSec = currentBpm / 60.0;
+          cdDiscMesh.rotation.y += revsPerSec * Math.PI * delta;
+        }
+
+        cdRenderer.render(cdScene, cdCamera);
+      }
+      requestAnimationFrame(animate);
+
+      // Handle resize
+      window.addEventListener('resize', () => {
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        cdCamera.aspect = w / h;
+        cdCamera.updateProjectionMatrix();
+        cdRenderer.setSize(w, h);
+      });
+    }
+
+    // Update dynamic CSS custom property
+    function updateBpm(bpm) {
+      currentBpm = parseInt(bpm);
+      bpmValue.textContent = `${currentBpm} BPM`;
+      document.documentElement.style.setProperty('--bpm', currentBpm);
+    }
+
+    bpmSlider.addEventListener('input', (e) => {
+      updateBpm(e.target.value);
+    });
+
+    // Pause/Resume movements (compliance WCAG 2.2.2)
+    playPauseBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        body.classList.remove('animations-paused');
+        playText.textContent = "Pausar Movimento";
+        playIcon.textContent = "⏸";
+        playPauseBtn.classList.remove('active');
+        if (isAudioActive) startAudioScheduler();
+      } else {
+        body.classList.add('animations-paused');
+        playText.textContent = "Retomar Movimento";
+        playIcon.textContent = "▶";
+        playPauseBtn.classList.add('active');
+        stopAudioScheduler();
+      }
+    });
+
+    // Web Audio Setup
+    function initAudio() {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    // Play a retro synth-wave pluck sound on beat
+    function playSynthPluck(time, beatNum) {
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const filter = audioCtx.createBiquadFilter();
+      const gainNode = audioCtx.createGain();
+
+      osc.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      // Metronome beat accents
+      // Beat 0: Deep Kick bass synth. Beats 1, 2, 3: higher pitch plucks.
+      if (beatNum === 0) {
+        // RETRO SYNTH KICK BASS
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(55, time); // A1 bass
+        osc.frequency.exponentialRampToValueAtTime(30, time + 0.15);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(600, time);
+        filter.frequency.exponentialRampToValueAtTime(80, time + 0.2);
+
+        gainNode.gain.setValueAtTime(0.5, time);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.35);
+
+        osc.start(time);
+        osc.stop(time + 0.4);
+      } else {
+        // RETRO SYNTH PLUCK
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(220, time); // A3 pluck note
+        // Arpeggiate notes on beats
+        if (beatNum === 2) {
+          osc.frequency.setValueAtTime(277.18, time); // C#4
+        } else if (beatNum === 1 || beatNum === 3) {
+          osc.frequency.setValueAtTime(329.63, time); // E4
+        }
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1200, time);
+        filter.frequency.exponentialRampToValueAtTime(150, time + 0.15);
+
+        gainNode.gain.setValueAtTime(0.3, time);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+
+        osc.start(time);
+        osc.stop(time + 0.25);
+      }
+    }
+
+    // High precision scheduler loop for Web Audio & visual synchronization
+    const lookahead = 15.0; // milliseconds
+    const scheduleAheadTime = 0.1; // seconds
+
+    function scheduler() {
+      while (nextBeatTime < audioCtx.currentTime + scheduleAheadTime) {
+        scheduleBeat(beatIndex, nextBeatTime);
+        advanceBeat();
+      }
+      schedulerTimer = setTimeout(scheduler, lookahead);
+    }
+
+    function scheduleBeat(beatNum, time) {
+      // Trigger Synthesizer
+      if (isAudioActive) {
+        playSynthPluck(time, beatNum);
+      }
+
+      // Sync visual metronome bar flash exactly on beat
+      const delayMs = (time - audioCtx.currentTime) * 1000;
+      setTimeout(() => {
+        if (!isPlaying) return;
+        
+        // Trigger visual bar metronome flash
+        beatIndicator.classList.remove('fade');
+        beatIndicator.classList.add('flash');
+        
+        // Force reflow
+        void beatIndicator.offsetWidth;
+        
+        beatIndicator.classList.remove('flash');
+        beatIndicator.classList.add('fade');
+
+        // Trigger Three.js PRO CD specular beat flash
+        if (cdDiscMesh && cdDiscMesh.material && cdDiscMesh.material.uniforms) {
+          cdDiscMesh.material.uniforms.u_beat_flash.value = 1.0;
+        }
+      }, Math.max(0, delayMs));
+    }
+
+    function advanceBeat() {
+      const secondsPerBeat = 60.0 / currentBpm;
+      nextBeatTime += secondsPerBeat;
+      beatIndex = (beatIndex + 1) % 4; // 4/4 time signature
+    }
+
+    function startAudioScheduler() {
+      if (!audioCtx) initAudio();
+      
+      // Resume audio context if suspended (browser security policy)
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      nextBeatTime = audioCtx.currentTime + 0.05;
+      beatIndex = 0;
+      scheduler();
+    }
+
+    function stopAudioScheduler() {
+      clearTimeout(schedulerTimer);
+      schedulerTimer = null;
+    }
+
+    // Toggle Audio Pluck
+    audioToggleBtn.addEventListener('click', () => {
+      if (!audioCtx) initAudio();
+
+      isAudioActive = !isAudioActive;
+      if (isAudioActive) {
+        audioToggleBtn.textContent = "🔊 Synth: LIGADO";
+        audioToggleBtn.classList.add('active');
+        if (isPlaying && !schedulerTimer) {
+          startAudioScheduler();
+        }
+      } else {
+        audioToggleBtn.textContent = "🔊 Synth";
+        audioToggleBtn.classList.remove('active');
+      }
+    });
+
+    // Toggle Text Pulsing on Beat
+    const textPulseBtn = document.getElementById('textPulseBtn');
+    let isTextPulseActive = false;
+
+    textPulseBtn.addEventListener('click', () => {
+      isTextPulseActive = !isTextPulseActive;
+      const elements = document.querySelectorAll('.rhythmic-text-beat');
+      if (isTextPulseActive) {
+        textPulseBtn.classList.add('active');
+        textPulseBtn.textContent = "✨ Pulsar: LIGADO";
+        elements.forEach(el => el.classList.add('active-pulse'));
+      } else {
+        textPulseBtn.classList.remove('active');
+        textPulseBtn.textContent = "✨ Pulsar";
+        elements.forEach(el => el.classList.remove('active-pulse'));
+      }
+    });
+
+    // --- TEXT TO SPEECH (TTS) WRAPPER AND HIGHLIGHTER ---
+    function prepareTTS() {
+      const lines = document.querySelectorAll('.reading-line');
+      lines.forEach((line) => {
+        const text = line.innerText;
+        line.innerHTML = '';
+        
+        // Split by word blocks and whitespaces
+        const tokens = text.split(/(\s+)/);
+        let index = 0;
+        
+        tokens.forEach((t) => {
+          if (t.trim() === '') {
+            // Whitespace nodes are kept as plain text to preserve spacing layout
+            line.appendChild(document.createTextNode(t));
+            index += t.length;
+          } else {
+            const span = document.createElement('span');
+            span.className = 'tts-word';
+            span.innerText = t;
+            span.dataset.start = index;
+            span.dataset.end = index + t.length;
+            
+            // Se o token for o número do parágrafo (ex: "1.", "2.", etc.), adiciona a classe tts-number
+            const isNumber = /^\d+\.$/.test(t);
+            if (isNumber) {
+              span.classList.add('tts-number');
+            }
+
+            // Re-apply variable font beat classes to target keywords
+            const cleanWord = t.toLowerCase().replace(/[.,]/g, '');
+            if (['sincronizadas', 'iluminando-se', 'periférica', 'elástica'].includes(cleanWord)) {
+              span.classList.add('rhythmic-text-beat');
+              if (isTextPulseActive) {
+                span.classList.add('active-pulse');
+              }
+            }
+            
+            line.appendChild(span);
+            index += t.length;
+          }
+        });
+      });
+    }
+
+    const ttsPlayBtn = document.getElementById('ttsPlayBtn');
+    let isSpeaking = false;
+    let audioTTS = null;
+
+    // Timestamps exatos fornecidos pelo Vertex Studio (em segundos)
+    const sentences = [
+      { start: 1.318, end: 7.378 },
+      { start: 8.928, end: 16.328 },
+      { start: 18.248, end: 26.118 },
+      { start: 27.728, end: 35.108 }
+    ];
+
+    let ttsAnimationId = null;
+
+    function initTTSAudio() {
+      audioTTS = new Audio('./media/speech.mp3');
+
+      audioTTS.addEventListener('ended', () => {
+        resetTTS();
+      });
+    }
+
+    // Heurística de fala: distribui a duração de cada palavra no tempo 
+    // de acordo com o número de letras da palavra (palavras maiores tomam mais tempo)
+    function updateTTSHighlight(currentTime) {
+      let activeIndex = -1;
+      let gapIndex = -1; // Índice da próxima frase se estivermos no intervalo silencioso antes dela
+
+      // Identifica qual das 4 frases está tocando
+      for (let i = 0; i < sentences.length; i++) {
+        if (currentTime >= sentences[i].start && currentTime <= sentences[i].end) {
+          activeIndex = i;
+          break;
+        }
+      }
+
+      // Se não há nenhuma frase ativa tocando, verifica se estamos no gap que antecede alguma frase
+      if (activeIndex === -1) {
+        for (let i = 0; i < sentences.length; i++) {
+          const prevEnd = (i === 0) ? 0 : sentences[i - 1].end;
+          // Se estamos no gap silencioso entre a frase anterior e a frase i
+          if (currentTime > prevEnd && currentTime < sentences[i].start) {
+            gapIndex = i;
+            break;
+          }
+        }
+      }
+
+      const lines = document.querySelectorAll('.reading-line');
+
+      if (activeIndex !== -1) {
+        const activeLine = lines[activeIndex];
+        const config = sentences[activeIndex];
+
+        // Destaque de bloco: acende a linha ativa e apaga as outras
+        lines.forEach((l, idx) => {
+          if (idx !== activeIndex) {
+            l.classList.remove('tts-active');
+            l.style.opacity = '0.35';
+            l.querySelectorAll('.tts-word').forEach(w => w.classList.remove('tts-highlight'));
+          } else {
+            l.classList.add('tts-active');
+            l.style.opacity = '1';
+          }
+        });
+
+        // Pega as palavras da linha ativa
+        const words = activeLine.querySelectorAll('.tts-word');
+        if (words.length > 0) {
+          // Calcula o total de letras das palavras desta frase (excluindo pontuações)
+          let totalLetters = 0;
+          words.forEach(w => {
+            totalLetters += w.innerText.replace(/[.,]/g, '').length;
+          });
+
+          const sentenceDuration = config.end - config.start;
+          const elapsedTime = currentTime - config.start;
+
+          // Percorre as palavras calculando o offset de tempo proporcional de cada uma
+          let accumTime = 0;
+          words.forEach(w => {
+            const wordLetters = w.innerText.replace(/[.,]/g, '').length;
+            const wordDuration = (wordLetters / totalLetters) * sentenceDuration;
+
+            const wordStart = accumTime;
+            const wordEnd = accumTime + wordDuration;
+
+            // Se o tempo corrido está dentro do intervalo da palavra, acende ela
+            if (elapsedTime >= wordStart && elapsedTime < wordEnd) {
+              w.classList.add('tts-highlight');
+            } else {
+              w.classList.remove('tts-highlight');
+            }
+
+            accumTime += wordDuration;
+          });
+        }
+      } else if (gapIndex !== -1) {
+        // PREDICTIVE TARGETING: no intervalo de silêncio, destaca totalmente a próxima linha e colapsa o halo sobre o número
+        lines.forEach((l, idx) => {
+          if (idx === gapIndex) {
+            l.classList.add('tts-active');
+            l.style.opacity = '1'; // Destaca totalmente o próximo bloco imediatamente!
+            
+            // Acende apenas o número do início da próxima linha para colapsar o halo
+            const numSpan = l.querySelector('.tts-number');
+            if (numSpan) {
+              numSpan.classList.add('tts-highlight');
+            }
+            
+            // Limpa as demais palavras da linha
+            l.querySelectorAll('.tts-word').forEach(w => {
+              if (w !== numSpan) w.classList.remove('tts-highlight');
+            });
+          } else {
+            l.classList.remove('tts-active');
+            l.style.opacity = '0.35';
+            l.querySelectorAll('.tts-word').forEach(w => w.classList.remove('tts-highlight'));
+          }
+        });
+      } else {
+        // Fora dos intervalos: limpa todos os destaques
+        lines.forEach(l => {
+          l.classList.remove('tts-active');
+          l.style.opacity = '';
+          l.querySelectorAll('.tts-word').forEach(w => w.classList.remove('tts-highlight'));
+        });
+      }
+    }
+
+    // Loop de renderização suave a 60fps usando requestAnimationFrame
+    function ttsRenderLoop() {
+      if (!isSpeaking || !audioTTS) return;
+      
+      updateTTSHighlight(audioTTS.currentTime);
+      
+      ttsAnimationId = requestAnimationFrame(ttsRenderLoop);
+    }
+
+    function resetTTS() {
+      isSpeaking = false;
+      ttsPlayBtn.textContent = "🗣️ Ler com TTS";
+      ttsPlayBtn.classList.remove('active');
+      
+      if (ttsAnimationId) {
+        cancelAnimationFrame(ttsAnimationId);
+        ttsAnimationId = null;
+      }
+
+      const lines = document.querySelectorAll('.reading-line');
+      lines.forEach(l => {
+        l.classList.remove('tts-active');
+        l.style.opacity = '';
+        l.querySelectorAll('.tts-word').forEach(w => w.classList.remove('tts-highlight'));
+      });
+
+      if (audioTTS) {
+        audioTTS.pause();
+        audioTTS.currentTime = 0;
+      }
+    }
+
+    ttsPlayBtn.addEventListener('click', () => {
+      if (!audioTTS) initTTSAudio();
+
+      if (isSpeaking) {
+        resetTTS();
+      } else {
+        isSpeaking = true;
+        ttsPlayBtn.textContent = "⏹️ Parar TTS";
+        ttsPlayBtn.classList.add('active');
+        
+        audioTTS.play().then(() => {
+          // Dispara o loop a 60fps para sincronia perfeita
+          ttsRenderLoop();
+        }).catch(e => {
+          console.error("Audio playback error:", e);
+          resetTTS();
+        });
+      }
+    });
+
+    // Sincronia com o botão de Pausa global do metrônomo
+    playPauseBtn.addEventListener('click', () => {
+      if (audioTTS) {
+        if (!isPlaying && isSpeaking) {
+          audioTTS.pause();
+        } else if (isPlaying && isSpeaking) {
+          audioTTS.play().catch(e => console.error(e));
+        }
+      }
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (audioTTS) {
+        audioTTS.pause();
+      }
+    });
+
+    // --- THEORY BOX EXPANSÍVEL ---
+    const expandTheoryBtn = document.getElementById('expandTheoryBtn');
+    if (expandTheoryBtn) {
+      expandTheoryBtn.addEventListener('click', () => {
+        const extended = document.getElementById('theoryExtended');
+        if (extended.style.display === 'none') {
+          extended.style.display = 'block';
+          expandTheoryBtn.textContent = '📜 Recolher Sabedoria';
+          expandTheoryBtn.classList.add('active');
+        } else {
+          extended.style.display = 'none';
+          expandTheoryBtn.textContent = '📜 Expandir Sabedoria';
+          expandTheoryBtn.classList.remove('active');
+        }
+      });
+    }
+
+    // Initialize scheduler on load to sync the visual metronome flash
+    window.addEventListener('load', () => {
+      // Create Context and start the silent clock loop just for visual flash syncing
+      initAudio();
+      startAudioScheduler();
+      
+      // Setup Three.js PRO CD
+      initThreeCD();
+      
+      // Setup TTS token boundaries
+      prepareTTS();
+
+      // Brochacho Records Easter Egg
+      console.log(
+        `%c🦥 水陶Flow %c// %cBrochacho Records v.01 %c松弛感`,
+        'color: #7fff00; font-size: 20px; font-weight: bold;',
+        '',
+        'color: #00e5ff; font-weight: bold;',
+        'color: #ff00ff; font-weight: bold;'
+      );
+      console.log('%c杯中有水，请来两杯 🥂', 'font-style: italic; color: #aaa;');
+    });
+  </script>
+
+</body>
+</html>
