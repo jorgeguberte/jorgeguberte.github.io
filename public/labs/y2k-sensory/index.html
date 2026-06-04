@@ -1,156 +1,166 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-sensory="balanced">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Y2K Brutalist & Neurodivergent Sensory Lab — Jorge Guberte</title>
-    
-    <!-- Premium Fonts Link -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-    
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <!-- LAYER 1: CHAOS LAYER (z-index: 0, completely un-interactive) -->
-    <div class="chaos-layer" aria-hidden="true">
-      <!-- Glow Orbs -->
-      <div class="orb orb-green"></div>
-      <div class="orb orb-blue"></div>
-      
-      <!-- CRT Scanlines and CRT screen filter -->
-      <div class="scanlines"></div>
-      
-      <!-- Noise texture overlay (Vanguard / film-grain) -->
-      <div class="noise-overlay"></div>
-      
-      <!-- High-stim ticker vertical barcode stream -->
-      <div class="barcode-ticker" id="ticker-bar">
-        SYS_STIMULUS_STREAM_OK // 0101011001 // LAT_4333_MS // STABLE_CONVERGENCE_CONTR_MAPPING
-      </div>
-    </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Física Sensorial & Design de Atenção — Jorge Guberte</title>
 
-    <!-- LAYER 2: FUNCTIONAL LAYER (z-index: 100+, pointer events enabled) -->
-    <div class="functional-layer">
-      <!-- Lab Header -->
-      <header class="lab-header">
-        <a href="/labs/" class="back-link transition-spring" aria-label="Retornar para os labs">
-          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4" style="width: 16px; height: 16px;">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
-          retornar para os labs
-        </a>
-        <div class="brand-capsule">
-          <span>SENSORY LAB V1.0 // ACTIVE</span>
-        </div>
-      </header>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-      <!-- SENSORY CONTROL DOCK (Floating Glass Capsule) -->
-      <div class="sensory-dock transition-spring" id="sensory-dock" role="radiogroup" aria-label="Controle de modulação sensorial">
-        <button class="dock-btn transition-spring" data-target="high-stim" title="TDAH: Movimento sutil para ancorar atenção dispersa" role="radio" aria-checked="false">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+  <!-- CHAOS LAYER -->
+  <div class="chaos-layer" aria-hidden="true">
+    <div class="orb orb--acid"></div>
+    <div class="orb orb--pink"></div>
+    <div class="orb orb--blue"></div>
+    <div class="grain-overlay"></div>
+  </div>
+
+  <!-- FUNCTIONAL LAYER -->
+  <div class="functional-layer">
+
+    <!-- HEADER -->
+    <header class="lab-header">
+      <a href="/labs/" class="back-link" aria-label="Retornar para os labs">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        labs
+      </a>
+      <div class="brand-badge">Sensory Lab v2</div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+      <p class="hero-eyebrow">Y2K Brutalism &times; AttentionGuard</p>
+      <h1 class="hero-title">Física Sensorial<br><em>&amp; Design</em> de Atenção</h1>
+      <p class="hero-sub">
+        Um laboratório vivo de acessibilidade neurodivergente.
+        O sistema separa a decoração caótica da interface funcional
+        em camadas independentes, regulando estímulos em tempo real
+        conforme as necessidades sensoriais de cada cérebro.
+      </p>
+
+      <!-- SENSORY DOCK -->
+      <div class="sensory-dock" id="sensory-dock" role="radiogroup" aria-label="Controle de modulação sensorial">
+        <button class="dock-btn" data-target="high-stim" role="radio" aria-checked="false">
           High-Stim
         </button>
-        <button class="dock-btn transition-spring active" data-target="balanced" title="Padrão: Equilíbrio translúcido e foco focado" role="radio" aria-checked="true">
+        <button class="dock-btn active" data-target="balanced" role="radio" aria-checked="true">
           Balanced
         </button>
-        <button class="dock-btn transition-spring" data-target="calm" title="Autismo: Movimento zero e cores descansadas" role="radio" aria-checked="false">
-          Calm Mode
+        <button class="dock-btn" data-target="calm" role="radio" aria-checked="false">
+          Calm
         </button>
       </div>
+    </section>
 
-      <!-- MAIN BENTO BOX GRID -->
-      <main class="bento-grid">
-        <!-- Hero Card (span-8) -->
-        <article class="bento-card col-8 transition-spring">
-          <div class="bento-card-inner">
-            <div>
-              <p class="eyebrow">Experimento 01 // Atenção Guiada</p>
-              <h1>Física Sensorial & Design de Atenção.</h1>
-              <p style="margin-bottom: 1.5rem;">
-                Este laboratório mescla a acidez e o contraste tátil do <strong>Y2K Brutalismo</strong> com o framework <strong>AttentionGuard</strong> (pedagogia e acessibilidade focadas em neurodivergência). O sistema separa a decoração caótica da interface funcional em camadas independentes, regulando estímulos em tempo real de acordo com as necessidades sensoriais do usuário.
-              </p>
-            </div>
-            <div>
-              <button class="btn-pill transition-spring" id="trigger-diagnostic">
-                Rodar Diagnóstico Sensorial
-                <span class="arrow-circle">↗</span>
-              </button>
-            </div>
+    <!-- ANATOMY -->
+    <section class="section">
+      <div class="section-label">── Anatomia do Sistema</div>
+
+      <div class="arch-grid">
+        <div class="arch-card">
+          <p class="arch-card-label">Camada 0</p>
+          <h3 class="arch-card-title">Caos Decorativo</h3>
+          <p class="arch-card-desc">
+            Orbs cromáticas, grão de filme e texturas não-interativas.
+            Esta camada responde ao perfil sensorial — satura e pulsa no
+            High-Stim, desaparece completamente no Calm.
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <p class="arch-card-label">Camada 1</p>
+          <h3 class="arch-card-title">Interface Funcional</h3>
+          <p class="arch-card-desc">
+            Tipografia, controles e conteúdo isolados do caos por
+            z-index e backdrop-filter. Totalmente navegável por
+            teclado e screen reader.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANCHOR -->
+    <section class="section">
+      <div class="section-label">── Âncora de Foco</div>
+
+      <p class="section-text">
+        Passe o cursor sobre a área abaixo. O ponto de alta densidade
+        visual ancora a visão central e reduz a flutuação do olhar —
+        uma ferramenta para cérebros com TDAH que buscam um ponto
+        fixo em meio ao ruído.
+      </p>
+
+      <div class="anchor-canvas" id="anchor-canvas">
+        <div class="anchor-dot" id="focus-dot"></div>
+        <span class="anchor-hint">passe o cursor para guiar a âncora</span>
+      </div>
+    </section>
+
+    <!-- TELEMETRY: VU METERS -->
+    <section class="section">
+      <div class="section-label">── Mesa de Sinais</div>
+
+      <div class="meter-rack" id="meter-rack">
+        <div class="meter-channel">
+          <p class="meter-label">Saturação</p>
+          <div class="meter-bar-wrap" id="meter-saturation">
+            <div class="meter-segments"></div>
           </div>
-        </article>
-
-        <!-- Dynamic Attention Anchor Card (span-4) -->
-        <article class="bento-card col-4 transition-spring">
-          <div class="bento-card-inner">
-            <div>
-              <p class="eyebrow">Âncora de Foco (ADHD)</p>
-              <h2>Estímulo Focado</h2>
-              <p>
-                Mova o mouse sobre a tela abaixo. O ponto de alta densidade visual (Focus-Dot) ancora a visão central, reduzindo a flutuação do olhar para quem tem TDAH.
-              </p>
-            </div>
-            
-            <div class="visual-anchor" id="anchor-canvas">
-              <div class="focus-dot transition-spring" id="focus-dot"></div>
-            </div>
-
-            <p class="eyebrow" style="font-size: 9px; margin-top: 0.5rem; text-align: center;">
-              Interativo: passe o cursor para guiar a âncora
-            </p>
+          <p class="meter-value" id="val-saturation">1.0</p>
+        </div>
+        <div class="meter-channel">
+          <p class="meter-label">Motion</p>
+          <div class="meter-bar-wrap" id="meter-motion">
+            <div class="meter-segments"></div>
           </div>
-        </article>
-
-        <!-- Real-time Telemetry Monitor Console (span-4) -->
-        <article class="bento-card col-4 transition-spring">
-          <div class="bento-card-inner">
-            <div>
-              <p class="eyebrow">Monitor de Sinais // Telemetria</p>
-              <h2>Filtro de Estado</h2>
-              <p style="margin-bottom: 1rem;">
-                Leitura do motor físico de renderização baseado nas restrições de modulação sensorial ativas.
-              </p>
-            </div>
-
-            <div class="diagnostic-console" id="console-output">
-              <!-- Logs will be appended here via JS -->
-            </div>
+          <p class="meter-value" id="val-motion">1.0</p>
+        </div>
+        <div class="meter-channel">
+          <p class="meter-label">Contraste</p>
+          <div class="meter-bar-wrap" id="meter-contrast">
+            <div class="meter-segments"></div>
           </div>
-        </article>
+          <p class="meter-value" id="val-contrast">1.0</p>
+        </div>
+      </div>
+    </section>
 
-        <!-- Control and Inputs Card (span-8) -->
-        <article class="bento-card col-8 transition-spring">
-          <div class="bento-card-inner">
-            <div>
-              <p class="eyebrow">Controles Funcionais</p>
-              <h2>Parâmetros e Variabilidade</h2>
-              <p style="margin-bottom: 1.5rem;">
-                Teste a resposta da interface. Os botões mudam sutilmente a densidade do texto (font-variation) e usam focagem em anel-duplo para máxima acessibilidade em telas estroboscópicas.
-              </p>
-              
-              <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                <button class="btn-pill transition-spring" style="padding: 0.6rem 1.2rem; font-size: 12px;" id="btn-intensity">
-                  Simular Pico de Estímulo
-                </button>
-                <button class="btn-pill transition-spring" style="padding: 0.6rem 1.2rem; font-size: 12px;" id="btn-contrast">
-                  Otimizar Contraste (WCAG 2.2)
-                </button>
-                <button class="btn-pill transition-spring" style="padding: 0.6rem 1.2rem; font-size: 12px;" id="btn-clear-logs">
-                  Limpar Telemetria
-                </button>
-              </div>
-            </div>
-            
-            <div style="border-t: 1px solid var(--border-color); pt-4 flex justify-between items-center text-xs text-zinc-500">
-              <span>Sinal de saída: Estável</span>
-              <span>WCAG AA Compliance</span>
-            </div>
-          </div>
-        </article>
-      </main>
-    </div>
+    <!-- CONTROLS -->
+    <section class="section">
+      <div class="section-label">── Parâmetros</div>
 
-    <!-- Script Application Logic -->
-    <script src="./app.js"></script>
-  </body>
+      <div class="control-row">
+        <button class="btn" id="btn-intensity">Simular Pico</button>
+        <button class="btn" id="btn-contrast">WCAG Contraste</button>
+        <button class="btn" id="btn-reset">Reset Meters</button>
+      </div>
+
+      <div class="status-bar">
+        <div class="status-item">
+          <span class="status-dot"></span>
+          WCAG AA
+        </div>
+        <div class="status-item">
+          <span class="status-dot"></span>
+          Keyboard Nav
+        </div>
+        <div class="status-item">
+          <span class="status-dot"></span>
+          Screen Reader
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="./app.js"></script>
+</body>
 </html>
