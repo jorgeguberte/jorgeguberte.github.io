@@ -414,6 +414,41 @@ p {
 .diag-green { color: var(--primary); }
 .diag-blue { color: var(--secondary); }
 
+/* Lacuna #9: Toast Feedback */
+.sensory-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(1rem);
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid var(--primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0.65rem 1.5rem;
+  border-radius: 9999px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px var(--primary-glow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.sensory-toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Lacuna #5: Calm Mode — disable orb animations when chaos-layer--calm */
+.chaos-layer--calm .orb-green,
+.chaos-layer--calm .orb-blue {
+  animation: none !important;
+  opacity: 0;
+}
+
 /* MOBILE RESPONSIVENESS (Universal Overrides) */
 @media (max-width: 768px) {
   .bento-grid {
