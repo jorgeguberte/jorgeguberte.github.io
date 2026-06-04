@@ -1,418 +1,281 @@
-// ===========================================
-// SENSORY LAB v3 — Desktop Environment
-// Generative wallpaper + Profile Card + Dock
-// ===========================================
+// Sensory Lab v2 — VU Meters + AttentionGuard
+// Y2K Brutalism Editorial
 
-(function () {
-  "use strict";
+var SENSORY_MODES = ["high-stim", "balanced", "calm"];
+var STORAGE_KEY = "y2k-sensory-mode";
 
-  // --- DOM refs ---
-  const wallpaperCanvas = document.getElementById("wallpaper");
-  const wallpaperCtx = wallpaperCanvas.getContext("2d");
-  const profileCanvas = document.getElementById("profile-output");
-  const profileCtx = profileCanvas.getContext("2d");
-  const desktop = document.getElementById("desktop");
-  const danmaku = document.getElementById("danmaku");
-  const dock = document.getElementById("dock");
+// --- Sensory state map ---
+var SENSORY_PROFILES = {
+  "high-stim": { saturation: 1.4, motion: 1.0, contrast: 1.0, noise: 0.05 },
+  "balanced":  { saturation: 1.0, motion: 1.0, contrast: 1.0, noise: 0.03 },
+  "calm":      { saturation: 0.3, motion: 0.0, contrast: 1.0, noise: 0    }
+};
 
-  // --- State ---
-  const params = {
-    saturation: 1.0,
-    motion: 0.5,
-    contrast: 1.0,
-    noise: 0.15,
-    beat: 0.5,
-    trail: 0.5,
-  };
+// --- VU Meter state ---
+var meterState = { saturation: 1.0, motion: 1.0, contrast: 1.0 };
+var meterTimers = [];
 
-  let mouse = { x: -1000, y: -1000, active: false };
-  let time = 0;
-  let frameId;
-  let mode = "balanced";
-
-  // --- Resize ---
-  function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-
-    wallpaperCanvas.width = w * dpr;
-    wallpaperCanvas.height = h * dpr;
-    wallpaperCanvas.style.width = w + "px";
-    wallpaperCanvas.style.height = h + "px";
-    wallpaperCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    profileCanvas.width = profileCanvas.clientWidth * dpr;
-    profileCanvas.height = profileCanvas.clientHeight * dpr;
-    profileCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+function buildMeterSegments(meterEl, count) {
+  var segs = meterEl.querySelector(".meter-segments");
+  segs.innerHTML = "";
+  for (var i = 0; i < count; i++) {
+    var seg = document.createElement("div");
+    seg.className = "meter-seg";
+    segs.appendChild(seg);
   }
-window.addEventListener("resize", resize);
-resize();
-
-// --- Wallpaper: generative particle field (Praystation vibe) ---
-const particles = [];
-const PARTICLE_COUNT = 80;
-
-function initParticles() {
-particles.length = 0;
-for (let i = 0; i < PARTICLE_COUNT; i++) {
-particles.push({
-  x: Math.random() * wallpaperCanvas.width / (Math.min(window.devicePixelRatio || 2, 2)),
-  y: Math.random() * wallpaperCanvas.height / (Math.min(window.devicePixelRatio || 2, 2)),
-  vx: (Math.random() - 0.5) * 0.5,
-  vy: (Math.random() - 0.5) * 0.5,
-  radius: Math.random() * 2.5 + 1,
-  hue: Math.random() < 0.5 ? 90 : (Math.random() < 0.5 ? 195 : 320), // acid, cyan, pink
-  phase: Math.random() * Math.PI * 2,
-});
 }
+
+function updateMeter(meterId, value) {
+  var meter = document.getElementById("meter-" + meterId);
+  if (!meter) return;
+  var segs = meter.querySelectorAll(".meter-seg");
+  var activeCount = Math.round(value * segs.length);
+  var warnThreshold = Math.round(0.75 * segs.length);
+  for (var i = 0; i < segs.length; i++) {
+    segs[i].className = "meter-seg";
+    if (i < activeCount) {
+      segs[i].classList.add(i >= warnThreshold ? "meter-seg--warn" : "meter-seg--active");
+    }
+  }
+  var valEl = document.getElementById("val-" + meterId);
+  if (valEl) valEl.textContent = value.toFixed(1);
 }
-initParticles();
 
-function drawWallpaper() {
-const ctx = wallpaperCtx;
-const w = wallpaperCanvas.width / (Math.min(window.devicePixelRatio || 2, 2));
-const h = wallpaperCanvas.height / (Math.min(window.devicePixelRatio || 2, 2));
+function animateMeterTo(meterId, from, to, duration) {
+  var steps = 20;
+  var stepTime = duration / steps;
+  var step = 0;
+  var timer = setInterval(function () {
+    step++;
+    var t = step / steps;
+    var eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // easeInOutQuad
+    updateMeter(meterId, from + (to - from) * eased);
+    if (step >= steps) clearInterval(timer);
+  }, stepTime);
+  meterTimers.push(timer);
+}
 
-// Fade trail — darker = longer trail
-const trailAlpha = 0.08 + params.noise * 0.15;
-ctx.fillStyle = `rgba(10, 10, 15, ${trailAlpha})`;
-ctx.fillRect(0, 0, w, h);
+function refreshAllMeters() {
+  var profile = SENSORY_PROFILES[getCurrentMode()];
+  meterState = Object.assign({}, profile);
+  updateMeter("saturation", profile.saturation);
+  updateMeter("motion", profile.motion);
+  updateMeter("contrast", profile.contrast);
+}
 
-for (const p of particles) {
-  // Update position
-  p.x += p.vx * params.motion;
-  p.y += p.vy * params.motion;
+// --- Sensory state ---
+function getCurrentMode() {
+  return document.documentElement.getAttribute("data-sensory") || "balanced";
+}
 
-  // Wrap around
-  if (p.x < -10) p.x = w + 10;
-  if (p.x > w + 10) p.x = -10;
-  if (p.y < -10) p.y = h + 10;
-  if (p.y > h + 10) p.y = -10;
+function applySensoryMode(mode) {
+  document.documentElement.setAttribute("data-sensory", mode);
 
-  // Cursor force-field — particles repel from mouse
-  if (mouse.active) {
-    const dx = p.x - mouse.x;
-    const dy = p.y - mouse.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const forceRadius = 180 * params.trail;
-    if (dist < forceRadius && dist > 0) {
-      const force = (1 - dist / forceRadius) * 0.8 * params.trail;
-      p.vx += (dx / dist) * force * 0.1;
-      p.vy += (dy / dist) * force * 0.1;
+  // Sync dock buttons + aria
+  var dock = document.getElementById("sensory-dock");
+  if (dock) {
+    var btns = dock.querySelectorAll(".dock-btn");
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle("active", btns[i].dataset.target === mode);
+      btns[i].setAttribute("aria-checked", btns[i].dataset.target === mode ? "true" : "false");
     }
   }
 
-  // Dampen
-  p.vx *= 0.995;
-  p.vy *= 0.995;
+  // Calm DOM cleanup
+  applyCalmDomCleanup();
 
-  // Draw
-  const alpha = 0.3 + params.contrast * 0.2;
-  const sat = params.saturation * 100;
-  ctx.beginPath();
-  ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-  ctx.fillStyle = `hsla(${p.hue}, ${sat}%, 60%, ${alpha})`;
-  ctx.fill();
+  // Animate meters
+  refreshAllMeters();
+
+  // Persist
+  try { localStorage.setItem(STORAGE_KEY, mode); } catch (_) {}
 }
 
-// Beat pulse — subtle background color shift
-if (params.beat > 0.3) {
-  const beatPhase = Math.sin(time * 0.02) * 0.5 + 0.5;
-  const beatAlpha = beatPhase * params.beat * 0.03;
-  ctx.fillStyle = `rgba(127, 255, 0, ${beatAlpha})`;
-  ctx.fillRect(0, 0, w, h);
-}
-}
-
-// --- Danmaku: live telemetry scrolling (Chinese UI) ---
-const danmakuMessages = [];
-const DANMAKU_MAX = 6;
-
-function updateDanmaku() {
-const msgs = [
-  `FPS: ${Math.round(60 * params.motion)}`,
-  `Mouse: ${mouse.active ? Math.round(mouse.x) + "," + Math.round(mouse.y) : "idle"}`,
-  `Profile: ${mode}`,
-  `Saturation: ${params.saturation.toFixed(1)}`,
-  `Motion: ${params.motion.toFixed(1)}`,
-  `Trail: ${params.trail.toFixed(1)}`,
-];
-
-for (const msg of msgs) {
-  if (danmakuMessages.find((m) => m.text === msg)) continue;
-  danmakuMessages.push({
-    text: msg,
-    x: wallpaperCanvas.width / (Math.min(window.devicePixelRatio || 2, 2)) + Math.random() * 200,
-    y: 20 + Math.random() * (wallpaperCanvas.height / (Math.min(window.devicePixelRatio || 2, 2)) - 50),
-    speed: 0.5 + Math.random() * 0.8,
-  });
-  if (danmakuMessages.length > DANMAKU_MAX) danmakuMessages.shift();
-}
+function loadSavedMode() {
+  var saved = null;
+  try { saved = localStorage.getItem(STORAGE_KEY); } catch (_) {}
+  if (saved && SENSORY_MODES.includes(saved)) return saved;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "calm";
+  return "balanced";
 }
 
-// --- Profile Card: reactive generative output ---
-const profileParticles = [];
-const PROFILE_PARTICLE_COUNT = 200;
-
-function initProfileParticles() {
-profileParticles.length = 0;
-const pw = profileCanvas.width / (Math.min(window.devicePixelRatio || 2, 2));
-const ph = profileCanvas.height / (Math.min(window.devicePixelRatio || 2, 2));
-for (let i = 0; i < PROFILE_PARTICLE_COUNT; i++) {
-profileParticles.push({
-  x: Math.random() * pw,
-  y: Math.random() * ph,
-  vx: (Math.random() - 0.5) * 2,
-  vy: (Math.random() - 0.5) * 2,
-  radius: Math.random() * 3 + 1,
-  hue: Math.random() * 360,
-  connections: [],
-});
-}
-}
-
-function drawProfile() {
-const ctx = profileCtx;
-const pw = profileCanvas.width / (Math.min(window.devicePixelRatio || 2, 2));
-const ph = profileCanvas.height / (Math.min(window.devicePixelRatio || 2, 2));
-
-// Clear with noise grain
-ctx.fillStyle = `rgba(8, 8, 12, ${0.85 + params.noise * 0.1})`;
-ctx.fillRect(0, 0, pw, ph);
-
-// Noise grain
-if (params.noise > 0) {
-  const imageData = ctx.getImageData(0, 0, pw, ph);
-  const data = imageData.data;
-  for (let i = 0; i < data.length; i += 4) {
-    if (Math.random() < params.noise * 0.5) {
-      const val = Math.random() * 30 * params.contrast;
-      data[i] += val;
-      data[i + 1] += val;
-      data[i + 2] += val;
+// Calm mode DOM cleanup
+function applyCalmDomCleanup() {
+  var chaosLayer = document.querySelector(".chaos-layer");
+  if (!chaosLayer) return;
+  var isCalm = getCurrentMode() === "calm";
+  if (isCalm) {
+    chaosLayer.classList.add("chaos-layer--calm");
+    var grain = chaosLayer.querySelector(".grain-overlay");
+    if (grain) grain.remove();
+  } else {
+    chaosLayer.classList.remove("chaos-layer--calm");
+    if (!chaosLayer.querySelector(".grain-overlay")) {
+      var g = document.createElement("div");
+      g.className = "grain-overlay";
+      chaosLayer.appendChild(g);
     }
   }
-  ctx.putImageData(imageData, 0, 0);
 }
 
-// Update and draw profile particles
-for (const p of profileParticles) {
-  p.x += p.vx * params.motion;
-  p.y += p.vy * params.motion;
-  if (p.x < 0) p.x = pw;
-  if (p.x > pw) p.x = 0;
-  if (p.y < 0) p.y = ph;
-  if (p.y > ph) p.y = 0;
+// Toast
+var toastTimer = null;
+function toast(msg) {
+  var el = document.querySelector(".sensory-toast");
+  if (el) el.remove();
+  if (toastTimer) clearTimeout(toastTimer);
 
-  const sat = params.saturation * 80 + 20;
-  const alpha = 0.4 + params.contrast * 0.3;
+  var t = document.createElement("div");
+  t.className = "sensory-toast";
+  t.textContent = msg;
+  document.body.appendChild(t);
 
-  ctx.beginPath();
-  ctx.arc(p.x, p.y, p.radius * params.contrast, 0, Math.PI * 2);
-  ctx.fillStyle = `hsla(${p.hue}, ${sat}%, ${55 + params.contrast * 20}%, ${alpha})`;
-  ctx.fill();
+  requestAnimationFrame(function () { t.classList.add("sensory-toast--visible"); });
+  toastTimer = setTimeout(function () {
+    if (t.parentNode) { t.classList.remove("sensory-toast--visible"); setTimeout(function () { if (t.parentNode) t.remove(); }, 350); }
+  }, 2200);
 }
-}
 
-// --- Dock controls ---
-function setMode(newMode) {
-mode = newMode;
-desktop.dataset.mode = mode;
-document.documentElement.dataset.sensory = mode;
-dock.querySelectorAll(".dock-btn[data-mode]").forEach((btn) => {
-btn.classList.toggle("active", btn.dataset.mode === mode);
+// --- INIT ---
+document.addEventListener("DOMContentLoaded", function () {
+  // Build meter segments
+  buildMeterSegments(document.getElementById("meter-saturation"), 12);
+  buildMeterSegments(document.getElementById("meter-motion"), 12);
+  buildMeterSegments(document.getElementById("meter-contrast"), 12);
+
+  // Apply saved mode
+  var initialMode = loadSavedMode();
+  document.documentElement.setAttribute("data-sensory", initialMode);
+  applyCalmDomCleanup();
+
+  // Sync dock
+  var dock = document.getElementById("sensory-dock");
+  if (dock) {
+    var btns = dock.querySelectorAll(".dock-btn");
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle("active", btns[i].dataset.target === initialMode);
+      btns[i].setAttribute("aria-checked", btns[i].dataset.target === initialMode ? "true" : "false");
+    }
+  }
+
+  // Initial meter state
+  refreshAllMeters();
+
+  if (initialMode !== "balanced") {
+    var labels = { "high-stim": "High-Stim ativado", "calm": "Calm Mode ativado" };
+    toast(labels[initialMode] || initialMode);
+  }
+
+  // --- DOCK CLICK ---
+  if (dock) {
+    dock.addEventListener("click", function (e) {
+      var btn = e.target.closest(".dock-btn");
+      if (!btn) return;
+      var mode = btn.dataset.target;
+      applySensoryMode(mode);
+
+      var msgs = {
+        "high-stim": "HIGH-STIM — saturação 1.4x, movimento ativo",
+        "balanced":  "BALANCED — parâmetros padrão",
+        "calm":      "CALM MODE — movimento zero, saturação 0.3x"
+      };
+      toast(msgs[mode]);
+    });
+  }
+
+  // --- ANCHOR CANVAS ---
+  var anchorCanvas = document.getElementById("anchor-canvas");
+  var focusDot = document.getElementById("focus-dot");
+  if (anchorCanvas && focusDot) {
+    focusDot.style.left = "calc(50% - 0.625rem)";
+    focusDot.style.top = "calc(50% - 0.625rem)";
+
+    anchorCanvas.addEventListener("mousemove", function (e) {
+      var rect = anchorCanvas.getBoundingClientRect();
+      var x = e.clientX - rect.left - 10;
+      var y = e.clientY - rect.top - 10;
+      var maxX = rect.width - 22;
+      var maxY = rect.height - 22;
+      focusDot.style.left = Math.max(4, Math.min(x, maxX)) + "px";
+      focusDot.style.top = Math.max(4, Math.min(y, maxY)) + "px";
+    });
+    anchorCanvas.addEventListener("mouseleave", function () {
+      focusDot.style.left = "calc(50% - 0.625rem)";
+      focusDot.style.top = "calc(50% - 0.625rem)";
+    });
+  }
+
+  // --- BUTTON: INTENSITY PEAK ---
+  var btnIntensity = document.getElementById("btn-intensity");
+  if (btnIntensity) {
+    btnIntensity.addEventListener("click", function () {
+      // Flash meters
+      animateMeterTo("saturation", meterState.saturation, 1.0, 200);
+      animateMeterTo("motion", meterState.motion, 1.0, 200);
+      animateMeterTo("contrast", meterState.contrast, 0.5, 200);
+      setTimeout(function () { refreshAllMeters(); }, 600);
+
+      // Pulse background
+      document.body.style.transition = "background 0.15s ease";
+      document.body.style.background = "#1a001a";
+      setTimeout(function () {
+        document.body.style.background = "";
+        setTimeout(function () { document.body.style.transition = ""; }, 200);
+      }, 150);
+
+      toast("PICO DE ESTÍMULO — medidores respondendo");
+    });
+  }
+
+  // --- BUTTON: WCAG CONTRAST ---
+  var highContrast = false;
+  var btnContrast = document.getElementById("btn-contrast");
+  if (btnContrast) {
+    btnContrast.addEventListener("click", function () {
+      highContrast = !highContrast;
+      if (highContrast) {
+        btnContrast.classList.add("btn--active");
+        document.documentElement.style.setProperty("--text-secondary", "#e0e0e0");
+        document.documentElement.style.setProperty("--void-mid", "#000000");
+        document.documentElement.style.setProperty("--border-subtle", "rgba(127,255,0,0.2)");
+        var segs = document.querySelectorAll(".meter-seg");
+        for (var i = 0; i < segs.length; i++) segs[i].style.background = segs[i].classList.contains("meter-seg--active") ? "#4db800" : "";
+        updateMeter("contrast", 1.0);
+        toast("CONTRASTE OTIMIZADO — WCAG 2.2 AA");
+      } else {
+        btnContrast.classList.remove("btn--active");
+        document.documentElement.style.removeProperty("--text-secondary");
+        document.documentElement.style.removeProperty("--void-mid");
+        document.documentElement.style.removeProperty("--border-subtle");
+        var segs = document.querySelectorAll(".meter-seg");
+        for (var i = 0; i < segs.length; i++) segs[i].style.background = "";
+        updateMeter("contrast", meterState.contrast);
+        toast("Contraste padrão restaurado");
+      }
+    });
+  }
+
+  // --- BUTTON: RESET METERS ---
+  var btnReset = document.getElementById("btn-reset");
+  if (btnReset) {
+    btnReset.addEventListener("click", function () {
+      refreshAllMeters();
+      toast("MEDIDORES RESETADOS");
+    });
+  }
+
+  // --- OS PREFERS-REDUCED-MOTION LISTENER ---
+  if (window.matchMedia) {
+    window.matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", function (e) {
+      if (e.matches) {
+        applySensoryMode("calm");
+        toast("OS solicitou redução de movimento — Calm ativado");
+      } else {
+        var saved = null;
+        try { saved = localStorage.getItem(STORAGE_KEY); } catch (_) {}
+        applySensoryMode(saved && SENSORY_MODES.includes(saved) ? saved : "balanced");
+        toast("Modo anterior restaurado");
+      }
+    });
+  }
 });
-}
-
-dock.addEventListener("click", (e) => {
-const btn = e.target.closest(".dock-btn");
-if (!btn) return;
-
-if (btn.dataset.mode) {
-setMode(btn.dataset.mode);
-} else if (btn.id === "btn-randomize") {
-randomizeParams();
-} else if (btn.id === "btn-reset") {
-resetParams();
-}
-});
-
-// --- Parameter controls ---
-function updateSliders() {
-Object.keys(params).forEach((key) => {
-const slider = document.getElementById("param-" + key);
-if (slider) slider.value = params[key];
-});
-}
-
-function randomizeParams() {
-params.saturation = +(Math.random() * 2).toFixed(2);
-params.motion = +(Math.random() * 2).toFixed(2);
-params.contrast = +(Math.random() * 2).toFixed(2);
-params.noise = +(Math.random()).toFixed(2);
-params.beat = +(Math.random() * 2).toFixed(2);
-params.trail = +(Math.random() * 2).toFixed(2);
-updateSliders();
-updateURL();
-}
-
-function resetParams() {
-params.saturation = 1.0;
-params.motion = 0.5;
-params.contrast = 1.0;
-params.noise = 0.15;
-params.beat = 0.5;
-params.trail = 0.5;
-updateSliders();
-updateURL();
-}
-
-document.querySelectorAll(".slider-row input").forEach((slider) => {
-slider.addEventListener("input", () => {
-const key = slider.id.replace("param-", "");
-params[key] = parseFloat(slider.value);
-});
-slider.addEventListener("change", updateURL);
-});
-
-// --- URL state (Constructionist: shareable) ---
-function urlParamsToState() {
-const qs = new URLSearchParams(window.location.search);
-const defaults = { s: 1, m: 0.5, c: 1, n: 0.15, b: 0.5, t: 0.5 };
-const map = { s: "saturation", m: "motion", c: "contrast", n: "noise", b: "beat", t: "trail" };
-
-let loaded = false;
-for (const [key, param] of Object.entries(map)) {
-const val = parseFloat(qs.get(key));
-if (!isNaN(val)) {
-params[param] = Math.max(0, Math.min(2, val));
-loaded = true;
-}
-}
-
-if (loaded) {
-updateSliders();
-}
-}
-
-function updateURL() {
-const qs = new URLSearchParams();
-const map = { saturation: "s", motion: "m", contrast: "c", noise: "n", beat: "b", trail: "t" };
-for (const [param, key] of Object.entries(map)) {
-qs.set(key, params[param].toFixed(2));
-}
-const url = window.location.pathname + "?" + qs.toString();
-window.history.replaceState(null, "", url);
-}
-
-// --- Widget buttons ---
-document.querySelector(".widget-capture")?.addEventListener("click", () => {
-const link = document.createElement("a");
-link.download = "sensory-profile-" + Date.now() + ".png";
-link.href = profileCanvas.toDataURL("image/png");
-link.click();
-});
-
-document.querySelector(".widget-share")?.addEventListener("click", () => {
-updateURL();
-navigator.clipboard.writeText(window.location.href).catch(() => {});
-});
-
-// --- Mouse tracking (force-field) ---
-document.addEventListener("mousemove", (e) => {
-mouse.x = e.clientX;
-mouse.y = e.clientY;
-mouse.active = true;
-});
-document.addEventListener("mouseleave", () => {
-mouse.active = false;
-});
-
-// --- Touch support ---
-document.addEventListener("touchmove", (e) => {
-mouse.x = e.touches[0].clientX;
-mouse.y = e.touches[0].clientY;
-mouse.active = true;
-}, { passive: true });
-document.addEventListener("touchend", () => {
-mouse.active = false;
-});
-
-// --- Widget dragging ---
-let dragTarget = null;
-let dragOffsetX = 0, dragOffsetY = 0;
-
-desktop.addEventListener("mousedown", (e) => {
-const handle = e.target.closest("[data-drag-handle]");
-if (!handle) return;
-const widget = handle.closest(".widget");
-if (!widget) return;
-
-dragTarget = widget;
-const rect = widget.getBoundingClientRect();
-dragOffsetX = e.clientX - rect.left;
-dragOffsetY = e.clientY - rect.top;
-widget.style.zIndex = 60;
-e.preventDefault();
-});
-
-document.addEventListener("mousemove", (e) => {
-if (!dragTarget) return;
-dragTarget.style.left = (e.clientX - dragOffsetX) + "px";
-dragTarget.style.top = (e.clientY - dragOffsetY) + "px";
-});
-
-document.addEventListener("mouseup", () => {
-if (dragTarget) {
-dragTarget.style.zIndex = "";
-dragTarget = null;
-}
-});
-
-// --- Main loop ---
-function loop() {
-time++;
-drawWallpaper();
-drawProfile();
-if (time % 30 === 0 && params.motion > 0.1) updateDanmaku();
-frameId = requestAnimationFrame(loop);
-}
-
-// --- Initialize ---
-urlParamsToState();
-randomizeParams(); // Start with randomized state — surprise on load
-initProfileParticles();
-resize();
-loop();
-
-// --- Keyboard shortcuts (hidden discovery) ---
-document.addEventListener("keydown", (e) => {
-if (e.key === "r" && e.ctrlKey) {
-e.preventDefault();
-randomizeParams();
-} else if (e.key === "0" && e.ctrlKey) {
-e.preventDefault();
-resetParams();
-} else if (e.key === "1" && e.ctrlKey) {
-e.preventDefault();
-setMode("high-stim");
-} else if (e.key === "2" && e.ctrlKey) {
-e.preventDefault();
-setMode("balanced");
-} else if (e.key === "3" && e.ctrlKey) {
-e.preventDefault();
-setMode("calm");
-}
-});
-
-// --- Handle window resize for particles ---
-let resizeTimeout;
-window.addEventListener("resize", () => {
-clearTimeout(resizeTimeout);
-resizeTimeout = setTimeout(() => {
-initParticles();
-initProfileParticles();
-}, 200);
-});
-})();
