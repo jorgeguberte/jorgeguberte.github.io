@@ -35,8 +35,8 @@
     <div class="functional-layer">
       <!-- Lab Header -->
       <header class="lab-header">
-        <a href="/labs/" class="back-link transition-spring">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4" style="width: 16px; height: 16px;">
+        <a href="/labs/" class="back-link transition-spring" aria-label="Retornar para os labs">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4" style="width: 16px; height: 16px;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
           retornar para os labs
@@ -47,14 +47,14 @@
       </header>
 
       <!-- SENSORY CONTROL DOCK (Floating Glass Capsule) -->
-      <div class="sensory-dock transition-spring" id="sensory-dock">
-        <button class="dock-btn transition-spring" data-target="high-stim" title="TDAH: Movimento sutil para ancorar atenção dispersa">
+      <div class="sensory-dock transition-spring" id="sensory-dock" role="radiogroup" aria-label="Controle de modulação sensorial">
+        <button class="dock-btn transition-spring" data-target="high-stim" title="TDAH: Movimento sutil para ancorar atenção dispersa" role="radio" aria-checked="false">
           High-Stim
         </button>
-        <button class="dock-btn transition-spring active" data-target="balanced" title="Padrão: Equilíbrio translúcido e foco focado">
+        <button class="dock-btn transition-spring active" data-target="balanced" title="Padrão: Equilíbrio translúcido e foco focado" role="radio" aria-checked="true">
           Balanced
         </button>
-        <button class="dock-btn transition-spring" data-target="calm" title="Autismo: Movimento zero e cores descansadas">
+        <button class="dock-btn transition-spring" data-target="calm" title="Autismo: Movimento zero e cores descansadas" role="radio" aria-checked="false">
           Calm Mode
         </button>
       </div>
