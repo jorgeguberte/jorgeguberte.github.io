@@ -25,6 +25,15 @@ const experiments = [
     tags: ["Speech-API", "WebGL", "GLSL-Shaders", "Audio-Reactive"],
     url: "./y2k-sensory/ai-hologram.html",
     linkText: "Ativar Orbe Cognitiva →"
+  },
+  {
+    title: "Rhythmic Entrainment Metronome",
+    description:
+      "A cognitive focus metronome using visual and auditory entrainment (130-170 BPM). Features a Web Audio API synth, interactive Three.js 3D compact disc, and elastic variable typography with targeted line-focus highlighting.",
+    stage: "open",
+    tags: ["Web-Audio-API", "Three.js", "Neuro-Focus", "Variable-Fonts"],
+    url: "./y2k-sensory/rhythmic.html",
+    linkText: "Sincronizar Ritmo Cognitivo →"
   }
 ];
 
