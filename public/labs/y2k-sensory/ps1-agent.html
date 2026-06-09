@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PS1 Agent Core Simulator — Labs</title>
+  
+  <!-- Y2K Design Tokens -->
+  <link rel="stylesheet" href="../tokens/colors.css">
+  <link rel="stylesheet" href="../tokens/typography.css">
+  <link rel="stylesheet" href="../tokens/motion.css">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--void-pure);
+      color: var(--text-primary);
+      min-height: 100vh;
+      font-family: var(--font-functional);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* === CRT TV FRAME CONTAINER === */
+    .viewport-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle, #15151a 0%, #030305 100%);
+      padding: 1.5rem;
+    }
+
+    .crt-monitor {
+      width: 100%;
+      max-width: 960px;
+      height: 100%;
+      max-height: 720px;
+      aspect-ratio: 4 / 3;
+      border: 12px solid #282830;
+      border-radius: 4px;
+      background: #000000;
+      position: relative;
+      box-shadow: 15px 15px 0px var(--void-pure), inset 0 0 40px rgba(0,0,0,0.9);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* CRT bezel shading */
+    .crt-monitor::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.95);
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    /* === LAYER 0: CRT FILTER EFFECTS === */
+    .crt-filters {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 40;
+      opacity: 0.15;
+    }
+
+    .scanlines {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0) 50%,
+        rgba(0, 0, 0, 0.4) 50%
+      );
+      background-size: 100% 6px;
+    }
+
+    .phosphor-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(0, 255, 102, 0.05) 0%, transparent 80%);
+    }
+
+    /* === BOOT BIOS SCREEN === */
+    .boot-overlay {
+      position: absolute;
+      inset: 0;
+      background: #000000;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .boot-logo-container {
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .boot-logo-gold {
+      font-size: 48px;
+      font-family: var(--font-chaos);
+      color: #ffcc00;
+      text-shadow: 0px 4px 0px #806600, 0 0 20px rgba(255, 204, 0, 0.3);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      animation: logo-drift 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes logo-drift {
+      from { transform: translateY(0) rotate(-1deg); }
+      to { transform: translateY(-10px) rotate(1deg); }
+    }
+
+    .boot-text-console {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--chrome-300);
+      margin-top: 1.5rem;
+      line-height: 1.8;
+      text-transform: uppercase;
+    }
+
+    .btn-boot {
+      background: #ffcc00;
+      border: 3px solid #ffffff;
+      color: #000000;
+      font-family: var(--font-functional);
+      font-weight: bold;
+      padding: 0.8rem 2rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 4px 4px 0px #000000;
+      margin-top: 2rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-boot:hover {
+      background: #ffffff;
+      box-shadow: 2px 2px 0px #000000;
+      transform: translate(2px, 2px);
+    }
+
+    /* === SCREEN HUD AND CONTROLS === */
+    .hud-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.5rem;
+      font-family: var(--font-functional);
+    }
+
+    .hud-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .hud-left {
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid var(--chrome-400);
+      padding: 0.75rem;
+      box-shadow: 4px 4px 0 #000000;
+      pointer-events: auto;
+    }
+
+    .hud-left h2 {
+      font-size: 14px;
+      color: var(--blue-300);
+      border-bottom: 1px dashed var(--chrome-400);
+      padding-bottom: 0.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .hud-left p {
+      font-size: 10px;
+      color: var(--chrome-200);
+      margin-bottom: 0.2rem;
+    }
+
+    .hud-right {
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid var(--chrome-400);
+      padding: 0.75rem;
+      box-shadow: 4px 4px 0 #000000;
+      text-align: right;
+    }
+
+    .hud-right div {
+      font-size: 10px;
+      color: var(--pink-300);
+      margin-bottom: 0.25rem;
+    }
+
+    .hud-bottom {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1rem;
+      align-items: flex-end;
+      width: 100%;
+    }
+
+    .console-box {
+      background: rgba(0, 0, 0, 0.85);
+      border: 2px solid var(--chrome-400);
+      padding: 0.75rem;
+      box-shadow: 4px 4px 0 #000000;
+      pointer-events: auto;
+    }
+
+    .console-title {
+      font-size: 10px;
+      color: var(--acid-300);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      border-bottom: 1px dashed var(--chrome-400);
+      padding-bottom: 0.2rem;
+    }
+
+    .console-logs {
+      height: 80px;
+      overflow-y: auto;
+      font-size: 9px;
+      line-height: 1.5;
+      color: var(--chrome-300);
+      margin-bottom: 0.5rem;
+    }
+
+    .console-input-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .console-input-row button {
+      background: transparent;
+      border: 1px solid var(--chrome-300);
+      color: var(--text-primary);
+      font-family: var(--font-functional);
+      font-size: 9px;
+      padding: 0.35rem 0.6rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.15s ease;
+    }
+
+    .console-input-row button:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(0, 255, 102, 0.05);
+    }
+
+    .control-deck {
+      background: rgba(0, 0, 0, 0.85);
+      border: 2px solid var(--chrome-400);
+      padding: 0.75rem;
+      box-shadow: 4px 4px 0 #000000;
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .control-deck-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+    }
+
+    .control-deck-row span {
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    .control-deck-row input[type="range"] {
+      width: 120px;
+      height: 4px;
+      background: var(--chrome-500);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .control-deck-row input[type="range"]::-webkit-slider-thumb {
+      width: 10px;
+      height: 14px;
+      background: var(--acid-500);
+      cursor: pointer;
+    }
+
+    .back-btn-hud {
+      background: transparent;
+      border: 2px solid var(--chrome-400);
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      font-family: var(--font-functional);
+      font-size: 9px;
+      padding: 0.35rem 0.8rem;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 3px 3px 0px #000000;
+    }
+
+    .back-btn-hud:hover {
+      border-color: var(--pink-500);
+      color: var(--pink-300);
+      box-shadow: 1px 1px 0px #000000;
+      transform: translate(2px, 2px);
+    }
+
+    /* === THREE.JS CANVAS RENDER TARGET === */
+    #canvas-container {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+    }
+
+    #canvas-container canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="viewport-container">
+    <div class="crt-monitor">
+      
+      <!-- BIOS BOOT SCREEN OVERLAY -->
+      <div class="boot-overlay" id="bootOverlay">
+        <div class="boot-logo-container" id="bootAction">
+          <div class="boot-logo-gold">BROCHACHO</div>
+          <div style="font-family: var(--font-mono); font-size: 12px; color: var(--pink-500); letter-spacing: 0.3em; margin-bottom: 2rem;">AGENT SYSTEM v1.99</div>
+          
+          <div class="boot-text-console">
+            BIOS Version 1.02 // (C) 1996 Brochacho Records<br>
+            Checking AI Cores: ALPHA, BETA, GAMMA... READY<br>
+            Audio Engine: WEB_AUDIO_API... SYNCED
+          </div>
+          
+          <button class="btn-boot" id="btnBoot">Boot Console</button>
+        </div>
+      </div>
+
+      <!-- CRT TV EFFECT LAYER -->
+      <div class="crt-filters">
+        <div class="scanlines"></div>
+        <div class="phosphor-glow"></div>
+      </div>
+
+      <!-- HUD OVERLAY HUD -->
+      <div class="hud-layer">
+        
+        <!-- Top HUD Row -->
+        <div class="hud-top">
+          <div class="hud-left">
+            <h2>PS1_SIM_CONSOLE // V.96</h2>
+            <p>ACTIVE CORE: <span id="hud-active-core" style="color: var(--acid-500)">ALPHA</span></p>
+            <p>CAMERA POS: <span id="hud-cam-pos" style="color: var(--blue-300)">0.00, 2.50, 6.00</span></p>
+            <p>STATUS: <span style="color: var(--primary)">DOCKING_OK</span></p>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end;">
+            <a href="../index.html" class="back-btn-hud">← Voltar</a>
+            <div class="hud-right">
+              <div>RENDER: 320x240 px</div>
+              <div>JITTER: <span id="hud-jitter-level">64</span>px</div>
+              <div>BPM: 140</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom HUD Row -->
+        <div class="hud-bottom">
+          <!-- Terminal log box -->
+          <div class="console-box">
+            <div class="console-title">Controle do Núcleo de Agentes</div>
+            <div class="console-logs" id="terminal-logs">
+              <!-- Logs appended dynamically -->
+            </div>
+            <div class="console-input-row">
+              <button id="btn-ping">Ping Node</button>
+              <button id="btn-overload">Overload</button>
+              <button id="btn-inject">Inject Mem</button>
+            </div>
+          </div>
+
+          <!-- Slider controllers -->
+          <div class="control-deck">
+            <div class="control-deck-row">
+              <span>Vertex Jitter (Jitter PS1)</span>
+              <input type="range" min="0" max="256" value="64" id="slider-jitter">
+            </div>
+            <div class="control-deck-row">
+              <span>Res. do Render (Pixelation)</span>
+              <input type="range" min="120" max="640" step="120" value="320" id="slider-resolution">
+            </div>
+            <div class="control-deck-row" style="font-size: 8px; color: var(--text-muted); justify-content: flex-start; gap: 0.5rem;">
+              <span>[WASD / Setas] Mover Câmera</span>
+              <span>[Mouse] Orbitar Câmera</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- THREE.JS CONTAINER -->
+      <div id="canvas-container"></div>
+
+    </div>
+  </div>
+
+  <!-- Three.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    // ==========================================
+    // 1. PROCEDURAL RETRO AUDIO SYSTEM (Web Audio)
+    // ==========================================
+    let audioCtx = null;
+
+    function initAudio() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    // Classic PS1 Synth Boot Sound (Procedural recreation)
+    function playPS1BootSound() {
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const now = audioCtx.currentTime;
+
+      // Sound 1: Deep cosmic ambient low-end sweep (bass drone)
+      const oscBass = audioCtx.createOscillator();
+      const gainBass = audioCtx.createGain();
+      oscBass.type = 'sawtooth';
+      oscBass.frequency.setValueAtTime(55, now); // Low A
+      oscBass.frequency.exponentialRampToValueAtTime(32.7, now + 5.0); // Drop to low C
+
+      // Filter to make it warm, dark and foggy
+      const filterBass = audioCtx.createBiquadFilter();
+      filterBass.type = 'lowpass';
+      filterBass.frequency.setValueAtTime(120, now);
+      filterBass.frequency.exponentialRampToValueAtTime(60, now + 6.0);
+
+      oscBass.connect(gainBass);
+      gainBass.connect(filterBass);
+      filterBass.connect(audioCtx.destination);
+
+      gainBass.gain.setValueAtTime(0.01, now);
+      gainBass.gain.exponentialRampToValueAtTime(0.6, now + 1.5);
+      gainBass.gain.exponentialRampToValueAtTime(0.001, now + 7.5);
+
+      oscBass.start(now);
+      oscBass.stop(now + 8.0);
+
+      // Sound 2: High metallic digital bell layer (representing the CD checking chime)
+      setTimeout(() => {
+        const nowChime = audioCtx.currentTime;
+        const oscChime1 = audioCtx.createOscillator();
+        const oscChime2 = audioCtx.createOscillator();
+        const gainChime = audioCtx.createGain();
+
+        oscChime1.type = 'triangle';
+        oscChime1.frequency.setValueAtTime(440, nowChime); // Middle A
+        oscChime1.frequency.exponentialRampToValueAtTime(659.25, nowChime + 0.4); // Slide to E
+        oscChime1.frequency.setValueAtTime(880, nowChime + 1.2); // High A
+
+        oscChime2.type = 'sine';
+        oscChime2.frequency.setValueAtTime(445, nowChime); // Ring modulation effect
+        oscChime2.frequency.exponentialRampToValueAtTime(662, nowChime + 0.4);
+
+        // Echo/Delay node for the metallic chime
+        const delay = audioCtx.createDelay();
+        delay.delayTime.setValueAtTime(0.3, nowChime);
+
+        const delayGain = audioCtx.createGain();
+        delayGain.gain.setValueAtTime(0.4, nowChime);
+
+        oscChime1.connect(gainChime);
+        oscChime2.connect(gainChime);
+        gainChime.connect(audioCtx.destination);
+
+        // Connect echo feedback loop
+        gainChime.connect(delay);
+        delay.connect(delayGain);
+        delayGain.connect(audioCtx.destination);
+        delayGain.connect(delay); // Feedback
+
+        gainChime.gain.setValueAtTime(0.01, nowChime);
+        gainChime.gain.exponentialRampToValueAtTime(0.25, nowChime + 0.2);
+        gainChime.gain.exponentialRampToValueAtTime(0.001, nowChime + 4.5);
+
+        oscChime1.start(nowChime);
+        oscChime2.start(nowChime);
+        oscChime1.stop(nowChime + 5.0);
+        oscChime2.stop(nowChime + 5.0);
+      }, 1500);
+    }
+
+    // Play retro beep sound for buttons
+    function playBeep(freq, type, duration) {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq || 600, now);
+      if (type === 'sawtooth') {
+        osc.frequency.exponentialRampToValueAtTime(100, now + duration);
+      }
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      osc.start(now);
+      osc.stop(now + duration + 0.1);
+    }
+
+    // ==========================================
+    // 2. GLSL CUSTOM SHADERS (PS1 Graphics Engine)
+    // ==========================================
+    const ps1VertexShader = `
+      uniform float u_jitter;
+      uniform float u_time;
+      uniform float u_scale;
+      varying vec2 vUv;
+      varying vec3 vNormal;
+
+      void main() {
+        vUv = uv;
+        vNormal = normalMatrix * normal;
+        
+        // Custom scale for expansion animations
+        vec3 scaledPosition = position * u_scale;
+
+        vec4 mvPosition = modelViewMatrix * vec4(scaledPosition, 1.0);
+        vec4 clipPosition = projectionMatrix * mvPosition;
+
+        // Snapping in clip space to simulate lack of sub-pixel precision!
+        if (u_jitter > 0.0) {
+          vec3 ndc = clipPosition.xyz / clipPosition.w;
+          ndc.xy = floor(ndc.xy * u_jitter) / u_jitter;
+          clipPosition.xyz = ndc * clipPosition.w;
+        }
+
+        gl_Position = clipPosition;
+      }
+    `;
+
+    const ps1FragmentShader = `
+      uniform float u_time;
+      uniform vec3 u_color;
+      uniform float u_glitch;
+      varying vec2 vUv;
+      varying vec3 vNormal;
+
+      void main() {
+        // Flat face-lighting (gouraud-like / low-poly shading feel)
+        vec3 normal = normalize(vNormal);
+        vec3 lightDirection = normalize(vec3(0.5, 1.0, 0.7));
+        float light = dot(normal, lightDirection) * 0.4 + 0.6;
+        
+        // Add subtle dithering pattern emulation
+        float dither = mod(gl_FragCoord.x + gl_FragCoord.y, 2.0) * 0.03;
+        
+        vec3 finalColor = u_color * light + vec3(dither);
+
+        // Simula noise/glitch bands
+        if (u_glitch > 0.0) {
+          float noise = sin(gl_FragCoord.y * 0.5 + u_time * 20.0) * u_glitch * 0.15;
+          finalColor += vec3(noise);
+        }
+
+        gl_FragColor = vec4(finalColor, 1.0);
+      }
+    `;
+
+    // ==========================================
+    // 3. THREE.JS 3D SCENE CONFIGURATION
+    // ==========================================
+    let scene, camera, renderer;
+    let agentAlpha, agentBeta, agentGamma;
+    let selectedAgent = 'ALPHA';
+    let currentJitter = 64.0;
+    let renderResolution = 320;
+    let clock = new THREE.Clock();
+
+    // UI elements
+    const bootOverlay = document.getElementById('bootOverlay');
+    const btnBoot = document.getElementById('btnBoot');
+    const logsContainer = document.getElementById('terminal-logs');
+    const hudActiveCore = document.getElementById('hud-active-core');
+    const hudCamPos = document.getElementById('hud-cam-pos');
+    const hudJitterLevel = document.getElementById('hud-jitter-level');
+    const sliderJitter = document.getElementById('slider-jitter');
+    const sliderResolution = document.getElementById('slider-resolution');
+
+    const btnPing = document.getElementById('btn-ping');
+    const btnOverload = document.getElementById('btn-overload');
+    const btnInject = document.getElementById('btn-inject');
+
+    // Terminal Logging utility
+    function appendLog(message, colorClass) {
+      colorClass = colorClass || '';
+      const timestamp = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      div.className = colorClass;
+      div.innerHTML = `<span style="color: var(--text-muted)">${timestamp}</span> > ${message}`;
+      logsContainer.appendChild(div);
+      logsContainer.scrollTop = logsContainer.scrollHeight;
+    }
+
+    // Main system boot
+    btnBoot.addEventListener('click', () => {
+      // 1. Play chime audio
+      playPS1BootSound();
+
+      // 2. Animate HUD mount
+      bootOverlay.style.opacity = '0';
+      setTimeout(() => {
+        bootOverlay.style.display = 'none';
+        initThreeEngine();
+        appendLog('PS1 CORE INITIALIZED successfully.', 'style-acid');
+        appendLog('Ready for remote neural connection.', 'style-acid');
+      }, 1200);
+    });
+
+    function initThreeEngine() {
+      const container = document.getElementById('canvas-container');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      // 1. Scene with toxic green retro fog
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x0a140f, 0.08);
+
+      // 2. Camera
+      camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 100);
+      camera.position.set(0, 2.5, 6);
+      camera.lookAt(0, 0, 0);
+
+      // 3. Renderer with absolute low-res pixels (locked grid)
+      renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
+      setLowResolutionViewport(renderResolution);
+      container.appendChild(renderer.domElement);
+
+      // 4. Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0x00ffaa, 0.85);
+      dirLight.position.set(2, 4, 3);
+      scene.add(dirLight);
+
+      // 5. Low-Poly Grid Floor
+      const gridGeometry = new THREE.PlaneGeometry(16, 16, 12, 12);
+      // Custom material for floor wireframe with vertex jitter
+      const floorMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          u_jitter: { value: currentJitter },
+          u_time: { value: 0 },
+          u_scale: { value: 1.0 },
+          u_color: { value: new THREE.Color(0x054422) },
+          u_glitch: { value: 0.0 }
+        },
+        vertexShader: ps1VertexShader,
+        fragmentShader: ps1FragmentShader,
+        wireframe: true
+      });
+      const gridFloor = new THREE.Mesh(gridGeometry, floorMaterial);
+      gridFloor.rotation.x = -Math.PI / 2;
+      scene.add(gridFloor);
+
+      // 6. Creating the Low-Poly Agent Nodes (Shader Materials)
+      
+      // Node A: Alpha (Icosahedron - Low Poly Sphere)
+      const alphaMat = new THREE.ShaderMaterial({
+        uniforms: {
+          u_jitter: { value: currentJitter },
+          u_time: { value: 0 },
+          u_scale: { value: 1.0 },
+          u_color: { value: new THREE.Color(0x00bfff) }, // Cyan
+          u_glitch: { value: 0.0 }
+        },
+        vertexShader: ps1VertexShader,
+        fragmentShader: ps1FragmentShader
+      });
+      agentAlpha = new THREE.Mesh(new THREE.IcosahedronGeometry(0.75, 0), alphaMat);
+      agentAlpha.position.set(-1.8, 0.8, 0);
+      scene.add(agentAlpha);
+
+      // Node B: Beta (Cube Box Monitor)
+      const betaMat = new THREE.ShaderMaterial({
+        uniforms: {
+          u_jitter: { value: currentJitter },
+          u_time: { value: 0 },
+          u_scale: { value: 1.0 },
+          u_color: { value: new THREE.Color(0x7fff00) }, // Acid Green
+          u_glitch: { value: 0.0 }
+        },
+        vertexShader: ps1VertexShader,
+        fragmentShader: ps1FragmentShader
+      });
+      agentBeta = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), betaMat);
+      agentBeta.position.set(0, 0.8, -0.5);
+      scene.add(agentBeta);
+
+      // Node C: Gamma (Octahedron Double Cone)
+      const gammaMat = new THREE.ShaderMaterial({
+        uniforms: {
+          u_jitter: { value: currentJitter },
+          u_time: { value: 0 },
+          u_scale: { value: 1.0 },
+          u_color: { value: new THREE.Color(0xff00aa) }, // Pink
+          u_glitch: { value: 0.0 }
+        },
+        vertexShader: ps1VertexShader,
+        fragmentShader: ps1FragmentShader
+      });
+      agentGamma = new THREE.Mesh(new THREE.OctahedronGeometry(0.75, 0), gammaMat);
+      agentGamma.position.set(1.8, 0.8, 0);
+      scene.add(agentGamma);
+
+      // Raycaster to select agents by clicking
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      renderer.domElement.addEventListener('click', (event) => {
+        // Calculate relative mouse coordinates inside canvas element
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects([agentAlpha, agentBeta, agentGamma]);
+
+        if (intersects.length > 0) {
+          const clicked = intersects[0].object;
+          if (clicked === agentAlpha) selectAgent('ALPHA');
+          else if (clicked === agentBeta) selectAgent('BETA');
+          else if (clicked === agentGamma) selectAgent('GAMMA');
+        }
+      });
+
+      // Initialize Camera Controls (Tank movement or Orbit mouse tilt)
+      initCameraControls();
+
+      // Start rendering loop
+      renderLoop();
+    }
+
+    function selectAgent(name) {
+      selectedAgent = name;
+      hudActiveCore.textContent = name;
+      if (name === 'ALPHA') hudActiveCore.style.color = 'var(--blue-300)';
+      else if (name === 'BETA') hudActiveCore.style.color = 'var(--acid-300)';
+      else if (name === 'GAMMA') hudActiveCore.style.color = 'var(--pink-300)';
+
+      playBeep(400, 'sine', 0.08);
+      appendLog(`Core focalized: AGENT_${name}`, 'style-cyan');
+    }
+
+    function setLowResolutionViewport(res) {
+      renderResolution = res;
+      // Locks actual WebGL drawing buffer to a tiny low-res square
+      const aspect = 4 / 3;
+      renderer.setSize(res, Math.floor(res / aspect), false);
+    }
+
+    // Camera move variables
+    let moveForward = false, moveBackward = false, rotateLeft = false, rotateRight = false;
+
+    function initCameraControls() {
+      // Listen for WASD / Arrows
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') moveForward = true;
+        if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') moveBackward = true;
+        if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') rotateLeft = true;
+        if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') rotateRight = true;
+      });
+
+      window.addEventListener('keyup', (e) => {
+        if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') moveForward = false;
+        if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') moveBackward = false;
+        if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') rotateLeft = false;
+        if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') rotateRight = false;
+      });
+    }
+
+    function getActiveAgent() {
+      if (selectedAgent === 'ALPHA') return agentAlpha;
+      if (selectedAgent === 'BETA') return agentBeta;
+      if (selectedAgent === 'GAMMA') return agentGamma;
+    }
+
+    // ==========================================
+    // 4. INTERACTION ACTIONS
+    // ==========================================
+
+    // Action 1: Ping Agent
+    btnPing.addEventListener('click', () => {
+      const agent = getActiveAgent();
+      if (!agent) return;
+
+      playBeep(880, 'sine', 0.25);
+      appendLog(`SIGNAL_PING dispatched to Agent_${selectedAgent}.`, 'style-cyan');
+
+      // Expand mesh scale and reset it slowly
+      agent.material.uniforms.u_scale.value = 1.6;
+      agent.material.uniforms.u_glitch.value = 1.5;
+    });
+
+    // Action 2: Overload Node
+    btnOverload.addEventListener('click', () => {
+      const agent = getActiveAgent();
+      if (!agent) return;
+
+      playBeep(120, 'sawtooth', 0.5);
+      appendLog(`CRITICAL OVERLOAD: Injecting thermal vector to Agent_${selectedAgent}!`, 'style-pink');
+
+      // Glitch mesh warp and flash color
+      agent.material.uniforms.u_glitch.value = 4.0;
+      agent.material.uniforms.u_scale.value = 0.5;
+      
+      const originalColor = agent.material.uniforms.u_color.value.clone();
+      agent.material.uniforms.u_color.value.setHex(0xff0000); // Burn Red
+
+      setTimeout(() => {
+        agent.material.uniforms.u_color.value.copy(originalColor);
+        agent.material.uniforms.u_scale.value = 1.0;
+      }, 500);
+    });
+
+    // Action 3: Inject Memory lines
+    btnInject.addEventListener('click', () => {
+      const agent = getActiveAgent();
+      if (!agent) return;
+
+      playBeep(520, 'triangle', 0.3);
+      appendLog(`WRITING MEMORY SECTORS to core...`, 'style-acid');
+      appendLog(`[0x8f22] INTR_RETR_MEMORY = OK`, 'style-muted');
+      appendLog(`[0x90a3] SYSTEM_EVALUATION = STABLE`, 'style-muted');
+
+      // Pulsing scale jitter
+      let cycles = 0;
+      const interval = setInterval(() => {
+        agent.material.uniforms.u_scale.value = 0.9 + Math.random() * 0.3;
+        cycles++;
+        if (cycles > 10) {
+          clearInterval(interval);
+          agent.material.uniforms.u_scale.value = 1.0;
+          appendLog(`Inject cycle completed.`, 'style-acid');
+        }
+      }, 60);
+    });
+
+    // Sliders event listeners
+    sliderJitter.addEventListener('input', (e) => {
+      currentJitter = parseFloat(e.target.value);
+      hudJitterLevel.textContent = currentJitter.toFixed(0);
+
+      // Update uniforms on all shaders
+      if (agentAlpha) {
+        agentAlpha.material.uniforms.u_jitter.value = currentJitter;
+        agentBeta.material.uniforms.u_jitter.value = currentJitter;
+        agentGamma.material.uniforms.u_jitter.value = currentJitter;
+        scene.traverse((node) => {
+          if (node.material && node.material.uniforms && node.material.uniforms.u_jitter) {
+            node.material.uniforms.u_jitter.value = currentJitter;
+          }
+        });
+      }
+    });
+
+    sliderResolution.addEventListener('input', (e) => {
+      const res = parseInt(e.target.value);
+      setLowResolutionViewport(res);
+      appendLog(`RENDER RESOLUTION shifted: ${res}x${Math.floor(res/(4/3))}`, 'style-cyan');
+    });
+
+    // ==========================================
+    // 5. MAIN ANIMATION & RENDERING LOOP
+    // ==========================================
+    function renderLoop() {
+      requestAnimationFrame(renderLoop);
+
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // 1. Rotate the low-poly meshes
+      if (agentAlpha) {
+        agentAlpha.rotation.y += 0.8 * delta;
+        agentAlpha.rotation.x += 0.4 * delta;
+        // Float slightly up and down
+        agentAlpha.position.y = 0.8 + Math.sin(time * 2.0) * 0.08;
+
+        // Dampen expand animations back to normal scale
+        agentAlpha.material.uniforms.u_scale.value += (1.0 - agentAlpha.material.uniforms.u_scale.value) * 0.1;
+        agentAlpha.material.uniforms.u_glitch.value += (0.0 - agentAlpha.material.uniforms.u_glitch.value) * 0.1;
+        agentAlpha.material.uniforms.u_time.value = time;
+      }
+
+      if (agentBeta) {
+        agentBeta.rotation.y -= 0.5 * delta;
+        agentBeta.position.y = 0.8 + Math.sin(time * 1.5 + 1.0) * 0.06;
+
+        agentBeta.material.uniforms.u_scale.value += (1.0 - agentBeta.material.uniforms.u_scale.value) * 0.1;
+        agentBeta.material.uniforms.u_glitch.value += (0.0 - agentBeta.material.uniforms.u_glitch.value) * 0.1;
+        agentBeta.material.uniforms.u_time.value = time;
+      }
+
+      if (agentGamma) {
+        agentGamma.rotation.y += 0.6 * delta;
+        agentGamma.rotation.z -= 0.4 * delta;
+        agentGamma.position.y = 0.8 + Math.sin(time * 2.5 + 2.0) * 0.1;
+
+        agentGamma.material.uniforms.u_scale.value += (1.0 - agentGamma.material.uniforms.u_scale.value) * 0.1;
+        agentGamma.material.uniforms.u_glitch.value += (0.0 - agentGamma.material.uniforms.u_glitch.value) * 0.1;
+        agentGamma.material.uniforms.u_time.value = time;
+      }
+
+      // 2. Camera controls tank-movement
+      if (camera) {
+        // Handle rotation
+        if (rotateLeft) camera.rotation.y += 1.2 * delta;
+        if (rotateRight) camera.rotation.y -= 1.2 * delta;
+
+        // Handle forward/backward along local camera look direction
+        if (moveForward || moveBackward) {
+          const moveDirection = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+          moveDirection.y = 0; // Lock to floor plane
+          moveDirection.normalize();
+
+          const speed = 3.5 * delta;
+          if (moveForward) camera.position.addScaledVector(moveDirection, speed);
+          if (moveBackward) camera.position.addScaledVector(moveDirection, -speed);
+        }
+
+        // Clamp camera positions so we don't fly off too far
+        camera.position.x = Math.max(-7, Math.min(camera.position.x, 7));
+        camera.position.z = Math.max(2, Math.min(camera.position.z, 9));
+
+        // Update camera position text on HUD
+        hudCamPos.textContent = `${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)}`;
+      }
+
+      renderer.render(scene, camera);
+    }
+  </script>
+
+  <!-- CSS color helpers for logs -->
+  <style>
+    .style-acid { color: var(--acid-300); font-weight: bold; }
+    .style-cyan { color: var(--blue-300); }
+    .style-pink { color: var(--pink-300); font-weight: bold; }
+    .style-muted { color: var(--text-muted); }
+  </style>
+
+</body>
+</html>

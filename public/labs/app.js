@@ -34,6 +34,15 @@ const experiments = [
     tags: ["Web-Audio-API", "Three.js", "Neuro-Focus", "Variable-Fonts"],
     url: "./y2k-sensory/rhythmic.html",
     linkText: "Sincronizar Ritmo Cognitivo →"
+  },
+  {
+    title: "PS1 Agent Core Simulator",
+    description:
+      "Interactive 3D simulation running a custom vertex-jitter shader to replicate the iconic PlayStation 1 graphics engine. Boot up, control low-poly agent nodes, and interact with the grid.",
+    stage: "open",
+    tags: ["WebGL", "Three.js", "PS1-Shader", "Procedural-Synth"],
+    url: "./y2k-sensory/ps1-agent.html",
+    linkText: "Ligar Console Retro →"
   }
 ];
 
