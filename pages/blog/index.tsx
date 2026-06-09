@@ -2,6 +2,7 @@ import Link from "next/link";
 import { posts } from "#site/content";
 import { isPublicPost, writingIntro } from "../../data/site-content";
 import { SeoHead } from "../../components/SeoHead";
+import { Navbar } from "../../components/Navbar";
 
 export default function BlogIndex() {
   const sortedPosts = [...posts]
@@ -16,15 +17,10 @@ export default function BlogIndex() {
         path="/blog"
       />
 
-      <main className="page-shell">
-        <nav className="mb-12 flex items-center justify-between gap-4">
-          <Link href="/" className="nav-pill">
-            ← home
-          </Link>
-          <Link href="/about" className="nav-pill">
-            about →
-          </Link>
-        </nav>
+      <div className="site-layout">
+        <Navbar />
+
+        <main className="mx-auto max-w-4xl py-4">
 
         <header className="glass-card mb-10 p-7 md:p-10">
           <p className="eyebrow mb-5">Writing</p>
@@ -64,7 +60,8 @@ export default function BlogIndex() {
             </Link>
           ))}
         </div>
-      </main>
+        </main>
+      </div>
     </>
   );
 }

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { posts } from "#site/content";
 import {
-  navLinks,
   nowItems,
   profile,
   selectedWork,
@@ -9,6 +8,7 @@ import {
   isPublicPost,
 } from "../data/site-content";
 import { SeoHead } from "../components/SeoHead";
+import { Navbar } from "../components/Navbar";
 
 const featuredPosts = [...posts]
   .filter(isPublicPost)
@@ -26,33 +26,11 @@ export default function Home() {
         path="/"
       />
 
-      <main className="site-shell overflow-hidden">
-        <div className="hero-orb" />
+      <div className="site-layout overflow-hidden">
+        <Navbar />
 
-        <nav className="top-nav">
-          <Link href="/" className="font-mono text-xs uppercase tracking-[0.24em] text-neutral-200">
-            Jorge Guberte
-          </Link>
-          <div className="flex flex-wrap gap-2">
-            {navLinks.map((link) =>
-              link.external ? (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="nav-pill"
-                >
-                  {link.label}
-                </a>
-              ) : (
-                <Link key={link.label} href={link.href} className="nav-pill">
-                  {link.label}
-                </Link>
-              ),
-            )}
-          </div>
-        </nav>
+        <main className="relative">
+          <div className="hero-orb" />
 
         <header className="relative mb-16 grid gap-10 md:grid-cols-[1.15fr_0.85fr] md:items-end">
           <div>
@@ -233,7 +211,8 @@ export default function Home() {
             Building systems around memory, context, retrieval, and the weird places where software starts feeling cognitive.
           </p>
         </footer>
-      </main>
+        </main>
+      </div>
     </>
   );
 }

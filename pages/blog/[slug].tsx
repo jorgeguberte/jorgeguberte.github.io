@@ -3,6 +3,7 @@ import { GetStaticPaths, GetStaticProps } from "next";
 import { posts } from "#site/content";
 import type { Post } from "#site/content";
 import { SeoHead } from "../../components/SeoHead";
+import { Navbar } from "../../components/Navbar";
 
 interface PostPageProps {
   post: Post;
@@ -19,15 +20,10 @@ export default function PostPage({ post }: PostPageProps) {
         publishedTime={new Date(post.date).toISOString()}
       />
 
-      <main className="page-shell max-w-3xl">
-        <nav className="mb-12 flex items-center justify-between gap-4">
-          <Link href="/blog" className="nav-pill">
-            ← blog
-          </Link>
-          <Link href="/" className="nav-pill">
-            home →
-          </Link>
-        </nav>
+      <div className="site-layout">
+        <Navbar />
+
+        <main className="mx-auto max-w-3xl py-4">
 
         <article className="glass-card p-7 md:p-10">
           <header className="mb-10 border-b border-white/10 pb-8">
@@ -69,7 +65,8 @@ export default function PostPage({ post }: PostPageProps) {
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
         </article>
-      </main>
+        </main>
+      </div>
     </>
   );
 }

@@ -9,6 +9,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    overflow-y: scroll;
   }
 
   body {
@@ -39,12 +40,8 @@
 }
 
 @layer components {
-  .site-shell {
+  .site-layout {
     @apply relative mx-auto min-h-screen max-w-6xl px-5 py-8 sm:px-6 md:py-12;
-  }
-
-  .page-shell {
-    @apply relative mx-auto min-h-screen max-w-4xl px-5 py-12 sm:px-6 md:py-16;
   }
 
   .top-nav {

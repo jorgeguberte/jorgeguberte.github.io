@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { aboutPage, profile } from "../data/site-content";
 import { SeoHead } from "../components/SeoHead";
+import { Navbar } from "../components/Navbar";
 
 export default function AboutPage() {
   return (
@@ -11,15 +12,10 @@ export default function AboutPage() {
         path="/about"
       />
 
-      <main className="page-shell">
-        <nav className="mb-12 flex items-center justify-between gap-4">
-          <Link href="/" className="nav-pill">
-            ← home
-          </Link>
-          <Link href="/blog" className="nav-pill">
-            writing →
-          </Link>
-        </nav>
+      <div className="site-layout">
+        <Navbar />
+
+        <main className="mx-auto max-w-4xl py-4">
 
         <header className="glass-card mb-12 p-7 md:p-10">
           <p className="eyebrow mb-5">About</p>
@@ -95,7 +91,8 @@ export default function AboutPage() {
             </a>
           </div>
         </section>
-      </main>
+        </main>
+      </div>
     </>
   );
 }
