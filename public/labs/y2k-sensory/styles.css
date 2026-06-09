@@ -168,7 +168,7 @@ html, body {
   width: 100%;
   min-height: 100dvh;
   display: flex;
-  flex-col: column;
+  flex-direction: column;
   padding: 2.5rem 1.5rem;
   max-width: 1200px;
   margin: 0 auto;
@@ -478,4 +478,36 @@ p {
   .barcode-ticker {
     display: none;
   }
+}
+
+/* Metronome Preview Dot & Pulse Animation */
+.metronome-preview-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  display: inline-block;
+  box-shadow: 0 0 8px var(--primary);
+  animation: metronome-pulse calc(60s / 140) ease-in-out infinite; /* Synced to 140 BPM */
+  transition: opacity 0.3s ease;
+}
+
+@keyframes metronome-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+    box-shadow: 0 0 4px var(--primary);
+  }
+  15% {
+    transform: scale(1.35);
+    opacity: 1;
+    box-shadow: 0 0 14px var(--primary);
+  }
+}
+
+/* Pause preview metronome animation in Calm Mode */
+:root[data-sensory="calm"] .metronome-preview-dot {
+  animation: none !important;
+  opacity: 0.3;
+  box-shadow: none;
 }
