@@ -7,43 +7,43 @@
   --sensory-blur: 12px;
   --sensory-contrast: 1.0;
   
-  --primary: #00ff66; /* Acid green */
-  --primary-glow: rgba(0, 255, 102, 0.15);
-  --secondary: #00e5ff; /* Cyber blue */
-  --secondary-glow: rgba(0, 229, 255, 0.15);
-  --accent: #ff0077; /* Neon pink */
+  --primary: var(--acid-500);
+  --primary-glow: rgba(127, 255, 0, 0.15);
+  --secondary: var(--blue-500);
+  --secondary-glow: rgba(0, 191, 255, 0.15);
+  --accent: var(--pink-500);
   
-  --bg-color: #050505;
-  --card-bg: rgba(12, 12, 12, 0.7);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --text-primary: #f4f4f5;
-  --text-secondary: #a1a1aa;
+  --bg-color: var(--void-soft);
+  --card-bg: rgba(13, 13, 13, 0.85);
+  --border-color: var(--chrome-400);
+  --text-primary: var(--chrome-100);
+  --text-secondary: var(--chrome-300);
   
-  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-functional);
 }
 
 /* Sensory State Overrides (AttentionGuard) */
 :root[data-sensory="high-stim"] {
   --sensory-saturation: 1.35;
   --sensory-motion: 1.0;
-  --sensory-blur: 3px; /* Allow movement through slightly clearer glass */
-  --primary: #00ff88;
-  --secondary: #00ffff;
+  --sensory-blur: 3px;
+  --primary: var(--acid-300);
+  --secondary: var(--blue-300);
   --card-bg: rgba(8, 8, 8, 0.45);
 }
 
 :root[data-sensory="calm"] {
   --sensory-saturation: 0.25;
-  --sensory-motion: 0.0; /* Completely freeze any visual distraction */
-  --sensory-blur: 24px;  /* Heavy blur to isolate background noise */
-  --primary: #52a370;    /* Muted sage */
-  --secondary: #4a8a96;  /* Muted steel blue */
-  --accent: #9e4368;     /* Muted rose */
-  --bg-color: #0a0a0c;
-  --card-bg: #0f0f12;    /* Solid cards */
-  --border-color: rgba(255, 255, 255, 0.12);
-  --text-secondary: #8c8c9e;
+  --sensory-motion: 0.0;
+  --sensory-blur: 24px;
+  --primary: var(--acid-900);
+  --secondary: var(--blue-900);
+  --accent: var(--pink-900);
+  --bg-color: var(--void-pure);
+  --card-bg: var(--void-mid);
+  --border-color: var(--chrome-500);
+  --text-secondary: var(--chrome-400);
 }
 
 /* Base reset to avoid slop */
@@ -208,26 +208,27 @@ html, body {
   align-items: center;
   gap: 0.5rem;
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
   padding: 0.35rem 1rem;
-  border-radius: 9999px;
-  font-size: 11px;
+  border-radius: 0;
+  font-size: 10px;
+  font-family: var(--font-mono);
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 
 /* COMPONENT: SENSORY CONTROLS BAR (Floating Glass) */
 .sensory-dock {
   background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
   backdrop-filter: blur(var(--sensory-blur));
   -webkit-backdrop-filter: blur(var(--sensory-blur));
   padding: 0.5rem;
-  border-radius: 9999px;
+  border-radius: 0;
   display: flex;
-  gap: 0.25rem;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  gap: 0.5rem;
+  box-shadow: 6px 6px 0px var(--void-pure);
   margin-bottom: 4rem;
   width: fit-content;
   align-self: center;
@@ -235,25 +236,28 @@ html, body {
 
 .dock-btn {
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: var(--text-secondary);
-  font-family: var(--font-sans);
-  font-size: 12px;
-  font-weight: 500;
-  padding: 0.65rem 1.5rem;
-  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .dock-btn:hover {
   color: var(--text-primary);
+  border-color: var(--chrome-400);
 }
 
 .dock-btn.active {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  color: var(--primary);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--void-pure);
 }
 
 /* DOUBLE-RING KEYBOARD FOCUS ACCESSIBILITY */
@@ -273,25 +277,32 @@ html, body {
 
 /* Double Bezel Card Construction (Vanguard + Soft Skill) */
 .bento-card {
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-color);
-  border-radius: 2rem;
-  padding: 0.5rem;
+  background-color: transparent;
+  border: 3px solid var(--border-color);
+  border-radius: 0;
+  padding: 0.35rem;
   display: flex;
   flex-direction: column;
+  box-shadow: 6px 6px 0px var(--void-pure);
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.bento-card:hover {
+  border-color: var(--primary);
+  box-shadow: 6px 6px 0px var(--void-pure), 0 0 15px var(--primary-glow);
 }
 
 .bento-card-inner {
   background-color: var(--card-bg);
   backdrop-filter: blur(var(--sensory-blur));
   -webkit-backdrop-filter: blur(var(--sensory-blur));
-  border-radius: calc(2rem - 0.5rem);
+  border-radius: 0;
   padding: 2rem;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
 }
 
 .col-12 { grid-column: span 12; }
@@ -301,7 +312,7 @@ html, body {
 
 /* Bento Typography */
 .eyebrow {
-  font-family: var(--font-mono);
+  font-family: var(--font-functional);
   font-size: 10px;
   color: var(--primary);
   text-transform: uppercase;
@@ -311,6 +322,7 @@ html, body {
 }
 
 h1 {
+  font-family: var(--font-display);
   font-size: 2.75rem;
   font-weight: 700;
   tracking: -0.02em;
@@ -319,6 +331,7 @@ h1 {
 }
 
 h2 {
+  font-family: var(--font-display);
   font-size: 1.75rem;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -326,8 +339,15 @@ h2 {
   margin-bottom: 1rem;
 }
 
+.bento-card h2 {
+  border-left: 3px solid var(--primary);
+  padding-left: 0.75rem;
+  color: var(--secondary);
+}
+
 p {
-  font-size: 14px;
+  font-family: var(--font-functional);
+  font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.6;
 }
@@ -337,8 +357,8 @@ p {
   width: 100%;
   height: 200px;
   background: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 70%);
-  border: 1px dashed var(--border-color);
-  border-radius: 1rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 0;
   margin: 1.5rem 0;
   position: relative;
   overflow: hidden;
@@ -358,52 +378,58 @@ p {
 
 /* Variable Font simulation and micro-animations on interactive items */
 .btn-pill {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-color);
+  background: transparent;
+  border: 2px solid var(--chrome-300);
   color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: 13px;
-  font-weight: 500;
-  padding: 0.75rem 1.75rem;
-  border-radius: 9999px;
+  font-family: var(--font-functional);
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  padding: 0.65rem 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   width: fit-content;
   text-decoration: none;
+  box-shadow: 3px 3px 0px var(--void-pure);
+  transition: all 0.2s ease;
+  border-radius: 0;
 }
 
 /* Smooth variable font hover simulation */
 .btn-pill:hover {
   border-color: var(--primary);
-  font-weight: 700; /* Simulated variable weight shift */
-  box-shadow: 0 0 15px var(--primary-glow);
+  color: var(--primary);
+  background: rgba(127, 255, 0, 0.03);
+  box-shadow: 3px 3px 0px var(--void-pure), 0 0 10px var(--primary-glow);
 }
 
 .arrow-circle {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .btn-pill:hover .arrow-circle {
   background: var(--primary);
-  color: #000000;
+  color: var(--void-pure);
 }
 
 /* Simulated diagnostic telemetry display (mono geek feel) */
 .diagnostic-console {
   font-family: var(--font-mono);
   font-size: 11px;
-  background-color: #010101;
-  border: 1px solid var(--border-color);
+  background-color: #000000;
+  border: 2px solid var(--border-color);
   padding: 1rem;
-  border-radius: 12px;
+  border-radius: 0;
   color: var(--text-secondary);
   line-height: 1.5;
   width: 100%;
@@ -421,17 +447,17 @@ p {
   left: 50%;
   transform: translateX(-50%) translateY(1rem);
   z-index: 9999;
-  background: rgba(0, 0, 0, 0.85);
-  border: 1px solid var(--primary);
+  background: rgba(0, 0, 0, 0.9);
+  border: 3px solid var(--primary);
   color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: 13px;
-  font-weight: 500;
-  padding: 0.65rem 1.5rem;
-  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px var(--primary-glow);
+  box-shadow: 6px 6px 0px var(--void-pure);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
