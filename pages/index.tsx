@@ -9,6 +9,8 @@ import {
 } from "../data/site-content";
 import { SeoHead } from "../components/SeoHead";
 import { Navbar } from "../components/Navbar";
+import { Footer } from "../components/Footer";
+import { BackToTop } from "../components/BackToTop";
 
 const featuredPosts = [...posts]
   .filter(isPublicPost)
@@ -57,11 +59,14 @@ export default function Home() {
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-300 shadow-[0_0_24px_rgba(52,211,153,1)]" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {signals.map((signal) => (
+              {signals.map((signal, i) => (
                 <div key={signal} className="rounded-2xl border border-white/10 bg-neutral-950/60 p-4">
                   <p className="font-mono text-sm text-neutral-200">{signal}</p>
                   <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-neutral-800">
-                    <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-200" />
+                    <div
+                      className="bar-fill h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-200"
+                      style={{ "--delay": `${0.3 + i * 0.15}s` } as React.CSSProperties}
+                    />
                   </div>
                 </div>
               ))}
@@ -205,13 +210,9 @@ export default function Home() {
           </Link>
         </section>
 
-        <footer className="border-t border-white/10 py-8 text-sm text-neutral-500 md:flex md:items-center md:justify-between md:gap-6">
-          <p className="font-mono text-xs">© {new Date().getFullYear()} Jorge Guberte</p>
-          <p className="mt-3 max-w-2xl md:mt-0">
-            Building systems around memory, context, retrieval, and the weird places where software starts feeling cognitive.
-          </p>
-        </footer>
+        <Footer />
         </main>
+        <BackToTop />
       </div>
     </>
   );

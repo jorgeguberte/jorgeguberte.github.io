@@ -45,7 +45,15 @@
   }
 
   .top-nav {
-    @apply sticky top-4 z-20 mb-14 flex flex-wrap items-center justify-between gap-3 rounded-full border border-white/10 bg-neutral-950/70 px-4 py-3 shadow-2xl shadow-black/30 backdrop-blur-xl;
+    @apply sticky top-4 z-20 mb-14 flex items-center justify-between gap-3 rounded-full border border-white/10 bg-neutral-950/70 px-4 py-3 shadow-2xl shadow-black/30 backdrop-blur-xl;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .top-nav--hidden {
+    transform: translateY(calc(-100% - 2rem));
+    opacity: 0;
+    pointer-events: none;
   }
 
   .nav-pill {
@@ -96,4 +104,15 @@
   .link-arrow {
     @apply font-mono text-sm text-emerald-300 transition-colors hover:text-emerald-100;
   }
+
+  .bar-fill {
+    animation: bar-fill 1.2s cubic-bezier(0.25, 1, 0.5, 1) both;
+    animation-delay: var(--delay, 0s);
+  }
 }
+
+@keyframes bar-fill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+

@@ -3,6 +3,8 @@ import { posts } from "#site/content";
 import { isPublicPost, writingIntro } from "../../data/site-content";
 import { SeoHead } from "../../components/SeoHead";
 import { Navbar } from "../../components/Navbar";
+import { Footer } from "../../components/Footer";
+import { BackToTop } from "../../components/BackToTop";
 
 export default function BlogIndex() {
   const sortedPosts = [...posts]
@@ -60,7 +62,9 @@ export default function BlogIndex() {
             </Link>
           ))}
         </div>
+        <Footer />
         </main>
+        <BackToTop />
       </div>
     </>
   );

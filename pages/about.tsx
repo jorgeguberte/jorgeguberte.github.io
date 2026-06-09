@@ -2,6 +2,8 @@ import Link from "next/link";
 import { aboutPage, profile } from "../data/site-content";
 import { SeoHead } from "../components/SeoHead";
 import { Navbar } from "../components/Navbar";
+import { Footer } from "../components/Footer";
+import { BackToTop } from "../components/BackToTop";
 
 export default function AboutPage() {
   return (
@@ -91,7 +93,9 @@ export default function AboutPage() {
             </a>
           </div>
         </section>
+        <Footer />
         </main>
+        <BackToTop />
       </div>
     </>
   );

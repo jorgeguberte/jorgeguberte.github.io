@@ -4,6 +4,8 @@ import { posts } from "#site/content";
 import type { Post } from "#site/content";
 import { SeoHead } from "../../components/SeoHead";
 import { Navbar } from "../../components/Navbar";
+import { Footer } from "../../components/Footer";
+import { BackToTop } from "../../components/BackToTop";
 
 interface PostPageProps {
   post: Post;
@@ -65,7 +67,9 @@ export default function PostPage({ post }: PostPageProps) {
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
         </article>
+        <Footer />
         </main>
+        <BackToTop />
       </div>
     </>
   );
