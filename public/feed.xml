@@ -3,7 +3,7 @@
   <channel>
     <title>Jorge Guberte</title>
     <link>https://jorgeguberte.com</link>
-    <description>Notes on memory, context, infrastructure, and the realities of building AI systems outside toy demos.</description>
+    <description>Essays and research notes on memory, context engineering, and the architecture of AI systems that last.</description>
     <language>en</language>
     <lastBuildDate>Fri, 10 Apr 2026 00:00:00 GMT</lastBuildDate>
     <atom:link href="https://jorgeguberte.com/feed.xml" rel="self" type="application/rss+xml"/>

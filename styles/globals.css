@@ -1,9 +1,38 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* ----------------------------------------------------------------
+   Design language: "HIGH EDITORIAL"
+   The authority of a printed research journal, set for screens.
+   Oversized serif display. Hairline rules. Marginalia. Folio marks.
+   Warm ink darkness, bone text, a single brass accent.
+   Typography IS the design. Everything else is restraint.
+----------------------------------------------------------------- */
+
 @theme {
+  --font-serif: "Newsreader", "Georgia", serif;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --font-mono: "IBM Plex Mono", "JetBrains Mono", monospace;
+
+  /* Ink — warm near-blacks, like unbleached paper in shadow */
+  --color-ink-950: #0c0b09;
+  --color-ink-900: #121110;
+  --color-ink-800: #1a1816;
+  --color-ink-700: #27241f;
+  --color-ink-600: #383329;
+
+  /* Bone — warm off-whites, the color of good paper */
+  --color-bone-100: #efeae2;
+  --color-bone-200: #ddd6c9;
+  --color-bone-400: #ab9f8c;
+  --color-bone-500: #897e6d;
+  --color-bone-600: #6b6254;
+
+  /* Brass — one accent. Foil-stamp, not neon. */
+  --color-brass-300: #e9c68f;
+  --color-brass-400: #d4a55c;
+  --color-brass-500: #b8873f;
+  --color-brass-900: #2c2310;
 }
 
 @layer base {
@@ -12,91 +41,199 @@
   }
 
   body {
-    @apply bg-neutral-950 text-neutral-100 antialiased;
+    @apply bg-ink-950 text-bone-200 antialiased;
     min-height: 100vh;
-    background:
-      radial-gradient(circle at 15% 10%, rgba(16, 185, 129, 0.18), transparent 28rem),
-      radial-gradient(circle at 85% 0%, rgba(45, 212, 191, 0.12), transparent 24rem),
-      radial-gradient(circle at 50% 100%, rgba(20, 83, 45, 0.22), transparent 30rem),
-      #050505;
+    font-feature-settings: "ss01", "cv05", "liga";
   }
 
+  /* Paper grain — barely there */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 52px 52px;
-    mask-image: radial-gradient(circle at top, black, transparent 75%);
+    z-index: 50;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Hairline page frame — the printed-page edge */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 12px;
+    pointer-events: none;
+    z-index: 40;
+    border: 1px solid rgba(221, 214, 201, 0.07);
+  }
+
+  @media (max-width: 640px) {
+    body::after {
+      inset: 6px;
+    }
   }
 
   ::selection {
-    @apply bg-emerald-500/30;
+    background: rgba(212, 165, 92, 0.3);
+    color: #efeae2;
+  }
+
+  h1, h2, h3 {
+    @apply font-serif text-bone-100;
+    text-wrap: balance;
+  }
+
+  em, i {
+    @apply font-serif italic;
   }
 }
 
 @layer components {
-  .site-shell {
-    @apply relative mx-auto min-h-screen max-w-6xl px-5 py-8 sm:px-6 md:py-12;
+  .shell {
+    @apply mx-auto w-full max-w-6xl px-6 sm:px-10 lg:px-14;
   }
 
-  .page-shell {
-    @apply relative mx-auto min-h-screen max-w-4xl px-5 py-12 sm:px-6 md:py-16;
+  /* ---- Editorial typography roles ---- */
+  .kicker {
+    @apply font-mono text-[0.625rem] font-medium uppercase tracking-[0.34em] text-brass-400;
   }
 
-  .top-nav {
-    @apply sticky top-4 z-20 mb-14 flex flex-wrap items-center justify-between gap-3 rounded-full border border-white/10 bg-neutral-950/70 px-4 py-3 shadow-2xl shadow-black/30 backdrop-blur-xl;
+  .display {
+    @apply font-serif font-medium tracking-[-0.02em] text-bone-100;
+    line-height: 1.04;
   }
 
-  .nav-pill {
-    @apply rounded-full border border-white/10 px-3.5 py-2 font-mono text-xs text-neutral-300 transition-colors hover:border-emerald-400/50 hover:bg-emerald-400/10 hover:text-emerald-200;
+  .display-italic {
+    @apply font-serif italic font-normal text-bone-400;
   }
 
-  .eyebrow {
-    @apply font-mono text-xs uppercase tracking-[0.32em] text-emerald-300;
+  .dek {
+    @apply font-serif text-xl leading-9 text-bone-400 md:text-2xl md:leading-10;
   }
 
-  .gradient-text {
-    @apply bg-gradient-to-br from-white via-neutral-100 to-emerald-200 bg-clip-text text-transparent;
+  .body-text {
+    @apply leading-8 text-bone-200;
   }
 
-  .glass-card {
-    @apply rounded-[2rem] border border-white/10 bg-white/[0.045] shadow-2xl shadow-black/20 backdrop-blur-xl;
+  .drop-rule {
+    @apply mb-10 h-px w-16 bg-brass-500/70;
   }
 
-  .glass-card-strong {
-    @apply rounded-[2rem] border border-emerald-300/20 bg-emerald-300/[0.07] shadow-2xl shadow-emerald-950/20 backdrop-blur-xl;
+  /* ---- Folio: numbered section marker, like a journal page ---- */
+  .folio {
+    @apply flex items-center gap-4;
   }
 
-  .card-hover {
-    @apply transition duration-300 hover:-translate-y-1 hover:border-emerald-300/40 hover:bg-white/[0.065];
-  }
-
-  .section-kicker {
-    @apply mb-3 flex items-center gap-3;
-  }
-
-  .section-kicker::after {
+  .folio::after {
     content: "";
-    @apply h-px flex-1 bg-gradient-to-r from-emerald-300/40 to-transparent;
+    @apply h-px flex-1 bg-ink-700;
   }
 
-  .chip {
-    @apply rounded-full border border-white/10 bg-neutral-900/80 px-2.5 py-1 font-mono text-xs text-neutral-400;
+  .folio-num {
+    @apply font-serif text-5xl font-light italic leading-none text-ink-600 md:text-7xl;
   }
 
-  .dot {
-    @apply mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-300 shadow-[0_0_18px_rgba(52,211,153,0.8)];
+  /* ---- Section scaffolding ---- */
+  .section {
+    @apply py-24 md:py-36;
   }
 
-  .hero-orb {
-    @apply pointer-events-none absolute -right-20 top-24 hidden h-80 w-80 rounded-full border border-emerald-300/10 bg-emerald-300/10 blur-3xl md:block;
+  .section-rule {
+    @apply border-t border-ink-700;
   }
 
-  .link-arrow {
-    @apply font-mono text-sm text-emerald-300 transition-colors hover:text-emerald-100;
+  /* ---- Navigation ---- */
+  .nav-link {
+    @apply font-mono text-[0.75rem] uppercase tracking-[0.18em] text-bone-500 transition-colors hover:text-bone-100;
+  }
+
+  .nav-link-active {
+    @apply text-brass-400;
+  }
+
+  /* ---- Buttons: understated, typographic ---- */
+  .btn-primary {
+    @apply inline-flex items-center gap-3 border border-brass-500/50 px-7 py-3.5 font-mono text-[0.6875rem] uppercase tracking-[0.22em] text-brass-300 transition-all duration-300 hover:border-brass-400 hover:bg-brass-900/50 hover:tracking-[0.28em];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-3 border border-ink-600 px-7 py-3.5 font-mono text-[0.6875rem] uppercase tracking-[0.22em] text-bone-400 transition-all duration-300 hover:border-bone-600 hover:text-bone-100 hover:tracking-[0.28em];
+  }
+
+  .link-quiet {
+    @apply font-mono text-[0.6875rem] uppercase tracking-[0.2em] text-brass-400 transition-colors hover:text-brass-300;
+  }
+
+  /* ---- Editorial link: serif with offset underline ---- */
+  .link-serif {
+    @apply font-serif italic text-brass-300 underline decoration-brass-500/40 underline-offset-4 transition-colors hover:decoration-brass-300;
+  }
+
+  /* ---- Planes: flat, hairline-bordered ---- */
+  .plane {
+    @apply border border-ink-700 bg-ink-900 transition-colors duration-300;
+  }
+
+  .plane-hover {
+    @apply hover:border-brass-500/30 hover:bg-ink-800;
+  }
+
+  /* ---- Instrumentation ---- */
+  .tag {
+    @apply font-mono text-[0.6563rem] uppercase tracking-[0.14em] text-bone-500;
+  }
+
+  .status {
+    @apply inline-flex items-center gap-2.5 font-mono text-[0.6563rem] uppercase tracking-[0.2em] text-bone-400;
+  }
+
+  .status::before {
+    content: "";
+    @apply h-1 w-4 bg-brass-400;
+  }
+
+  /* ---- Numbered list items, journal style ---- */
+  .num-marker {
+    @apply font-serif text-xl italic leading-none text-brass-500;
+  }
+
+  /* ---- Pull quote ---- */
+  .pullquote {
+    @apply relative font-serif text-2xl font-light italic leading-snug text-bone-100 md:text-3xl;
+  }
+
+  .pullquote::before {
+    content: "“";
+    @apply absolute -left-8 -top-2 font-serif text-6xl not-italic leading-none text-brass-500/60 md:-left-12 md:text-7xl;
+  }
+
+  /* ---- Prose for essays ---- */
+  .essay {
+    @apply prose prose-invert max-w-none
+      prose-headings:font-serif prose-headings:font-medium prose-headings:tracking-tight prose-headings:text-bone-100
+      prose-p:font-serif prose-p:text-lg prose-p:leading-9 prose-p:text-bone-200
+      prose-a:text-brass-400 prose-a:underline prose-a:decoration-brass-500/40 prose-a:underline-offset-4 hover:prose-a:decoration-brass-300
+      prose-strong:text-bone-100
+      prose-li:font-serif prose-li:text-lg prose-li:text-bone-200
+      prose-blockquote:border-l-brass-500/60 prose-blockquote:font-serif prose-blockquote:text-xl prose-blockquote:italic prose-blockquote:text-bone-100
+      prose-code:bg-ink-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:font-mono prose-code:text-base prose-code:text-brass-300 prose-code:before:content-[''] prose-code:after:content-['']
+      prose-pre:border prose-pre:border-ink-700 prose-pre:bg-ink-900
+      prose-hr:border-ink-700;
+  }
+
+  .essay > p:first-of-type::first-letter {
+    @apply float-left mr-3 mt-1 font-serif text-6xl font-medium leading-[0.8] text-brass-300;
+  }
+
+  /* ---- Hero memory-field canvas ---- */
+  .memory-field {
+    @apply pointer-events-none absolute inset-0 opacity-50;
+    mask-image: radial-gradient(ellipse 75% 65% at 60% 40%, black 25%, transparent 72%);
+  }
+
+  /* ---- Marginalia: side labels on wide screens ---- */
+  .margin-note {
+    @apply font-mono text-[0.625rem] uppercase tracking-[0.3em] text-bone-600;
+    writing-mode: vertical-rl;
   }
 }
