@@ -430,7 +430,18 @@ function updateCameraPosition() {
   const y = r * Math.sin(currentRotX);
   const z = r * Math.cos(currentRotY) * Math.cos(currentRotX);
   camera.position.set(x, y + 1.5, z);
+  // LOCK: always look at center, never drift off
   camera.lookAt(0, 1.2, 0);
+}
+
+// Clamp zoom to prevent objects escaping view
+function clampZoom(z) {
+  return Math.max(3.5, Math.min(12, z));
+}
+
+// Clamp rotation to prevent flipping
+function clampRotX(rx) {
+  return Math.max(-1.2, Math.min(1.2, rx));
 }
 
 // ============================================================
@@ -518,7 +529,8 @@ function applyGesture(classification) {
       // Rotate camera with palm position
       camAutoRotate = false;
       targetRotY = (palmX - 0.5) * Math.PI * 1.5;
-      targetRotX = -(palmY - 0.5) * Math.PI * 0.8 + 0.3;
+      targetRotX = clampRotX(-(palmY - 0.5) * Math.PI * 0.8 + 0.3);
+      targetZoom = clampZoom(currentZoom);
       gestureLabel.textContent = 'ROTATE';
       gestureLabel.className = 'gesture-label';
       highlightRing.material.opacity = 0;
@@ -528,15 +540,14 @@ function applyGesture(classification) {
     case 'PINCH':
       // Zoom with pinch distance
       camAutoRotate = false;
-      targetZoom = 4 + pinchDist * 80;
-      targetZoom = Math.max(3, Math.min(15, targetZoom));
-      // Explode objects outward
-      const explodeScale = 1.0 + (1.0 - Math.min(pinchDist * 20, 1.0)) * 1.5;
+      targetZoom = clampZoom(4 + pinchDist * 80);
+      // Explode objects outward (capped)
+      const explodeScale = 1.0 + (1.0 - Math.min(pinchDist * 15, 1.0)) * 1.2;
       objects.forEach((obj, i) => {
         const orig = obj.userData.originalPos || obj.position.clone();
-        if (!obj.userData.originalPos) obj.userData.originalPos = orig;
+        if (!obj.userData.originalPos) obj.userData.originalPos = orig.clone();
         const dir = orig.clone().sub(new THREE.Vector3(0, 1.2, 0)).normalize();
-        obj.position.copy(orig.clone().add(dir.multiplyScalar((explodeScale - 1) * 3)));
+        obj.position.copy(orig.clone().add(dir.multiplyScalar((explodeScale - 1) * 2.5)));
       });
       gestureLabel.textContent = 'ZOOM + EXPLODE';
       gestureLabel.className = 'gesture-label acid';
@@ -563,6 +574,7 @@ function applyGesture(classification) {
     case 'POINT':
       // Select nearest object to index finger direction
       camAutoRotate = false;
+      targetZoom = clampZoom(currentZoom);
       if (indexTip) {
         // Map index tip to screen
         const sx = (indexTip.x - 0.5) * 2;
@@ -591,6 +603,8 @@ function applyGesture(classification) {
       gestureLabel.textContent = 'IDLE';
       gestureLabel.className = 'gesture-label inactive';
       camAutoRotate = true;
+      // Smoothly return zoom to comfortable default
+      targetZoom = clampZoom(targetZoom + (8 - targetZoom) * 0.02);
       highlightRing.material.opacity = 0;
       // Objects return to original positions
       objects.forEach(obj => {
@@ -694,6 +708,7 @@ function animate(time) {
         gestureLabel.textContent = 'NO HAND';
         gestureLabel.className = 'gesture-label inactive';
         camAutoRotate = true;
+        targetZoom = clampZoom(targetZoom + (8 - targetZoom) * 0.02);
         highlightRing.material.opacity = 0;
         // Return objects
         objects.forEach(obj => {
@@ -791,7 +806,9 @@ document.getElementById('toggleCam').addEventListener('click', () => {
 // Keyboard fallback
 window.addEventListener('keydown', (e) => {
   switch(e.key.toLowerCase()) {
-    case 'r': targetRotY = 0; targetRotX = 0.3; targetZoom = 8; break;
+    case 'r': targetRotY = 0; targetRotX = 0.3; targetZoom = 8; camAutoRotate = true;
+      objects.forEach(obj => { if (obj.userData.originalPos) obj.position.copy(obj.userData.originalPos); });
+      break;
     case 'g':
       scene.traverse(obj => {
         if (obj.isMesh && obj.material && !obj.material.isPointsMaterial) {
