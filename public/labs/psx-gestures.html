@@ -306,11 +306,11 @@ const W = window.innerWidth, H = window.innerHeight;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#050508');
-scene.fog = new THREE.Fog('#050508', 4, 28);
+scene.fog = new THREE.Fog('#050508', 6, 40);
 
-const camera = new THREE.PerspectiveCamera(60, W/H, 0.1, 100);
-camera.position.set(0, 2, 8);
-camera.lookAt(0, 1, 0);
+const camera = new THREE.PerspectiveCamera(65, W/H, 0.1, 60);
+camera.position.set(0, 2.5, 7);
+camera.lookAt(0, 1.2, 0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
 renderer.setSize(W, H);
@@ -415,8 +415,8 @@ scene.add(highlightRing);
 // CAMERA STATE FOR HAND CONTROL
 // ============================================================
 
-let targetRotY = 0, targetRotX = 0.3, targetZoom = 8;
-let currentRotY = 0, currentRotX = 0.3, currentZoom = 8;
+let targetRotY = 0, targetRotX = 0.14, targetZoom = 7;
+let currentRotY = 0, currentRotX = 0.14, currentZoom = 7;
 let camAutoRotate = true;
 let autoRotSpeed = 0.3;
 
@@ -557,7 +557,7 @@ function applyGesture(classification) {
     case 'FIST':
       // Reset everything
       camAutoRotate = true;
-      targetZoom = 8;
+      targetZoom = 7;
       targetRotY = 0;
       targetRotX = 0.3;
       objects.forEach(obj => {
@@ -604,7 +604,7 @@ function applyGesture(classification) {
       gestureLabel.className = 'gesture-label inactive';
       camAutoRotate = true;
       // Smoothly return zoom to comfortable default
-      targetZoom = clampZoom(targetZoom + (8 - targetZoom) * 0.02);
+      targetZoom = clampZoom(targetZoom + (7 - targetZoom) * 0.02);
       highlightRing.material.opacity = 0;
       // Objects return to original positions
       objects.forEach(obj => {
@@ -708,7 +708,7 @@ function animate(time) {
         gestureLabel.textContent = 'NO HAND';
         gestureLabel.className = 'gesture-label inactive';
         camAutoRotate = true;
-        targetZoom = clampZoom(targetZoom + (8 - targetZoom) * 0.02);
+        targetZoom = clampZoom(targetZoom + (7 - targetZoom) * 0.02);
         highlightRing.material.opacity = 0;
         // Return objects
         objects.forEach(obj => {
@@ -806,7 +806,7 @@ document.getElementById('toggleCam').addEventListener('click', () => {
 // Keyboard fallback
 window.addEventListener('keydown', (e) => {
   switch(e.key.toLowerCase()) {
-    case 'r': targetRotY = 0; targetRotX = 0.3; targetZoom = 8; camAutoRotate = true;
+    case 'r': targetRotY = 0; targetRotX = 0.14; targetZoom = 7; camAutoRotate = true;
       objects.forEach(obj => { if (obj.userData.originalPos) obj.position.copy(obj.userData.originalPos); });
       break;
     case 'g':
