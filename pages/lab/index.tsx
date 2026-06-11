@@ -61,20 +61,36 @@ export default function LabIndex() {
 
         <div className="mt-20 border-t border-ink-700 pt-12">
           <p className="kicker mb-8">Experiments</p>
-          <Link
-            href="/labs/psx-vibes.html"
-            target="_blank"
-            rel="noreferrer"
-            className="plane plane-hover group block p-6"
-          >
-            <span className="display text-2xl transition-colors group-hover:text-brass-300">
-              PSX Vibes
-            </span>
-            <span className="display-italic ml-3 text-lg">
-              PlayStation 1 Graphics Demo
-            </span>
-            <p className="tag mt-3">Three.js · PSX shaders · Low-poly · Dithering · Vertex snapping</p>
-          </Link>
+          <div className="space-y-px">
+            <Link
+              href="/labs/psx-gestures.html"
+              target="_blank"
+              rel="noreferrer"
+              className="plane plane-hover group block p-6"
+            >
+              <span className="display text-2xl transition-colors group-hover:text-brass-300">
+                PSX Gestures
+              </span>
+              <span className="display-italic ml-3 text-lg">
+                Hand Tracking × PS1 Graphics
+              </span>
+              <p className="tag mt-3">Three.js · MediaPipe Hands · Webcam · Gesture control</p>
+            </Link>
+            <Link
+              href="/labs/psx-vibes.html"
+              target="_blank"
+              rel="noreferrer"
+              className="plane plane-hover group block p-6"
+            >
+              <span className="display text-2xl transition-colors group-hover:text-brass-300">
+                PSX Vibes
+              </span>
+              <span className="display-italic ml-3 text-lg">
+                PlayStation 1 Graphics Demo
+              </span>
+              <p className="tag mt-3">Three.js · PSX shaders · Low-poly · Dithering · Vertex snapping</p>
+            </Link>
+          </div>
         </div>
 
         <div className="mt-20 border-t border-ink-700 pt-12">
