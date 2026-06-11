@@ -40,7 +40,7 @@ export default function Home() {
             <span className="h-px w-12 bg-brass-500/70" />
             <p className="kicker">{profile.eyebrow}</p>
           </div>
-          <h1 className="display max-w-5xl text-5xl sm:text-6xl md:text-7xl lg:text-[5.25rem]">
+          <h1 className="display max-w-5xl text-5xl sm:text-6xl md:text-7xl lg:text-[5.25rem] y2k-chrome">
             AI systems should{" "}
             <em className="font-light text-brass-300">retain context</em>, adapt
             over time, and remain useful{" "}
@@ -73,7 +73,7 @@ export default function Home() {
               <p className="font-serif text-2xl leading-snug text-bone-100 md:text-3xl md:leading-[1.35]">
                 {whyMemory.paragraphs[0]}
               </p>
-              <div className="mt-10 space-y-6 border-l border-ink-700 pl-8">
+              <div className="mt-10 space-y-6 border-l border-ink-700 pl-8 y2k-acid-border">
                 {whyMemory.paragraphs.slice(1).map((p, i) => (
                   <p key={i} className="body-text text-bone-400">
                     {p}
@@ -104,7 +104,7 @@ export default function Home() {
               <Link
                 key={program.slug}
                 href={`/lab/${program.slug}`}
-                className="group flex flex-col gap-5 bg-ink-950 p-9 transition-colors duration-300 hover:bg-ink-900"
+                className="y2k-card group flex flex-col gap-5 bg-ink-950 p-9 transition-colors duration-300 hover:bg-ink-900 y2k-glitch-hover"
               >
                 <span className="font-serif text-lg italic text-ink-600 transition-colors group-hover:text-brass-500">
                   {String(idx + 1).padStart(2, "0")}

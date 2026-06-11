@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSX GESTURES — PlayStation 1 Graphics × Hand Tracking</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #050508;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* Hidden video element for webcam */
+  #webcam {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 160px;
+    height: 120px;
+    z-index: 100;
+    opacity: 0.3;
+    transform: scaleX(-1);
+    border: 1px solid rgba(127,255,0,0.2);
+    image-rendering: pixelated;
+  }
+
+  canvas { display: block; image-rendering: pixelated; }
+
+  /* ===== HUD ===== */
+
+  .hud-bl {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .hud-br {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 10;
+    pointer-events: none;
+    text-align: right;
+  }
+
+  .hud-tl {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+    pointer-events: none;
+    border: 1px solid rgba(127,255,0,0.2);
+    padding: 8px 14px;
+  }
+
+  .hud-tr {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    text-align: right;
+    pointer-events: none;
+  }
+
+  .hud-center {
+    position: fixed;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    pointer-events: all;
+  }
+
+  .hud-text {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: #b8ff6b;
+    text-shadow: 0 0 4px rgba(127,255,0,0.5);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+
+  .hud-text.dim { color: #8888a0; text-shadow: none; }
+  .hud-text.warn { color: #ff00aa; text-shadow: 0 0 4px rgba(255,0,170,0.5); }
+  .hud-text.blue { color: #00bfff; text-shadow: 0 0 4px rgba(0,191,255,0.5); }
+  .hud-text.acid { color: #7fff00; text-shadow: 0 0 6px rgba(127,255,0,0.7); }
+
+  .hud-btn {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: #8888a0;
+    text-decoration: none;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid rgba(136,136,160,0.2);
+    transition: all 0.2s;
+    background: none;
+    cursor: pointer;
+  }
+
+  .hud-btn:hover {
+    color: #b8ff6b;
+    border-color: rgba(127,255,0,0.4);
+  }
+
+  .hud-btn.active {
+    color: #7fff00;
+    border-color: rgba(127,255,0,0.6);
+    background: rgba(127,255,0,0.06);
+  }
+
+  /* Gesture indicator */
+  .gesture-indicator {
+    position: fixed;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    pointer-events: none;
+    text-align: center;
+  }
+
+  .gesture-label {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #7fff00;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(127,255,0,0.6);
+    transition: all 0.15s;
+  }
+
+  .gesture-label.inactive {
+    color: #686888;
+    text-shadow: none;
+  }
+
+  /* Scanline overlay */
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0.035;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px
+    );
+  }
+
+  .vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%);
+  }
+
+  /* Loading overlay */
+  #loader {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: #050508;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  #loader-text {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #7fff00;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    animation: blink 0.6s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <span id="loader-text">INITIALIZING HAND TRACKING...</span>
+  <span class="hud-text dim" style="font-size:9px;">TensorFlow.js + MediaPipe Hands</span>
+</div>
+
+<video id="webcam" autoplay playsinline></video>
+
+<div class="hud-tl">
+  <span class="hud-text">PSX GESTURES</span>
+  <span class="hud-text dim" style="display:block;font-size:8px;">Hand Tracking Demo</span>
+</div>
+
+<div class="hud-tr">
+  <span class="hud-text dim">FRAME: <span class="hud-text" id="fps">--</span></span>
+  <span class="hud-text dim">TRIS: <span class="hud-text" id="tris">--</span></span>
+  <span class="hud-text dim" style="display:block;font-size:8px;">RES: 320×240</span>
+  <span class="hud-text dim" style="display:block;font-size:8px;">HAND: <span class="hud-text" id="handStatus">--</span></span>
+</div>
+
+<div class="hud-bl">
+  <span class="hud-text dim">OPEN HAND → ROTATE</span>
+  <span class="hud-text dim" style="display:block;">PINCH → ZOOM + EXPLODE</span>
+  <span class="hud-text dim" style="display:block;">FIST → RESET</span>
+  <span class="hud-text dim" style="display:block;">POINT → SELECT</span>
+</div>
+
+<div class="hud-br">
+  <span class="hud-text dim">WEBCAM: <span class="hud-text" id="camStatus">ON</span></span>
+  <span class="hud-text dim" style="display:block;">LANDMARKS: <span class="hud-text" id="lmCount">0</span></span>
+  <span class="hud-text dim" style="display:block;">GESTURE: <span class="hud-text" id="gestureName">--</span></span>
+</div>
+
+<div class="hud-center">
+  <a href="/lab" class="hud-btn">← LAB</a>
+  <button id="toggleCam" class="hud-btn active">CAM: ON</button>
+</div>
+
+<div class="gesture-indicator">
+  <span class="gesture-label inactive" id="gestureLabel">NO HAND</span>
+</div>
+
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ============================================================
+// PSX SHADERS
+// ============================================================
+
+const DitherShader = {
+  uniforms: {
+    tDiffuse: { value: null },
+    resolution: { value: new THREE.Vector2(320, 240) }
+  },
+  vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+  fragmentShader: `
+    varying vec2 vUv;
+    uniform sampler2D tDiffuse;
+    uniform vec2 resolution;
+    const float bayer[16] = float[](0.0,8.0,2.0,10.0, 12.0,4.0,14.0,6.0, 3.0,11.0,1.0,9.0, 15.0,7.0,13.0,5.0);
+    void main() {
+      vec4 c = texture2D(tDiffuse, vUv);
+      c.rgb = floor(c.rgb * 31.0) / 31.0;
+      int x = int(mod(gl_FragCoord.x, 4.0));
+      int y = int(mod(gl_FragCoord.y, 4.0));
+      c.rgb += (bayer[x*4+y]/16.0 - 0.5) * 0.03;
+      gl_FragColor = c;
+    }
+  `
+};
+
+function makePSXMaterial(color, roughness = 0.7, metalness = 0.05) {
+  const mat = new THREE.MeshStandardMaterial({ color, roughness, metalness, flatShading: true });
+  mat.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader.replace('#include <project_vertex>', `
+      vec4 mvPosition = vec4(transformed, 1.0);
+      mvPosition = instanceMatrix * mvPosition;
+      mvPosition = modelViewMatrix * mvPosition;
+      vec4 projPos = projectionMatrix * mvPosition;
+      projPos.xy = floor(projPos.xy * 160.0) / 160.0;
+      gl_Position = projPos;
+    `);
+    shader.fragmentShader = shader.fragmentShader.replace('#include <lights_fragment_begin>', `
+      GeometricContext geometry;
+      geometry.position = -vViewPosition;
+      geometry.normal = normal;
+      geometry.viewDir = normalize(vViewPosition);
+      IncidentLight directLight;
+    `);
+  };
+  return mat;
+}
+
+// ============================================================
+// SCENE
+// ============================================================
+
+const INTERNAL_W = 320, INTERNAL_H = 240;
+const W = window.innerWidth, H = window.innerHeight;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#050508');
+scene.fog = new THREE.Fog('#050508', 4, 28);
+
+const camera = new THREE.PerspectiveCamera(60, W/H, 0.1, 100);
+camera.position.set(0, 2, 8);
+camera.lookAt(0, 1, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+renderer.setSize(W, H);
+renderer.setPixelRatio(1);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+const rt = new THREE.WebGLRenderTarget(INTERNAL_W, INTERNAL_H, {
+  minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter,
+  format: THREE.RGBAFormat, colorSpace: THREE.SRGBColorSpace,
+});
+
+// Manual compose: render scene to rt, then dither + blit
+const ditherScene = new THREE.Scene();
+const ditherCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const ditherMat = new THREE.ShaderMaterial(DitherShader);
+ditherMat.uniforms.tDiffuse.value = rt.texture;
+const ditherQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), ditherMat);
+ditherScene.add(ditherQuad);
+
+// Blit to screen
+const blitScene = new THREE.Scene();
+const blitCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const blitMat = new THREE.ShaderMaterial({
+  uniforms: { tDiffuse: { value: null } },
+  vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position,1.0); }`,
+  fragmentShader: `varying vec2 vUv; uniform sampler2D tDiffuse; void main() { gl_FragColor = texture2D(tDiffuse, vUv); }`
+});
+blitMat.uniforms.tDiffuse.value = rt.texture;
+const blitQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blitMat);
+blitScene.add(blitQuad);
+
+// ============================================================
+// LIGHTING
+// ============================================================
+
+scene.add(new THREE.AmbientLight('#334466', 1.0));
+scene.add(new THREE.DirectionalLight('#ffeebb', 1.5)).position.set(5, 10, 3);
+
+const light1 = new THREE.PointLight('#ff00aa', 14, 8); light1.position.set(2, 1, 3); scene.add(light1);
+const light2 = new THREE.PointLight('#00bfff', 10, 8); light2.position.set(-3, 2, -2); scene.add(light2);
+const light3 = new THREE.PointLight('#7fff00', 8, 10); light3.position.set(0, -1, -4); scene.add(light3);
+
+scene.add(new THREE.PolarGridHelper(8, 16, 12, 64, '#1a1a28', '#1a1a28'));
+
+// ============================================================
+// OBJECTS
+// ============================================================
+
+const objects = [];
+
+const crystal = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2, 1), makePSXMaterial('#7fff00', 0.25, 0.7));
+crystal.position.set(0, 1.5, 0); scene.add(crystal); objects.push(crystal);
+
+const pyr1 = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.2, 4, 1), makePSXMaterial('#ff00aa', 0.4, 0.3));
+pyr1.position.set(2.5, 0.6, -1.5); pyr1.rotation.y = Math.PI/4; scene.add(pyr1); objects.push(pyr1);
+
+const pyr2 = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.2, 4, 1), makePSXMaterial('#00bfff', 0.5, 0.2));
+pyr2.position.set(-2.8, 0.6, -2); pyr2.rotation.y = -Math.PI/3; scene.add(pyr2); objects.push(pyr2);
+
+const wireSphere = new THREE.Mesh(
+  new THREE.SphereGeometry(0.9, 10, 6),
+  new THREE.MeshBasicMaterial({ color: '#ff00aa', wireframe: true, transparent: true, opacity: 0.7 })
+);
+wireSphere.position.set(-1.8, 2, 1.5); scene.add(wireSphere); objects.push(wireSphere);
+
+const torus = new THREE.Mesh(new THREE.TorusGeometry(0.8, 0.15, 8, 12), makePSXMaterial('#b8ff6b', 0.3, 0.6));
+torus.position.set(2, 2.5, -2); torus.rotation.x = Math.PI/3; scene.add(torus); objects.push(torus);
+
+const cube1 = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), makePSXMaterial('#9b00ff', 0.5, 0.4));
+cube1.position.set(-1.2, 0.35, 3); scene.add(cube1); objects.push(cube1);
+
+const cube2 = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), makePSXMaterial('#ff8c00', 0.6, 0.3));
+cube2.position.set(3, 0.35, 1); scene.add(cube2); objects.push(cube2);
+
+// Particles
+const pGeo = new THREE.BufferGeometry();
+const pCount = 200;
+const pPos = new Float32Array(pCount*3), pCol = new Float32Array(pCount*3);
+for (let i = 0; i < pCount; i++) {
+  pPos[i*3] = (Math.random()-0.5)*12; pPos[i*3+1] = Math.random()*6; pPos[i*3+2] = (Math.random()-0.5)*12;
+  const c = new THREE.Color(); c.setHSL(0.15+Math.random()*0.5, 0.9, 0.5+Math.random()*0.5);
+  pCol[i*3]=c.r; pCol[i*3+1]=c.g; pCol[i*3+2]=c.b;
+}
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+pGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
+const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({
+  size: 0.06, vertexColors: true, transparent: true, opacity: 0.8,
+  blending: THREE.AdditiveBlending, depthWrite: false
+}));
+scene.add(particles);
+
+// Selected object highlight ring
+const highlightRing = new THREE.Mesh(
+  new THREE.TorusGeometry(0.6, 0.04, 8, 16),
+  new THREE.MeshBasicMaterial({ color: '#7fff00', transparent: true, opacity: 0, depthTest: false })
+);
+highlightRing.renderOrder = 999;
+scene.add(highlightRing);
+
+// ============================================================
+// CAMERA STATE FOR HAND CONTROL
+// ============================================================
+
+let targetRotY = 0, targetRotX = 0.3, targetZoom = 8;
+let currentRotY = 0, currentRotX = 0.3, currentZoom = 8;
+let camAutoRotate = true;
+let autoRotSpeed = 0.3;
+
+// Store last hand positions for gesture state
+let lastPalmX = 0, lastPalmY = 0, palmSmoothX = 0, palmSmoothY = 0;
+let selectedObject = null;
+
+function updateCameraPosition() {
+  const r = currentZoom;
+  const x = r * Math.sin(currentRotY) * Math.cos(currentRotX);
+  const y = r * Math.sin(currentRotX);
+  const z = r * Math.cos(currentRotY) * Math.cos(currentRotX);
+  camera.position.set(x, y + 1.5, z);
+  camera.lookAt(0, 1.2, 0);
+}
+
+// ============================================================
+// HAND TRACKING (MediaPipe via CDN)
+// ============================================================
+
+let handLandmarker = null;
+let lastVideoTime = -1;
+let camEnabled = true;
+
+const video = document.getElementById('webcam');
+const gestureLabel = document.getElementById('gestureLabel');
+const gestureNameEl = document.getElementById('gestureName');
+const handStatusEl = document.getElementById('handStatus');
+const lmCountEl = document.getElementById('lmCount');
+const fpsEl = document.getElementById('fps');
+const trisEl = document.getElementById('tris');
+const loader = document.getElementById('loader');
+
+// Gesture detection thresholds
+const PINCH_THRESHOLD = 0.05;  // thumb tip to index tip distance
+const FIST_THRESHOLD = 0.25;   // average finger curl
+
+function classifyGesture(landmarks) {
+  if (!landmarks || landmarks.length === 0) return 'NONE';
+
+  const wrist = landmarks[0];
+  const thumbTip = landmarks[4];
+  const indexTip = landmarks[8];
+  const middleTip = landmarks[12];
+  const ringTip = landmarks[16];
+  const pinkyTip = landmarks[20];
+  
+  const indexMcp = landmarks[5];
+  const middleMcp = landmarks[9];
+  const ringMcp = landmarks[13];
+  const pinkyMcp = landmarks[17];
+
+  // Palm center (average of MCPs)
+  const palmX = (indexMcp.x + middleMcp.x + ringMcp.x + pinkyMcp.x) / 4;
+  const palmY = (indexMcp.y + middleMcp.y + ringMcp.y + pinkyMcp.y) / 4;
+  
+  // Smooth for control
+  palmSmoothX += (palmX - palmSmoothX) * 0.3;
+  palmSmoothY += (palmY - palmSmoothY) * 0.3;
+
+  // Pinch: thumb tip close to index tip
+  const pinchDist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y, thumbTip.z - indexTip.z);
+
+  // Fist: all fingertips close to palm
+  const fingerTips = [indexTip, middleTip, ringTip, pinkyTip];
+  const fingerMcps = [indexMcp, middleMcp, ringMcp, pinkyMcp];
+  
+  let avgCurl = 0;
+  for (let i = 0; i < 4; i++) {
+    const d = Math.hypot(fingerTips[i].x - fingerMcps[i].x, fingerTips[i].y - fingerMcps[i].y, fingerTips[i].z - fingerMcps[i].z);
+    avgCurl += d;
+  }
+  avgCurl /= 4;
+
+  // Point: index extended, others curled
+  const indexExtended = Math.hypot(indexTip.x - indexMcp.x, indexTip.y - indexMcp.y) > 0.15;
+  const middleCurled = Math.hypot(middleTip.x - middleMcp.x, middleTip.y - middleMcp.y) < 0.1;
+  const ringCurled = Math.hypot(ringTip.x - ringMcp.x, ringTip.y - ringMcp.y) < 0.1;
+  const pinkyCurled = Math.hypot(pinkyTip.x - pinkyMcp.x, pinkyTip.y - pinkyMcp.y) < 0.1;
+
+  // All fingers extended = open hand
+  const allExtended = avgCurl > 0.18;
+
+  if (pinchDist < PINCH_THRESHOLD) return { gesture: 'PINCH', palmX: palmSmoothX, palmY: palmSmoothY, pinchDist };
+  if (avgCurl < FIST_THRESHOLD) return { gesture: 'FIST', palmX: palmSmoothX, palmY: palmSmoothY };
+  if (indexExtended && middleCurled && ringCurled && pinkyCurled) return { gesture: 'POINT', palmX: palmSmoothX, palmY: palmSmoothY, indexTip };
+  if (allExtended) return { gesture: 'OPEN', palmX: palmSmoothX, palmY: palmSmoothY };
+  
+  return { gesture: 'IDLE', palmX: palmSmoothX, palmY: palmSmoothY };
+}
+
+function applyGesture(classification) {
+  const { gesture, palmX, palmY, pinchDist, indexTip } = classification;
+
+  gestureNameEl.textContent = gesture;
+  
+  switch(gesture) {
+    case 'OPEN':
+      // Rotate camera with palm position
+      camAutoRotate = false;
+      targetRotY = (palmX - 0.5) * Math.PI * 1.5;
+      targetRotX = -(palmY - 0.5) * Math.PI * 0.8 + 0.3;
+      gestureLabel.textContent = 'ROTATE';
+      gestureLabel.className = 'gesture-label';
+      highlightRing.material.opacity = 0;
+      selectedObject = null;
+      break;
+
+    case 'PINCH':
+      // Zoom with pinch distance
+      camAutoRotate = false;
+      targetZoom = 4 + pinchDist * 80;
+      targetZoom = Math.max(3, Math.min(15, targetZoom));
+      // Explode objects outward
+      const explodeScale = 1.0 + (1.0 - Math.min(pinchDist * 20, 1.0)) * 1.5;
+      objects.forEach((obj, i) => {
+        const orig = obj.userData.originalPos || obj.position.clone();
+        if (!obj.userData.originalPos) obj.userData.originalPos = orig;
+        const dir = orig.clone().sub(new THREE.Vector3(0, 1.2, 0)).normalize();
+        obj.position.copy(orig.clone().add(dir.multiplyScalar((explodeScale - 1) * 3)));
+      });
+      gestureLabel.textContent = 'ZOOM + EXPLODE';
+      gestureLabel.className = 'gesture-label acid';
+      highlightRing.material.opacity = 0;
+      break;
+
+    case 'FIST':
+      // Reset everything
+      camAutoRotate = true;
+      targetZoom = 8;
+      targetRotY = 0;
+      targetRotX = 0.3;
+      objects.forEach(obj => {
+        if (obj.userData.originalPos) {
+          obj.position.copy(obj.userData.originalPos);
+        }
+      });
+      gestureLabel.textContent = 'RESET';
+      gestureLabel.className = 'gesture-label warn';
+      highlightRing.material.opacity = 0;
+      selectedObject = null;
+      break;
+
+    case 'POINT':
+      // Select nearest object to index finger direction
+      camAutoRotate = false;
+      if (indexTip) {
+        // Map index tip to screen
+        const sx = (indexTip.x - 0.5) * 2;
+        const sy = -(indexTip.y - 0.5) * 2;
+        // Raycast from camera through point
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2(sx, sy);
+        raycaster.setFromCamera(mouse, camera);
+        const hits = raycaster.intersectObjects(objects);
+        if (hits.length > 0) {
+          selectedObject = hits[0].object;
+          highlightRing.position.copy(selectedObject.position);
+          highlightRing.material.opacity = 0.8;
+          // Pulse selected object
+          selectedObject.rotation.y += 0.05;
+          selectedObject.rotation.x += 0.03;
+        } else {
+          highlightRing.material.opacity = 0;
+        }
+      }
+      gestureLabel.textContent = selectedObject ? 'SELECTED' : 'POINT';
+      gestureLabel.className = 'gesture-label blue';
+      break;
+
+    default:
+      gestureLabel.textContent = 'IDLE';
+      gestureLabel.className = 'gesture-label inactive';
+      camAutoRotate = true;
+      highlightRing.material.opacity = 0;
+      // Objects return to original positions
+      objects.forEach(obj => {
+        if (obj.userData.originalPos) {
+          obj.position.lerp(obj.userData.originalPos, 0.05);
+        }
+      });
+      break;
+  }
+}
+
+// ============================================================
+// INIT MEDIAPIPE
+// ============================================================
+
+async function initHandTracking() {
+  try {
+    // Load MediaPipe Hands from CDN
+    const { HandLandmarker, FilesetResolver } = await import(
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/+esm'
+    );
+
+    const vision = await FilesetResolver.forVisionTasks(
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm'
+    );
+
+    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+        delegate: 'GPU'
+      },
+      runningMode: 'VIDEO',
+      numHands: 1
+    });
+
+    // Start webcam
+    const stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { width: 320, height: 240, facingMode: 'user' } 
+    });
+    video.srcObject = stream;
+    await video.play();
+
+    document.getElementById('loader').style.display = 'none';
+    handStatusEl.textContent = 'READY';
+    gestureLabel.className = 'gesture-label inactive';
+  } catch(e) {
+    console.error('Hand tracking init failed:', e);
+    document.getElementById('loader-text').textContent = 'HAND TRACKING FAILED';
+    document.getElementById('loader-text').style.color = '#ff00aa';
+    // Still show scene without hand tracking
+    setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 2000);
+  }
+}
+
+// ============================================================
+// RENDER LOOP
+// ============================================================
+
+let frameCount = 0, lastFpsTime = performance.now(), fpsCounter = 0;
+
+function countTris() {
+  let tris = 0;
+  scene.traverse(obj => {
+    if (obj.isMesh && obj.geometry) {
+      tris += obj.geometry.index ? obj.geometry.index.count/3 : obj.geometry.attributes.position.count/3;
+    }
+  });
+  return Math.floor(tris);
+}
+
+function animate(time) {
+  requestAnimationFrame(animate);
+
+  // FPS
+  frameCount++;
+  if (time - lastFpsTime >= 1000) {
+    fpsCounter = Math.round(frameCount/((time-lastFpsTime)/1000));
+    frameCount = 0; lastFpsTime = time;
+    fpsEl.textContent = fpsCounter;
+    trisEl.textContent = countTris();
+  }
+
+  const t = time * 0.001;
+
+  // Hand tracking
+  if (handLandmarker && camEnabled && video.readyState >= 2) {
+    if (video.currentTime !== lastVideoTime) {
+      lastVideoTime = video.currentTime;
+      const result = handLandmarker.detectForVideo(video, performance.now());
+      
+      if (result.landmarks && result.landmarks.length > 0) {
+        const lm = result.landmarks[0];
+        lmCountEl.textContent = lm.length;
+        handStatusEl.textContent = 'TRACKING';
+        const classification = classifyGesture(lm);
+        applyGesture(classification);
+      } else {
+        lmCountEl.textContent = '0';
+        handStatusEl.textContent = 'NO HAND';
+        gestureNameEl.textContent = 'NONE';
+        gestureLabel.textContent = 'NO HAND';
+        gestureLabel.className = 'gesture-label inactive';
+        camAutoRotate = true;
+        highlightRing.material.opacity = 0;
+        // Return objects
+        objects.forEach(obj => {
+          if (obj.userData.originalPos) {
+            obj.position.lerp(obj.userData.originalPos, 0.05);
+          }
+        });
+      }
+    }
+  }
+
+  // Smooth camera
+  if (camAutoRotate) {
+    targetRotY += autoRotSpeed * 0.005;
+  }
+  currentRotY += (targetRotY - currentRotY) * 0.08;
+  currentRotX += (targetRotX - currentRotX) * 0.08;
+  currentZoom += (targetZoom - currentZoom) * 0.08;
+  updateCameraPosition();
+
+  // Animate objects
+  crystal.rotation.y += 0.01;
+  crystal.rotation.x += 0.005;
+  crystal.position.y = 1.5 + Math.sin(t * 1.5) * 0.3;
+
+  pyr1.rotation.y += 0.015;
+  pyr2.rotation.y -= 0.012;
+
+  wireSphere.rotation.x += 0.008;
+  wireSphere.rotation.y += 0.012;
+  wireSphere.position.y = 2 + Math.sin(t * 0.8) * 0.4;
+
+  torus.rotation.z += 0.01;
+  torus.rotation.y += 0.008;
+  torus.position.y = 2.5 + Math.cos(t * 1.2) * 0.3;
+
+  cube1.rotation.x += 0.008; cube1.rotation.y += 0.012;
+  cube2.rotation.z += 0.007; cube2.rotation.y -= 0.01;
+
+  // Animate highlight ring
+  if (highlightRing.material.opacity > 0) {
+    highlightRing.rotation.z += 0.03;
+    highlightRing.scale.setScalar(1 + Math.sin(t * 4) * 0.1);
+    if (selectedObject) highlightRing.position.copy(selectedObject.position);
+  }
+
+  // Particles
+  const posArr = particles.geometry.attributes.position.array;
+  for (let i = 0; i < pCount; i++) {
+    posArr[i*3+1] += 0.005;
+    if (posArr[i*3+1] > 6) {
+      posArr[i*3+1] = 0;
+      posArr[i*3] = (Math.random()-0.5)*12;
+      posArr[i*3+2] = (Math.random()-0.5)*12;
+    }
+  }
+  particles.geometry.attributes.position.needsUpdate = true;
+
+  // Light dance
+  light1.intensity = 12 + Math.sin(t*2)*3;
+  light2.intensity = 10 + Math.cos(t*2.5)*2;
+  light3.intensity = 7 + Math.sin(t*1.7)*2;
+
+  // RENDER: scene → rt → dither → blit
+  renderer.setRenderTarget(rt);
+  renderer.render(scene, camera);
+  renderer.setRenderTarget(null);
+  
+  ditherMat.uniforms.tDiffuse.value = rt.texture;
+  renderer.render(ditherScene, ditherCam);
+  
+  blitMat.uniforms.tDiffuse.value = rt.texture;
+  renderer.render(blitScene, blitCam);
+}
+
+// ============================================================
+// CONTROLS
+// ============================================================
+
+document.getElementById('toggleCam').addEventListener('click', () => {
+  camEnabled = !camEnabled;
+  const btn = document.getElementById('toggleCam');
+  const status = document.getElementById('camStatus');
+  if (camEnabled) {
+    btn.textContent = 'CAM: ON';
+    btn.classList.add('active');
+    status.textContent = 'ON';
+  } else {
+    btn.textContent = 'CAM: OFF';
+    btn.classList.remove('active');
+    status.textContent = 'OFF';
+  }
+});
+
+// Keyboard fallback
+window.addEventListener('keydown', (e) => {
+  switch(e.key.toLowerCase()) {
+    case 'r': targetRotY = 0; targetRotX = 0.3; targetZoom = 8; break;
+    case 'g':
+      scene.traverse(obj => {
+        if (obj.isMesh && obj.material && !obj.material.isPointsMaterial) {
+          obj.material.wireframe = !obj.material.wireframe;
+        }
+      });
+      break;
+    case 'a': camAutoRotate = !camAutoRotate; break;
+    case 'arrowleft': targetRotY -= 0.15; break;
+    case 'arrowright': targetRotY += 0.15; break;
+    case 'arrowup': targetRotX += 0.15; break;
+    case 'arrowdown': targetRotX -= 0.15; break;
+  }
+});
+
+// Resize
+window.addEventListener('resize', () => {
+  const w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w/h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+
+// ============================================================
+// START
+// ============================================================
+
+initHandTracking().then(() => animate(performance.now()));
+</script>
+</body>
+</html>

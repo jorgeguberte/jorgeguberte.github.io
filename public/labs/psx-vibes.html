@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSX VIBES — Three.js PlayStation 1 Graphics Lab</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #050508;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+    cursor: crosshair;
+  }
+
+  canvas {
+    display: block;
+    image-rendering: pixelated;
+  }
+
+  /* HUD overlay */
+  .hud {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .hud-line {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: #b8ff6b;
+    text-shadow: 0 0 4px rgba(127,255,0,0.5);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+
+  .hud-line.dim { color: #8888a0; text-shadow: none; }
+
+  /* Title badge */
+  .title-badge {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+    pointer-events: none;
+    border: 1px solid rgba(127,255,0,0.2);
+    padding: 8px 14px;
+  }
+
+  .title-badge span {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: #b8ff6b;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+  }
+
+  .title-badge .sub {
+    display: block;
+    color: #8888a0;
+    margin-top: 3px;
+    letter-spacing: 0.1em;
+  }
+
+  /* Stats */
+  .stats {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    text-align: right;
+    pointer-events: none;
+  }
+
+  .stats span {
+    display: block;
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: #8888a0;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.5;
+  }
+
+  .stats .val { color: #b8ff6b; }
+
+  /* Controls hint */
+  .controls-hint {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .controls-hint span {
+    font-family: 'Courier New', monospace;
+    font-size: 8px;
+    color: #686888;
+    letter-spacing: 0.15em;
+    display: block;
+    text-align: right;
+    line-height: 1.5;
+  }
+
+  /* Back link */
+  .back-link {
+    position: fixed;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    pointer-events: all;
+  }
+
+  .back-link a {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: #8888a0;
+    text-decoration: none;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid rgba(136,136,160,0.2);
+    transition: all 0.2s;
+  }
+
+  .back-link a:hover {
+    color: #b8ff6b;
+    border-color: rgba(127,255,0,0.4);
+  }
+
+  /* Scanline overlay */
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0.04;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.1) 2px,
+      rgba(0,0,0,0.1) 4px
+    );
+  }
+
+  /* CRT vignette */
+  .vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.5) 100%);
+  }
+</style>
+</head>
+<body>
+
+<div class="title-badge">
+  <span>LAB // PSX VIBES</span>
+  <span class="sub">PlayStation 1 Graphics Demo</span>
+</div>
+
+<div class="stats" id="stats">
+  <span>FRAME: <span class="val" id="fps">--</span></span>
+  <span>TRIS: <span class="val" id="tris">--</span></span>
+  <span>RES: <span class="val">320×240</span></span>
+</div>
+
+<div class="hud">
+  <div class="hud-line">SYSTEM: ACTIVE</div>
+  <div class="hud-line dim">RENDER: NEAREST // NO MIPMAP</div>
+  <div class="hud-line dim">DITHER: ORDERED 4×4</div>
+  <div class="hud-line dim">SNAP: 1/16 PIXEL</div>
+</div>
+
+<div class="controls-hint">
+  <span>DRAG: ROTATE</span>
+  <span>SCROLL: ZOOM</span>
+  <span>R: RESET</span>
+  <span>G: WIREFRAME</span>
+</div>
+
+<div class="back-link">
+  <a href="/lab">← BACK TO LAB</a>
+</div>
+
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+
+// ============================================================
+// PSX-STYLE POST-PROCESSING SHADERS
+// ============================================================
+
+// Ordered dithering (Bayer 4×4 matrix)
+const DitherShader = {
+  uniforms: {
+    tDiffuse: { value: null },
+    resolution: { value: new THREE.Vector2(320, 240) }
+  },
+  vertexShader: /* glsl */`
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: /* glsl */`
+    varying vec2 vUv;
+    uniform sampler2D tDiffuse;
+    uniform vec2 resolution;
+
+    // Bayer 4×4 matrix
+    const float bayer[16] = float[](
+      0.0/16.0, 8.0/16.0, 2.0/16.0, 10.0/16.0,
+      12.0/16.0, 4.0/16.0, 14.0/16.0, 6.0/16.0,
+      3.0/16.0, 11.0/16.0, 1.0/16.0, 9.0/16.0,
+      15.0/16.0, 7.0/16.0, 13.0/16.0, 5.0/16.0
+    );
+
+    void main() {
+      vec4 color = texture2D(tDiffuse, vUv);
+
+      // Reduce color depth (15-bit color — PS1 style: 5 bits per channel)
+      color.rgb = floor(color.rgb * 31.0) / 31.0;
+
+      // Apply ordered dithering
+      int x = int(mod(gl_FragCoord.x, 4.0));
+      int y = int(mod(gl_FragCoord.y, 4.0));
+      float threshold = bayer[x * 4 + y] - 0.5;
+      color.rgb += threshold * 0.03;
+
+      gl_FragColor = color;
+    }
+  `
+};
+
+// Affine texture warp + vertex snapping (done in the vertex shader of materials)
+// We use onBeforeCompile on all materials
+
+// ============================================================
+// SCENE SETUP
+// ============================================================
+
+const WIDTH = window.innerWidth;
+const HEIGHT = window.innerHeight;
+
+// Render at 320x240 (PS1 internal res) then upscale
+const INTERNAL_W = 320;
+const INTERNAL_H = 240;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#050508');
+scene.fog = new THREE.Fog('#050508', 5, 30);
+
+// Camera
+const camera = new THREE.PerspectiveCamera(60, WIDTH / HEIGHT, 0.1, 100);
+camera.position.set(4, 3, 8);
+camera.lookAt(0, 0, 0);
+
+// Renderer — low-res render target
+const renderer = new THREE.WebGLRenderer({ 
+  antialias: false,
+  powerPreference: 'high-performance'
+});
+renderer.setSize(WIDTH, HEIGHT);
+renderer.setPixelRatio(1); // Force 1x for pixel look
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+// Low-res render target
+const rt = new THREE.WebGLRenderTarget(INTERNAL_W, INTERNAL_H, {
+  minFilter: THREE.NearestFilter,
+  magFilter: THREE.NearestFilter,
+  format: THREE.RGBAFormat,
+  colorSpace: THREE.SRGBColorSpace,
+});
+
+// Post-processing: dither pass
+const composer = new EffectComposer(renderer, rt);
+const renderPass = new RenderPass(scene, camera);
+composer.addPass(renderPass);
+
+const ditherPass = new ShaderPass(DitherShader);
+ditherPass.renderToScreen = false;
+composer.addPass(ditherPass);
+
+// Final blit from low-res rt to screen
+const blitMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    tDiffuse: { value: rt.texture }
+  },
+  vertexShader: /* glsl */`
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: /* glsl */`
+    varying vec2 vUv;
+    uniform sampler2D tDiffuse;
+    void main() {
+      gl_FragColor = texture2D(tDiffuse, vUv);
+    }
+  `
+});
+
+const blitScene = new THREE.Scene();
+const blitCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const blitQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blitMaterial);
+blitScene.add(blitQuad);
+
+// ============================================================
+// LIGHTING
+// ============================================================
+
+// Ambient — flat, PS1-style
+const ambient = new THREE.AmbientLight('#334466', 1.2);
+scene.add(ambient);
+
+// Directional sun
+const sun = new THREE.DirectionalLight('#ffeebb', 1.5);
+sun.position.set(5, 10, 3);
+scene.add(sun);
+
+// Colored point lights for vibe
+const light1 = new THREE.PointLight('#ff00aa', 15, 8);
+light1.position.set(2, 1, 3);
+scene.add(light1);
+
+const light2 = new THREE.PointLight('#00bfff', 12, 8);
+light2.position.set(-3, 2, -2);
+scene.add(light2);
+
+const light3 = new THREE.PointLight('#7fff00', 8, 10);
+light3.position.set(0, -1, -4);
+scene.add(light3);
+
+// ============================================================
+// MATERIAL HELPERS — inject vertex snapping + affine warp
+// ============================================================
+
+function makePSXMaterial(color, opts = {}) {
+  const mat = new THREE.MeshStandardMaterial({
+    color,
+    roughness: opts.roughness ?? 0.7,
+    metalness: opts.metalness ?? 0.05,
+    flatShading: true, // CRITICAL for PS1 look — no smooth normals
+  });
+
+  mat.onBeforeCompile = (shader) => {
+    // Vertex snapping (simulate lack of sub-pixel precision)
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <project_vertex>',
+      `
+      vec4 mvPosition = vec4(transformed, 1.0);
+      mvPosition = instanceMatrix * mvPosition;
+      mvPosition = modelViewMatrix * mvPosition;
+
+      // Snap to 1/16 pixel grid (PS1 precision)
+      vec4 projPos = projectionMatrix * mvPosition;
+      projPos.xy = floor(projPos.xy * 160.0) / 160.0; // Snap at internal res
+      gl_Position = projPos;
+      `
+    );
+
+    // No specular pass — PS1 had no specular
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <lights_fragment_begin>',
+      `
+      // Kill specular, keep diffuse only
+      GeometricContext geometry;
+      geometry.position = -vViewPosition;
+      geometry.normal = normal;
+      geometry.viewDir = normalize(vViewPosition);
+      IncidentLight directLight;
+      `
+    );
+  };
+
+  return mat;
+}
+
+// ============================================================
+// GEOMETRY — Low-poly PS1 objects
+// ============================================================
+
+const objects = [];
+
+// === WIREFRAME GRID FLOOR ===
+const gridHelper = new THREE.PolarGridHelper(8, 16, 12, 64, '#1a1a28', '#1a1a28');
+scene.add(gridHelper);
+
+// === CRYSTAL / GEM (icosahedron, low detail) ===
+const crystalGeo = new THREE.IcosahedronGeometry(1.2, 1); // detail=1 = 80 faces
+const crystalMat = makePSXMaterial('#7fff00', { roughness: 0.25, metalness: 0.7 });
+const crystal = new THREE.Mesh(crystalGeo, crystalMat);
+crystal.position.set(0, 1.5, 0);
+crystal.rotation.y = Math.PI / 6;
+scene.add(crystal);
+objects.push(crystal);
+
+// === FLOATING PYRAMIDS ===
+const pyramidGeo = new THREE.ConeGeometry(0.5, 1.2, 4, 1); // 4 sides = pyramid
+const pyramidMat1 = makePSXMaterial('#ff00aa', { roughness: 0.4, metalness: 0.3 });
+const pyramidMat2 = makePSXMaterial('#00bfff', { roughness: 0.5, metalness: 0.2 });
+
+const pyramid1 = new THREE.Mesh(pyramidGeo, pyramidMat1);
+pyramid1.position.set(2.5, 0.6, -1.5);
+pyramid1.rotation.y = Math.PI / 4;
+scene.add(pyramid1);
+objects.push(pyramid1);
+
+const pyramid2 = new THREE.Mesh(pyramidGeo, pyramidMat2);
+pyramid2.position.set(-2.8, 0.6, -2);
+pyramid2.rotation.y = -Math.PI / 3;
+scene.add(pyramid2);
+objects.push(pyramid2);
+
+// === WIREFRAME SPHERE (classic PS1 debug object) ===
+const wireGeo = new THREE.SphereGeometry(0.9, 10, 6); // low segments
+const wireMat = new THREE.MeshBasicMaterial({ 
+  color: '#ff00aa', 
+  wireframe: true,
+  transparent: true,
+  opacity: 0.7
+});
+const wireSphere = new THREE.Mesh(wireGeo, wireMat);
+wireSphere.position.set(-1.8, 2, 1.5);
+scene.add(wireSphere);
+objects.push(wireSphere);
+
+// === FLOATING RINGS ===
+const torusGeo = new THREE.TorusGeometry(0.8, 0.15, 8, 12); // low segments
+const torusMat = makePSXMaterial('#b8ff6b', { roughness: 0.3, metalness: 0.6 });
+const torus = new THREE.Mesh(torusGeo, torusMat);
+torus.position.set(2, 2.5, -2);
+torus.rotation.x = Math.PI / 3;
+scene.add(torus);
+objects.push(torus);
+
+// === CUBES ===
+const cubeGeo = new THREE.BoxGeometry(0.7, 0.7, 0.7);
+const cubeMat1 = makePSXMaterial('#9b00ff', { roughness: 0.5, metalness: 0.4 });
+const cubeMat2 = makePSXMaterial('#ff8c00', { roughness: 0.6, metalness: 0.3 });
+
+const cube1 = new THREE.Mesh(cubeGeo, cubeMat1);
+cube1.position.set(-1.2, 0.35, 3);
+cube1.rotation.set(0.3, 0.5, 0);
+scene.add(cube1);
+objects.push(cube1);
+
+const cube2 = new THREE.Mesh(cubeGeo, cubeMat2);
+cube2.position.set(3, 0.35, 1);
+cube2.rotation.set(0.2, -0.4, 0);
+scene.add(cube2);
+objects.push(cube2);
+
+// === FLOATING PARTICLES (PS1 sparkles) ===
+const particlesGeo = new THREE.BufferGeometry();
+const particleCount = 200;
+const positions = new Float32Array(particleCount * 3);
+const colors = new Float32Array(particleCount * 3);
+
+for (let i = 0; i < particleCount; i++) {
+  positions[i * 3] = (Math.random() - 0.5) * 12;
+  positions[i * 3 + 1] = Math.random() * 6;
+  positions[i * 3 + 2] = (Math.random() - 0.5) * 12;
+  
+  // Random between acid, pink, blue
+  const c = new THREE.Color();
+  c.setHSL(0.15 + Math.random() * 0.5, 0.9, 0.5 + Math.random() * 0.5);
+  colors[i * 3] = c.r;
+  colors[i * 3 + 1] = c.g;
+  colors[i * 3 + 2] = c.b;
+}
+
+particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+particlesGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+const particlesMat = new THREE.PointsMaterial({
+  size: 0.06,
+  vertexColors: true,
+  transparent: true,
+  opacity: 0.8,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+});
+const particles = new THREE.Points(particlesGeo, particlesMat);
+scene.add(particles);
+
+// ============================================================
+// ORBIT CONTROLS (low polling rate for PS1 feel)
+// ============================================================
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.target.set(0, 1.2, 0);
+controls.update();
+
+// ============================================================
+// HUD UPDATES
+// ============================================================
+
+let frameCount = 0;
+let lastTime = performance.now();
+let fpsCounter = 0;
+
+const fpsEl = document.getElementById('fps');
+const trisEl = document.getElementById('tris');
+
+function countTris() {
+  let tris = 0;
+  scene.traverse((obj) => {
+    if (obj.isMesh && obj.geometry) {
+      const g = obj.geometry;
+      if (g.index) {
+        tris += g.index.count / 3;
+      } else if (g.attributes.position) {
+        tris += g.attributes.position.count / 3;
+      }
+    }
+  });
+  return Math.floor(tris);
+}
+
+// ============================================================
+// KEYBOARD: R = reset, G = wireframe toggle
+// ============================================================
+
+let wireframeMode = false;
+
+window.addEventListener('keydown', (e) => {
+  switch(e.key.toLowerCase()) {
+    case 'r':
+      camera.position.set(4, 3, 8);
+      controls.target.set(0, 1.2, 0);
+      controls.update();
+      break;
+    case 'g':
+      wireframeMode = !wireframeMode;
+      scene.traverse((obj) => {
+        if (obj.isMesh && obj.material && !obj.material.isPointsMaterial) {
+          if (obj.material.wireframe !== undefined) {
+            // Skip already wireframe objects
+            if (obj === wireSphere) return;
+            obj.material.wireframe = wireframeMode;
+          }
+        }
+      });
+      break;
+  }
+});
+
+// ============================================================
+// RENDER LOOP
+// ============================================================
+
+const rtScene = new THREE.Scene();
+rtScene.background = new THREE.Color('#050508');
+
+function animate(time) {
+  requestAnimationFrame(animate);
+
+  // FPS counter
+  frameCount++;
+  if (time - lastTime >= 1000) {
+    fpsCounter = Math.round(frameCount / ((time - lastTime) / 1000));
+    frameCount = 0;
+    lastTime = time;
+    fpsEl.textContent = fpsCounter;
+    trisEl.textContent = countTris();
+  }
+
+  controls.update();
+
+  // Animate objects
+  const t = time * 0.001;
+  
+  crystal.rotation.y += 0.01;
+  crystal.rotation.x += 0.005;
+  crystal.position.y = 1.5 + Math.sin(t * 1.5) * 0.3;
+
+  pyramid1.rotation.y += 0.015;
+  pyramid2.rotation.y -= 0.012;
+
+  wireSphere.rotation.x += 0.008;
+  wireSphere.rotation.y += 0.012;
+  wireSphere.position.y = 2 + Math.sin(t * 0.8) * 0.4;
+
+  torus.rotation.z += 0.01;
+  torus.rotation.y += 0.008;
+  torus.position.y = 2.5 + Math.cos(t * 1.2) * 0.3;
+
+  cube1.rotation.x += 0.008;
+  cube1.rotation.y += 0.012;
+  cube1.position.y = 0.35 + Math.abs(Math.sin(t * 1.3)) * 1.5;
+
+  cube2.rotation.z += 0.007;
+  cube2.rotation.y -= 0.01;
+  cube2.position.y = 0.35 + Math.abs(Math.cos(t * 1.1)) * 1.5;
+
+  // Particles float up and reset
+  const posArr = particles.geometry.attributes.position.array;
+  for (let i = 0; i < particleCount; i++) {
+    posArr[i * 3 + 1] += 0.005;
+    if (posArr[i * 3 + 1] > 6) {
+      posArr[i * 3 + 1] = 0;
+      posArr[i * 3] = (Math.random() - 0.5) * 12;
+      posArr[i * 3 + 2] = (Math.random() - 0.5) * 12;
+    }
+  }
+  particles.geometry.attributes.position.needsUpdate = true;
+
+  // Light dance
+  light1.intensity = 12 + Math.sin(t * 2) * 3;
+  light2.intensity = 10 + Math.cos(t * 2.5) * 2;
+  light3.intensity = 7 + Math.sin(t * 1.7) * 2;
+
+  // Render low-res → dither → blit to screen
+  composer.render();
+
+  // Blit low-res render target to full screen with nearest filtering
+  renderer.setRenderTarget(null);
+  blitScene.overrideMaterial = null;
+  renderer.render(blitScene, blitCamera);
+}
+
+// ============================================================
+// RESIZE
+// ============================================================
+
+window.addEventListener('resize', () => {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+  // Keep blit quad covering full screen
+  blitQuad.scale.set(w, h, 1);
+});
+
+// Correct initial blit quad size
+blitQuad.scale.set(window.innerWidth, window.innerHeight, 1);
+
+// ============================================================
+// START
+// ============================================================
+
+animate(performance.now());
+</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+/* ===========================================
+   Y2K BRUTALIST OVERRIDE — Visual Impact Layer
+   Drop this on top of High Editorial.
+   What changes: colors, noise, scanlines, chrome.
+   What stays: layout, typography roles, spacing.
+   =========================================== */
+
+/* ---- Y2K KEYFRAMES ---- */
+@keyframes y2k-flicker {
+  0%, 95%, 100% { opacity: 1; }
+  96% { opacity: 0.4; }
+  97% { opacity: 0.9; }
+  98% { opacity: 0.3; }
+}
+
+@keyframes y2k-glitch {
+  0%, 90%, 100% { transform: translate(0); }
+  92% { transform: translate(-3px, 1px); }
+  94% { transform: translate(3px, -1px); }
+  96% { transform: translate(-1px, 2px); }
+}
+
+@keyframes y2k-drift {
+  0% { transform: translateX(-2%); }
+  50% { transform: translateX(2%); }
+  100% { transform: translateX(-2%); }
+}
+
+@keyframes y2k-scan {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 8px; }
+}
+
+/* ============================================
+   THEME SWITCH: Apply .y2k-active to <html>
+   ============================================ */
+
+/* Background: deep void + noise grain */
+.y2k-active {
+  --color-ink-950: #050508;
+  --color-ink-900: #0a0a0f;
+  --color-ink-800: #0f0f18;
+  --color-ink-700: #1a1a28;
+
+  /* Kill the warm bones, bring cold chrome */
+  --color-bone-100: #e8e8f0;
+  --color-bone-200: #c8c8d8;
+  --color-bone-400: #8888a0;
+  --color-bone-500: #686888;
+  --color-bone-600: #484868;
+
+  /* Multi-accent: brass becomes acid, but we rotate */
+  --color-brass-300: #b8ff6b;
+  --color-brass-400: #7fff00;
+  --color-brass-500: #5cd600;
+  --color-brass-900: #142800;
+}
+
+.y2k-active body {
+  background: var(--color-ink-950);
+}
+
+/* ===== SECTION SEPARATORS ===== */
+.y2k-active .section-rule {
+  border-color: rgba(127, 255, 0, 0.12) !important;
+}
+
+.y2k-active .folio::after {
+  background: rgba(127, 255, 0, 0.15);
+}
+
+.y2k-active .folio-num {
+  color: rgba(127, 255, 0, 0.12) !important;
+}
+
+/* ===== KICKER — acid green ===== */
+.y2k-active .kicker {
+  color: #b8ff6b !important;
+}
+
+/* ===== NAV LINKS ===== */
+.y2k-active .nav-link {
+  color: #9999aa !important;
+}
+
+.y2k-active .nav-link:hover {
+  color: #b8ff6b !important;
+}
+
+.y2k-active .nav-link-active {
+  color: #7fff00 !important;
+}
+
+/* ===== DISPLAY TITLES — chromatic aberration on hover ===== */
+.y2k-active .display {
+  transition: text-shadow 0.15s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.y2k-active .display:hover {
+  text-shadow:
+    2px 0 2px rgba(255, 0, 170, 0.3),
+    -2px 0 2px rgba(0, 191, 255, 0.3);
+}
+
+/* ===== BUTTONS — acid ===== */
+.y2k-active .btn-primary {
+  border-color: rgba(127, 255, 0, 0.5) !important;
+  color: #b8ff6b !important;
+}
+
+.y2k-active .btn-primary:hover {
+  border-color: #7fff00 !important;
+  color: #7fff00 !important;
+  background: rgba(127, 255, 0, 0.06) !important;
+}
+
+.y2k-active .btn-ghost {
+  border-color: rgba(200, 200, 220, 0.2) !important;
+  color: #aaaaCC !important;
+}
+
+.y2k-active .btn-ghost:hover {
+  border-color: rgba(200, 200, 220, 0.5) !important;
+  color: #e8e8f0 !important;
+}
+
+/* ===== STATUS INDICATOR — acid dot ===== */
+.y2k-active .status::before {
+  background: #7fff00 !important;
+}
+
+/* ===== CARDS: y2k-card brutalist ===== */
+.y2k-active .y2k-card,
+.y2k-active a[class*="group flex flex-col gap-5"] {
+  border: 1px solid rgba(127, 255, 0, 0.1) !important;
+  border-radius: 0 !important;
+  transition: border-color 0.2s, transform 0.15s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.y2k-active .y2k-card:hover,
+.y2k-active a[class*="group flex flex-col gap-5"]:hover {
+  border-color: rgba(127, 255, 0, 0.3) !important;
+}
+
+/* ===== PULL QUOTE — acid quote mark ===== */
+.y2k-active .pullquote::before {
+  color: rgba(127, 255, 0, 0.4) !important;
+}
+
+/* ===== PAGE FRAME — acid instead of bone ===== */
+.y2k-active body::after {
+  border-color: rgba(127, 255, 0, 0.06) !important;
+}
+
+/* ===== SELECTION ===== */
+.y2k-active ::selection {
+  background: rgba(127, 255, 0, 0.25) !important;
+  color: #e8e8f0 !important;
+}
+
+/* ===== SCANLINES ===== */
+.y2k-active .y2k-scanlines {
+  opacity: 0.04 !important;
+}
+
+/* ===== NOISE OVERLAY ===== */
+.y2k-active .y2k-noise {
+  opacity: 0.08 !important;
+}
+
+/* ===== LINK-QUIET ===== */
+.y2k-active .link-quiet {
+  color: #b8ff6b !important;
+}
+
+.y2k-active .link-quiet:hover {
+  color: #7fff00 !important;
+}
+
+/* ===== NUM MARKERS ===== */
+.y2k-active .num-marker {
+  color: #7fff00 !important;
+}
+
+/* ===== ACID BORDER LEFT ===== */
+.y2k-active .y2k-acid-border {
+  border-left-color: rgba(127, 255, 0, 0.35) !important;
+}
+
+/* ===== TAGS ===== */
+.y2k-active .tag {
+  color: #8888a0 !important;
+}
+
+/* ===== ESSAY STYLES ===== */
+.y2k-active .essay a,
+.y2k-active .link-serif {
+  color: #b8ff6b !important;
+}
+
+.y2k-active .essay blockquote {
+  border-left-color: rgba(127, 255, 0, 0.6) !important;
+}
+
+.y2k-active .essay code {
+  background: #0f0f18 !important;
+  color: #b8ff6b !important;
+}
+
+/* ===== PROSE ===== */
+.y2k-active .prose-invert {
+  --tw-prose-body: #c8c8d8 !important;
+  --tw-prose-headings: #e8e8f0 !important;
+  --tw-prose-links: #b8ff6b !important;
+  --tw-prose-bold: #e8e8f0 !important;
+  --tw-prose-counters: #8888a0 !important;
+  --tw-prose-bullets: #8888a0 !important;
+  --tw-prose-hr: rgba(127, 255, 0, 0.15) !important;
+}
+
+/* ===== FOOTER ===== */
+.y2k-active footer {
+  border-color: rgba(127, 255, 0, 0.1) !important;
+}
+
+/* ===== DECORATIVE LAYER ANIMATIONS (pointer-events:none only) ===== */
+.y2k-active .y2k-drift {
+  animation: y2k-drift 12s ease-in-out infinite;
+}
+
+.y2k-active .y2k-chrome:hover {
+  text-shadow:
+    2px 0 2px rgba(255, 0, 170, 0.35),
+    -2px 0 2px rgba(0, 191, 255, 0.35);
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  .y2k-active .display,
+  .y2k-active .y2k-drift {
+    animation: none !important;
+    transition: none !important;
+  }
+  .y2k-active .display:hover,
+  .y2k-active .y2k-chrome:hover {
+    text-shadow: none !important;
+  }
+}

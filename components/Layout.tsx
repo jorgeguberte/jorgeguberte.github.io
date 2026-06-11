@@ -1,7 +1,47 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { navLinks, profile, thesis, footerContent } from "../data/site-content";
+
+function ThemeToggle() {
+  const [y2k, setY2k] = useState(true);
+
+  useEffect(() => {
+    // Read initial state from DOM (set by inline script before hydration)
+    const active = document.documentElement.classList.contains("y2k-active");
+    setY2k(active);
+  }, []);
+
+  const toggle = () => {
+    const next = !y2k;
+    setY2k(next);
+    if (next) {
+      document.documentElement.classList.add("y2k-active");
+      localStorage.setItem("theme", "y2k");
+    } else {
+      document.documentElement.classList.remove("y2k-active");
+      localStorage.setItem("theme", "editorial");
+    }
+  };
+
+  return (
+    <button
+      onClick={toggle}
+      aria-label={y2k ? "Switch to Editorial theme" : "Switch to Y2K theme"}
+      className="nav-link flex items-center gap-2"
+      title={y2k ? "Y2K Brutalist — click for Editorial" : "High Editorial — click for Y2K"}
+    >
+      <span className="font-mono text-[0.625rem] uppercase tracking-[0.3em]">
+        {y2k ? "ACID" : "INK"}
+      </span>
+      <span
+        className={`inline-block h-2 w-2 transition-colors duration-300 ${
+          y2k ? "bg-[#7fff00]" : "bg-brass-400"
+        }`}
+      />
+    </button>
+  );
+}
 
 export function Nav() {
   const router = useRouter();
@@ -12,7 +52,7 @@ export function Nav() {
     <header className="border-b border-ink-700">
       <div className="shell flex items-center justify-between py-7">
         <Link href="/" className="group flex items-baseline gap-3">
-          <span className="font-serif text-xl font-medium tracking-tight text-bone-100 transition-colors group-hover:text-brass-300">
+          <span className="y2k-chrome font-serif text-xl font-medium tracking-tight text-bone-100 transition-colors group-hover:text-brass-300">
             Jorge Guberte
           </span>
           <span className="hidden font-mono text-[0.625rem] uppercase tracking-[0.3em] text-bone-600 md:inline">
@@ -29,6 +69,7 @@ export function Nav() {
               {link.label}
             </Link>
           ))}
+          <ThemeToggle />
           <Link
             href="/work-with-me"
             className="hidden border border-brass-500/40 px-4 py-2 font-mono text-[0.625rem] uppercase tracking-[0.22em] text-brass-400 transition-all duration-300 hover:border-brass-400 hover:text-brass-300 sm:inline-block"
@@ -102,6 +143,9 @@ export function Footer() {
 export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Y2K Decorative Layer — pointer-events:none, aria-hidden */}
+      <div className="y2k-scanlines" aria-hidden="true" />
+      <div className="y2k-noise" aria-hidden="true" />
       <Nav />
       <main className="flex-1">{children}</main>
       <Footer />

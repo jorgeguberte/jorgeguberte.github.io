@@ -2,11 +2,13 @@
 @plugin "@tailwindcss/typography";
 
 /* ----------------------------------------------------------------
-   Design language: "HIGH EDITORIAL"
+   Design language: "HIGH EDITORIAL × Y2K BRUTALISM"
    The authority of a printed research journal, set for screens.
    Oversized serif display. Hairline rules. Marginalia. Folio marks.
-   Warm ink darkness, bone text, a single brass accent.
+   Warm ink darkness, bone text, brass accent.
+   PLUS: Y2K decorative chaos layer — flicker, glitch, scanlines.
    Typography IS the design. Everything else is restraint.
+   Chaos lives in pointer-events:none, aria-hidden layers only.
 ----------------------------------------------------------------- */
 
 @theme {
@@ -235,5 +237,75 @@
   .margin-note {
     @apply font-mono text-[0.625rem] uppercase tracking-[0.3em] text-bone-600;
     writing-mode: vertical-rl;
+  }
+
+  /* ===== Y2K BRUTALISM LAYER — Decorative only ===== */
+
+  /* Scanline overlay (CRT warmth, pointer-events:none) */
+  .y2k-scanlines {
+    @apply pointer-events-none fixed inset-0;
+    z-index: 60;
+    opacity: 0.025;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.12) 2px,
+      rgba(0, 0, 0, 0.12) 4px
+    );
+  }
+
+  /* Noise texture — more aggressive than paper grain */
+  .y2k-noise {
+    @apply pointer-events-none fixed inset-0;
+    z-index: 55;
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Acid green accent line — brutalist left border */
+  .y2k-acid-border {
+    border-left: 2px solid var(--y2k-acid, #7fff00);
+  }
+
+  /* Chromatic aberration on hover */
+  .y2k-chrome {
+    transition: text-shadow 0.15s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  }
+
+  .y2k-chrome:hover {
+    text-shadow:
+      1px 0 1px rgba(255, 0, 170, 0.35),
+      -1px 0 1px rgba(0, 191, 255, 0.35);
+  }
+
+  /* Flicker animation utility */
+  .y2k-flicker {
+    animation: y2k-flicker 3.4s steps(1) infinite;
+  }
+
+  /* Glitch shift on hover */
+  .y2k-glitch-hover:hover {
+    animation: y2k-glitch 0.3s steps(1);
+  }
+
+  /* Brutalist flat card — no radius, solid border */
+  .y2k-card {
+    border-radius: 0;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(18, 17, 16, 0.9);
+  }
+
+  /* Accessibility: kill all animations */
+  @media (prefers-reduced-motion: reduce) {
+    .y2k-flicker,
+    .y2k-glitch-hover:hover,
+    .y2k-drift {
+      animation: none !important;
+    }
+    .y2k-chrome:hover {
+      text-shadow: none;
+    }
   }
 }
