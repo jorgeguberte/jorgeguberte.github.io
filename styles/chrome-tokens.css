@@ -1,0 +1,41 @@
+/* ===========================================
+   CHROME THEME — CORE TOKENS
+   Y2K Brutalism puro. Sem concessões.
+   Aplica quando .theme-chrome está no <html>.
+   =========================================== */
+
+:root.theme-chrome {
+  /* --- Chrome Metal Palette --- */
+  --chrome-bg: #050508;
+  --chrome-surface: #0a0a0f;
+  --chrome-elevated: #0f0f18;
+  --chrome-border: #1a1a28;
+  --chrome-text: #e8e8f0;
+  --chrome-text-secondary: #8888a0;
+  --chrome-text-muted: #484868;
+
+  /* --- Accents --- */
+  --chrome-acid: #7fff00;
+  --chrome-acid-dim: #4db800;
+  --chrome-pink: #ff00aa;
+  --chrome-cyan: #00e5ff;
+  --chrome-purple: #9b00ff;
+
+  /* --- Typography --- */
+  --chrome-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --chrome-font-mono: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+  --chrome-font-body: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+
+  /* --- Motion (BPM-synced, 140 BPM) --- */
+  --chrome-bpm: 140;
+  --chrome-beat: calc(60s / var(--chrome-bpm));
+  --chrome-bar: calc(var(--chrome-beat) * 4);
+
+  /* --- Borders --- */
+  --chrome-border-width: 2px;
+  --chrome-radius: 0;
+
+  /* --- Effects --- */
+  --chrome-glow-acid: 0 0 20px rgba(127, 255, 0, 0.15);
+  --chrome-glow-pink: 0 0 20px rgba(255, 0, 170, 0.15);
+}

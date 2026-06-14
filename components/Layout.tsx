@@ -3,41 +3,76 @@ import { useRouter } from "next/router";
 import { ReactNode, useEffect, useState } from "react";
 import { navLinks, profile, thesis, footerContent } from "../data/site-content";
 
+type Theme = "editorial" | "y2k" | "chrome";
+
+const THEME_CYCLE: Theme[] = ["editorial", "y2k", "chrome"];
+
+const THEME_META: Record<Theme, { label: string; indicator: string; next: string }> = {
+  editorial: {
+    label: "INK",
+    indicator: "bg-brass-400",
+    next: "ACID",
+  },
+  y2k: {
+    label: "ACID",
+    indicator: "bg-[#7fff00]",
+    next: "CHROME",
+  },
+  chrome: {
+    label: "CHROME",
+    indicator: "bg-[#ff00aa]",
+    next: "INK",
+  },
+};
+
 function ThemeToggle() {
-  const [y2k, setY2k] = useState(true);
+  const [theme, setTheme] = useState<Theme>("chrome");
 
   useEffect(() => {
     // Read initial state from DOM (set by inline script before hydration)
-    const active = document.documentElement.classList.contains("y2k-active");
-    setY2k(active);
+    if (document.documentElement.classList.contains("theme-editorial")) {
+      setTheme("editorial");
+    } else if (document.documentElement.classList.contains("theme-chrome")) {
+      setTheme("chrome");
+    } else {
+      setTheme("y2k");
+    }
   }, []);
 
   const toggle = () => {
-    const next = !y2k;
-    setY2k(next);
-    if (next) {
+    const currentIndex = THEME_CYCLE.indexOf(theme);
+    const nextTheme = THEME_CYCLE[(currentIndex + 1) % THEME_CYCLE.length];
+    setTheme(nextTheme);
+
+    // Clear all theme classes
+    document.documentElement.classList.remove("y2k-active", "theme-editorial", "theme-chrome");
+
+    if (nextTheme === "editorial") {
+      localStorage.setItem("theme", "editorial");
+      // No classes needed — editorial is the base theme
+    } else if (nextTheme === "y2k") {
       document.documentElement.classList.add("y2k-active");
       localStorage.setItem("theme", "y2k");
-    } else {
-      document.documentElement.classList.remove("y2k-active");
-      localStorage.setItem("theme", "editorial");
+    } else if (nextTheme === "chrome") {
+      document.documentElement.classList.add("theme-chrome");
+      localStorage.setItem("theme", "chrome");
     }
   };
+
+  const meta = THEME_META[theme];
 
   return (
     <button
       onClick={toggle}
-      aria-label={y2k ? "Switch to Editorial theme" : "Switch to Y2K theme"}
+      aria-label={`Current: ${meta.label}. Click for ${meta.next}`}
       className="nav-link flex items-center gap-2"
-      title={y2k ? "Y2K Brutalist — click for Editorial" : "High Editorial — click for Y2K"}
+      title={`${meta.label} theme — click for ${meta.next}`}
     >
       <span className="font-mono text-[0.625rem] uppercase tracking-[0.3em]">
-        {y2k ? "ACID" : "INK"}
+        {meta.label}
       </span>
       <span
-        className={`inline-block h-2 w-2 transition-colors duration-300 ${
-          y2k ? "bg-[#7fff00]" : "bg-brass-400"
-        }`}
+        className={`inline-block h-2 w-2 transition-colors duration-300 ${meta.indicator}`}
       />
     </button>
   );

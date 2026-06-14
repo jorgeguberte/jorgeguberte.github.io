@@ -11,15 +11,20 @@ export default function Document() {
               (function() {
                 try {
                   var theme = localStorage.getItem('theme');
-                  // Default to Y2K if never set
                   if (theme === 'editorial') {
+                    document.documentElement.classList.remove('y2k-active', 'theme-chrome');
+                  } else if (theme === 'chrome') {
                     document.documentElement.classList.remove('y2k-active');
+                    document.documentElement.classList.add('theme-chrome');
                   } else {
+                    // default: y2k
                     document.documentElement.classList.add('y2k-active');
+                    document.documentElement.classList.remove('theme-chrome');
                   }
                 } catch(e) {
                   // localStorage unavailable — default to Y2K
                   document.documentElement.classList.add('y2k-active');
+                  document.documentElement.classList.remove('theme-chrome');
                 }
               })();
             `,
