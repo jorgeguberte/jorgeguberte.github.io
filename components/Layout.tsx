@@ -3,9 +3,9 @@ import { useRouter } from "next/router";
 import { ReactNode, useEffect, useState } from "react";
 import { navLinks, profile, thesis, footerContent } from "../data/site-content";
 
-type Theme = "editorial" | "y2k" | "chrome";
+type Theme = "editorial" | "y2k" | "chrome" | "brutalist";
 
-const THEME_CYCLE: Theme[] = ["editorial", "y2k", "chrome"];
+const THEME_CYCLE: Theme[] = ["editorial", "y2k", "chrome", "brutalist"];
 
 const THEME_META: Record<Theme, { label: string; indicator: string; next: string }> = {
   editorial: {
@@ -21,6 +21,11 @@ const THEME_META: Record<Theme, { label: string; indicator: string; next: string
   chrome: {
     label: "CHROME",
     indicator: "bg-[#ff00aa]",
+    next: "TERMINAL",
+  },
+  brutalist: {
+    label: "TERMINAL",
+    indicator: "bg-[#e61919]",
     next: "INK",
   },
 };
@@ -34,6 +39,8 @@ function ThemeToggle() {
       setTheme("editorial");
     } else if (document.documentElement.classList.contains("theme-chrome")) {
       setTheme("chrome");
+    } else if (document.documentElement.classList.contains("bt-active")) {
+      setTheme("brutalist");
     } else {
       setTheme("y2k");
     }
@@ -45,7 +52,12 @@ function ThemeToggle() {
     setTheme(nextTheme);
 
     // Clear all theme classes
-    document.documentElement.classList.remove("y2k-active", "theme-editorial", "theme-chrome");
+    document.documentElement.classList.remove(
+      "y2k-active",
+      "theme-editorial",
+      "theme-chrome",
+      "bt-active"
+    );
 
     if (nextTheme === "editorial") {
       localStorage.setItem("theme", "editorial");
@@ -56,6 +68,9 @@ function ThemeToggle() {
     } else if (nextTheme === "chrome") {
       document.documentElement.classList.add("theme-chrome");
       localStorage.setItem("theme", "chrome");
+    } else if (nextTheme === "brutalist") {
+      document.documentElement.classList.add("bt-active");
+      localStorage.setItem("theme", "brutalist");
     }
   };
 
@@ -131,31 +146,105 @@ export function Footer() {
           <div>
             <p className="kicker mb-5">Lab</p>
             <ul className="space-y-2.5">
-              <li><Link href="/lab/loomdb" className="nav-link normal-case tracking-normal font-serif text-base">LoomDB</Link></li>
-              <li><Link href="/lab/epcg" className="nav-link normal-case tracking-normal font-serif text-base">EPCG</Link></li>
-              <li><Link href="/lab/ayvu-talian" className="nav-link normal-case tracking-normal font-serif text-base">Ayvu-Talian</Link></li>
+              <li>
+                <Link
+                  href="/lab/loomdb"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  LoomDB
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/lab/epcg"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  EPCG
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/lab/ayvu-talian"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  Ayvu-Talian
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
             <p className="kicker mb-5">Systems</p>
             <ul className="space-y-2.5">
-              <li><Link href="/systems/pixie" className="nav-link normal-case tracking-normal font-serif text-base">Pixie</Link></li>
-              <li><Link href="/systems/multiverse" className="nav-link normal-case tracking-normal font-serif text-base">Multiverse</Link></li>
+              <li>
+                <Link
+                  href="/systems/pixie"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  Pixie
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/systems/multiverse"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  Multiverse
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
             <p className="kicker mb-5">Writing</p>
             <ul className="space-y-2.5">
-              <li><Link href="/writing" className="nav-link normal-case tracking-normal font-serif text-base">Essays</Link></li>
-              <li><a href="/feed.xml" className="nav-link normal-case tracking-normal font-serif text-base">RSS</a></li>
+              <li>
+                <Link
+                  href="/writing"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  Essays
+                </Link>
+              </li>
+              <li>
+                <a
+                  href="/feed.xml"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  RSS
+                </a>
+              </li>
             </ul>
           </div>
           <div>
             <p className="kicker mb-5">Elsewhere</p>
             <ul className="space-y-2.5">
-              <li><a href={profile.github} className="nav-link normal-case tracking-normal font-serif text-base" target="_blank" rel="noreferrer">GitHub</a></li>
-              <li><a href={`mailto:${profile.email}`} className="nav-link normal-case tracking-normal font-serif text-base">Email</a></li>
-              <li><a href={profile.linkedin} className="nav-link normal-case tracking-normal font-serif text-base" target="_blank" rel="noreferrer">LinkedIn</a></li>
+              <li>
+                <a
+                  href={profile.github}
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  GitHub
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`mailto:${profile.email}`}
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  Email
+                </a>
+              </li>
+              <li>
+                <a
+                  href={profile.linkedin}
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  LinkedIn
+                </a>
+              </li>
             </ul>
           </div>
         </div>
@@ -181,6 +270,10 @@ export function Layout({ children }: { children: ReactNode }) {
       {/* Y2K Decorative Layer — pointer-events:none, aria-hidden */}
       <div className="y2k-scanlines" aria-hidden="true" />
       <div className="y2k-noise" aria-hidden="true" />
+      {/* Brutalist Decorative Layer — pointer-events:none, aria-hidden */}
+      <div className="bt-scanlines" aria-hidden="true" />
+      <div className="bt-noise" aria-hidden="true" />
+      <div className="bt-page-frame" aria-hidden="true" />
       <Nav />
       <main className="flex-1">{children}</main>
       <Footer />
