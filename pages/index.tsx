@@ -32,20 +32,15 @@ export default function Home() {
         path="/"
       />
 
-      {/* ============ BRUTALIST DECORATIVE LAYERS (pointer-events:none) ============ */}
-      <div className="bt-scanlines" aria-hidden="true" />
-      <div className="bt-noise" aria-hidden="true" />
-      <div className="bt-page-frame" aria-hidden="true" />
-
       {/* ============ HERO: front page of a journal ============ */}
-      <section className="relative overflow-hidden border-b border-ink-700 bt-divider--hairline">
+      <section className="relative overflow-hidden border-b border-ink-700">
         <MemoryField />
         <div className="shell relative py-28 md:py-40">
           <div className="mb-10 flex items-center gap-6">
             <span className="h-px w-12 bg-brass-500/70" />
             <p className="kicker">{profile.eyebrow}</p>
           </div>
-          <h1 className="display max-w-5xl text-5xl sm:text-6xl md:text-7xl lg:text-[5.25rem] y2k-chrome bt-drift">
+          <h1 className="display max-w-5xl text-5xl sm:text-6xl md:text-7xl lg:text-[5.25rem] y2k-chrome">
             AI systems should{" "}
             <em className="font-light text-brass-300">retain context</em>, adapt
             over time, and remain useful{" "}
@@ -67,7 +62,7 @@ export default function Home() {
       </section>
 
       {/* ============ 01 — WHY MEMORY ============ */}
-      <section className="section bt-divider--hairline">
+      <section className="section">
         <div className="shell">
           <div className="folio mb-14">
             <span className="folio-num">i.</span>
@@ -78,7 +73,7 @@ export default function Home() {
               <p className="font-serif text-2xl leading-snug text-bone-100 md:text-3xl md:leading-[1.35]">
                 {whyMemory.paragraphs[0]}
               </p>
-              <div className="mt-10 space-y-6 border-l border-ink-700 pl-8 y2k-acid-border bt-barcode">
+              <div className="mt-10 space-y-6 border-l border-ink-700 pl-8 y2k-acid-border">
                 {whyMemory.paragraphs.slice(1).map((p, i) => (
                   <p key={i} className="body-text text-bone-400">
                     {p}
@@ -91,7 +86,7 @@ export default function Home() {
       </section>
 
       {/* ============ 02 — THE LAB ============ */}
-      <section className="section section-rule bt-divider">
+      <section className="section section-rule">
         <div className="shell">
           <div className="folio mb-6">
             <span className="folio-num">ii.</span>
@@ -104,14 +99,16 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="bt-grid md:grid-cols-3">
+          <div className="grid gap-px bg-ink-700 md:grid-cols-3">
             {labPrograms.map((program, idx) => (
               <Link
                 key={program.slug}
                 href={`/lab/${program.slug}`}
-                className="bt-card group flex flex-col gap-5 p-9 bt-crosshair"
+                className="y2k-card group flex flex-col gap-5 bg-ink-950 p-9 transition-colors duration-300 hover:bg-ink-900 y2k-glitch-hover"
               >
-                <span className="bt-rev-tag">UNIT / {String(idx + 1).padStart(2, "0")}</span>
+                <span className="font-serif text-lg italic text-ink-600 transition-colors group-hover:text-brass-500">
+                  {String(idx + 1).padStart(2, "0")}
+                </span>
                 <h3 className="font-serif text-3xl text-bone-100 transition-colors group-hover:text-brass-300">
                   {program.name}
                 </h3>
@@ -121,12 +118,9 @@ export default function Home() {
                 <p className="text-sm leading-7 text-bone-500">
                   {program.description.split(". ").slice(0, 2).join(". ")}.
                 </p>
-                <div className="mt-auto space-y-3 pt-6 bt-divider--hairline">
+                <div className="mt-auto space-y-3 pt-6">
                   <p className="status">{program.status}</p>
                   <p className="tag">{program.themes.join(" · ")}</p>
-                  <data className="bt-coord" value={program.slug}>
-                    COORD: {program.slug.toUpperCase()}
-                  </data>
                 </div>
               </Link>
             ))}
@@ -135,7 +129,7 @@ export default function Home() {
       </section>
 
       {/* ============ 03 — THE SYSTEMS ============ */}
-      <section className="section section-rule bt-divider">
+      <section className="section section-rule">
         <div className="shell">
           <div className="folio mb-6">
             <span className="folio-num">iii.</span>
@@ -151,11 +145,11 @@ export default function Home() {
           {/* Flagship — Pixie, full editorial feature */}
           <Link
             href="/systems/pixie"
-            className="bt-card plane-hover group block p-10 md:p-14 bt-barcode"
+            className="plane plane-hover group block p-10 md:p-14"
           >
             <div className="grid gap-10 md:grid-cols-12">
               <div className="md:col-span-8">
-                <p className="kicker mb-6 bt-frame--dir">Flagship · Case study</p>
+                <p className="kicker mb-6">Flagship · Case study</p>
                 <h3 className="display text-4xl transition-colors group-hover:text-brass-300 md:text-5xl">
                   {pixie.name}
                 </h3>
@@ -177,10 +171,9 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <div className="space-y-3 bt-divider--hairline">
+                <div className="space-y-3">
                   <p className="tag">{pixie.stack.join(" · ")}</p>
                   <p className="link-quiet">Read the case study →</p>
-                  <samp className="bt-unit-id">REV 2.6</samp>
                 </div>
               </div>
             </div>
@@ -189,11 +182,11 @@ export default function Home() {
           {/* Secondary — Multiverse */}
           <Link
             href="/systems/multiverse"
-            className="bt-card plane-hover group mt-px block p-10"
+            className="plane plane-hover group mt-px block p-10"
           >
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="max-w-2xl">
-                <p className="kicker mb-4 bt-frame--angle">Open source</p>
+                <p className="kicker mb-4">Open source</p>
                 <h3 className="font-serif text-3xl text-bone-100 transition-colors group-hover:text-brass-300">
                   {multiverse.name}
                   <span className="display-italic ml-3 text-xl">
@@ -204,12 +197,11 @@ export default function Home() {
                   {multiverse.description}
                 </p>
               </div>
-              <div className="shrink-0 space-y-3 md:text-right bt-divider--hairline">
+              <div className="shrink-0 space-y-3 md:text-right">
                 <p className="tag">{multiverse.status}</p>
                 <p className="font-mono text-xs text-bone-500">
                   $ {multiverse.install}
                 </p>
-                <kbd className="bt-coord">BRANCH / MAIN</kbd>
               </div>
             </div>
           </Link>
@@ -217,7 +209,7 @@ export default function Home() {
       </section>
 
       {/* ============ 04 — WRITING ============ */}
-      <section className="section section-rule bt-divider">
+      <section className="section section-rule">
         <div className="shell">
           <div className="folio mb-6">
             <span className="folio-num">iv.</span>
@@ -236,14 +228,14 @@ export default function Home() {
           </div>
 
           {latestPosts.length > 0 ? (
-            <ul className="divide-y divide-ink-700 border-y border-ink-700 bt-grid">
+            <ul className="divide-y divide-ink-700 border-y border-ink-700">
               {latestPosts.map((post) => (
-                <li key={post.slug} className="bt-card">
+                <li key={post.slug}>
                   <Link
                     href={`/writing/${post.slug}`}
                     className="group grid gap-2 py-8 sm:grid-cols-12 sm:items-baseline"
                   >
-                    <time className="tag sm:col-span-2 bt-coord">
+                    <time className="tag sm:col-span-2">
                       {new Date(post.date).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "short",
@@ -262,7 +254,7 @@ export default function Home() {
               ))}
             </ul>
           ) : (
-            <p className="tag border-y border-ink-700 py-10 bt-frame">
+            <p className="tag border-y border-ink-700 py-10">
               First essays arriving soon. Subscribe via RSS.
             </p>
           )}
@@ -270,7 +262,7 @@ export default function Home() {
       </section>
 
       {/* ============ 05 — WORK WITH ME ============ */}
-      <section className="section section-rule bt-divider">
+      <section className="section section-rule">
         <div className="shell">
           <div className="folio mb-14">
             <span className="folio-num">v.</span>
@@ -293,13 +285,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* ============ TERMINAL GREEN STATUS — SINGLE USE (Pixie = live system) ============ */}
-      <div className="fixed bottom-6 right-6 z-50 md:bottom-8 md:right-8" aria-hidden="true">
-        <span className="bt-status-term">
-          PIXIE ONLINE
-        </span>
-      </div>
     </>
   );
 }
