@@ -1,0 +1,350 @@
+/* ===========================================
+   CHROME THEME — VISUAL LAYER
+   Aplica quando .theme-chrome está no <html>.
+   Y2K Brutalism puro. Cantos retos. Verde ácido.
+   =========================================== */
+
+/* ---- Keyframes (chaos layer only) ---- */
+
+@keyframes chrome-flicker {
+  0%, 95%, 100% { opacity: 1; }
+  96% { opacity: 0.4; }
+  97% { opacity: 0.9; }
+  98% { opacity: 0.3; }
+}
+
+@keyframes chrome-glitch {
+  0%, 90%, 100% { transform: translate(0); }
+  92% { transform: translate(-2px, 1px); }
+  94% { transform: translate(2px, -1px); }
+  96% { transform: translate(-1px, 2px); }
+}
+
+@keyframes chrome-scan {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 8px; }
+}
+
+/* ---- BASE LAYER ---- */
+
+.theme-chrome body {
+  background: var(--chrome-bg) !important;
+  color: var(--chrome-text) !important;
+}
+
+.theme-chrome ::selection {
+  background: rgba(127, 255, 0, 0.25) !important;
+  color: #e8e8f0 !important;
+}
+
+/* ---- TYPOGRAPHY ---- */
+
+.theme-chrome h1,
+.theme-chrome h2,
+.theme-chrome h3,
+.theme-chrome h4,
+.theme-chrome h5,
+.theme-chrome h6 {
+  font-family: var(--chrome-font-display) !important;
+  letter-spacing: -0.02em !important;
+  font-weight: 700 !important;
+}
+
+.theme-chrome .display {
+  font-family: var(--chrome-font-display) !important;
+  font-weight: 700 !important;
+  line-height: 1.0 !important;
+}
+
+.theme-chrome .display-italic {
+  font-family: var(--chrome-font-display) !important;
+  font-style: italic !important;
+  font-weight: 400 !important;
+  color: var(--chrome-text-secondary) !important;
+}
+
+.theme-chrome .kicker {
+  font-family: var(--chrome-font-mono) !important;
+  font-size: 0.625rem !important;
+  letter-spacing: 0.34em !important;
+  color: var(--chrome-acid) !important;
+}
+
+.theme-chrome .body-text,
+.theme-chrome p,
+.theme-chrome .dek {
+  font-family: var(--chrome-font-body) !important;
+}
+
+.theme-chrome .dek {
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+  color: var(--chrome-text-secondary) !important;
+}
+
+.theme-chrome em,
+.theme-chrome i {
+  font-family: var(--chrome-font-display) !important;
+  font-style: italic !important;
+}
+
+/* ---- NAVIGATION ---- */
+
+.theme-chrome .nav-link {
+  color: var(--chrome-text-secondary) !important;
+  font-family: var(--chrome-font-mono) !important;
+}
+
+.theme-chrome .nav-link:hover {
+  color: var(--chrome-acid) !important;
+}
+
+.theme-chrome .nav-link-active {
+  color: var(--chrome-acid) !important;
+}
+
+.theme-chrome header {
+  border-bottom-color: var(--chrome-border) !important;
+}
+
+/* ---- CARDS & PLANES ---- */
+
+.theme-chrome .plane,
+.theme-chrome .y2k-card {
+  border: var(--chrome-border-width) solid var(--chrome-border) !important;
+  border-radius: var(--chrome-radius) !important;
+  background: var(--chrome-surface) !important;
+}
+
+.theme-chrome .plane:hover,
+.theme-chrome .y2k-card:hover {
+  border-color: var(--chrome-acid-dim) !important;
+  box-shadow: var(--chrome-glow-acid) !important;
+}
+
+/* ---- BUTTONS ---- */
+
+.theme-chrome .btn-primary {
+  border: var(--chrome-border-width) solid var(--chrome-acid-dim) !important;
+  color: var(--chrome-acid) !important;
+  background: transparent !important;
+  border-radius: var(--chrome-radius) !important;
+  font-family: var(--chrome-font-mono) !important;
+}
+
+.theme-chrome .btn-primary:hover {
+  border-color: var(--chrome-acid) !important;
+  box-shadow: var(--chrome-glow-acid) !important;
+  background: rgba(127, 255, 0, 0.04) !important;
+  letter-spacing: 0.28em;
+}
+
+.theme-chrome .btn-ghost {
+  border: var(--chrome-border-width) solid var(--chrome-border) !important;
+  color: var(--chrome-text-secondary) !important;
+  border-radius: var(--chrome-radius) !important;
+  font-family: var(--chrome-font-mono) !important;
+}
+
+.theme-chrome .btn-ghost:hover {
+  border-color: var(--chrome-text-secondary) !important;
+  color: var(--chrome-text) !important;
+}
+
+/* ---- LINKS ---- */
+
+.theme-chrome .link-quiet {
+  color: var(--chrome-acid-dim) !important;
+  font-family: var(--chrome-font-mono) !important;
+}
+
+.theme-chrome .link-quiet:hover {
+  color: var(--chrome-acid) !important;
+}
+
+.theme-chrome .link-serif {
+  color: var(--chrome-acid) !important;
+  font-family: var(--chrome-font-mono) !important;
+  font-style: normal !important;
+}
+
+/* ---- FOLIO (section numbers) ---- */
+
+.theme-chrome .folio-num {
+  color: var(--chrome-acid-dim) !important;
+  opacity: 0.3 !important;
+  font-family: var(--chrome-font-display) !important;
+}
+
+.theme-chrome .folio::after {
+  background: var(--chrome-border) !important;
+}
+
+/* ---- SECTION RULES & BORDERS ---- */
+
+.theme-chrome .section-rule {
+  border-color: var(--chrome-border) !important;
+}
+
+.theme-chrome [class*="border-ink"] {
+  border-color: var(--chrome-border) !important;
+}
+
+.theme-chrome [class*="divide-ink"] {
+  border-color: var(--chrome-border) !important;
+}
+
+/* ---- STATUS INDICATOR ---- */
+
+.theme-chrome .status::before {
+  background: var(--chrome-acid) !important;
+}
+
+.theme-chrome .status {
+  color: var(--chrome-text-secondary) !important;
+  font-family: var(--chrome-font-mono) !important;
+}
+
+/* ---- TAGS ---- */
+
+.theme-chrome .tag {
+  color: var(--chrome-text-muted) !important;
+  font-family: var(--chrome-font-mono) !important;
+}
+
+/* ---- NUM MARKERS ---- */
+
+.theme-chrome .num-marker {
+  color: var(--chrome-acid) !important;
+  font-family: var(--chrome-font-mono) !important;
+  font-style: normal !important;
+}
+
+/* ---- MARGIN NOTES ---- */
+
+.theme-chrome .margin-note {
+  color: var(--chrome-text-muted) !important;
+}
+
+/* ---- DECORATIVE: SCANLINES (chaos layer) ---- */
+
+.theme-chrome .y2k-scanlines {
+  opacity: 0.04 !important;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  ) !important;
+}
+
+/* ---- DECORATIVE: NOISE (chaos layer) ---- */
+
+.theme-chrome .y2k-noise {
+  opacity: 0.08 !important;
+  mix-blend-mode: overlay !important;
+}
+
+/* ---- GLITCH HOVER ---- */
+
+.theme-chrome .y2k-glitch-hover:hover {
+  animation: chrome-glitch 0.3s steps(1) !important;
+}
+
+/* ---- CHROMATIC ABERRATION ON HOVER ---- */
+
+.theme-chrome .y2k-chrome:hover {
+  text-shadow:
+    1px 0 1px rgba(255, 0, 170, 0.4),
+    -1px 0 1px rgba(0, 229, 255, 0.4) !important;
+}
+
+/* ---- ESSAY / PROSE ---- */
+
+.theme-chrome .essay {
+  --tw-prose-body: var(--chrome-text-secondary) !important;
+  --tw-prose-headings: var(--chrome-text) !important;
+  --tw-prose-links: var(--chrome-acid) !important;
+  --tw-prose-bold: var(--chrome-text) !important;
+}
+
+.theme-chrome .essay code {
+  background: var(--chrome-elevated) !important;
+  color: var(--chrome-acid) !important;
+  border: 1px solid var(--chrome-border) !important;
+  font-family: var(--chrome-font-mono) !important;
+}
+
+.theme-chrome .essay blockquote {
+  border-left-color: var(--chrome-acid-dim) !important;
+  color: var(--chrome-text-secondary) !important;
+}
+
+.theme-chrome .essay a {
+  color: var(--chrome-acid) !important;
+}
+
+.theme-chrome .essay hr {
+  border-color: var(--chrome-border) !important;
+}
+
+/* ---- PROSE INVERT (Tailwind Typography) ---- */
+
+.theme-chrome .prose-invert {
+  --tw-prose-body: var(--chrome-text-secondary) !important;
+  --tw-prose-headings: var(--chrome-text) !important;
+  --tw-prose-links: var(--chrome-acid) !important;
+  --tw-prose-bold: var(--chrome-text) !important;
+  --tw-prose-counters: var(--chrome-text-muted) !important;
+  --tw-prose-bullets: var(--chrome-text-muted) !important;
+  --tw-prose-hr: var(--chrome-border) !important;
+}
+
+/* ---- PAGE FRAME ---- */
+
+.theme-chrome body::after {
+  border-color: rgba(127, 255, 0, 0.06) !important;
+}
+
+/* ---- PAPER GRAIN (body::before) ---- */
+
+.theme-chrome body::before {
+  opacity: 0.06 !important;
+}
+
+/* ---- DROP RULE ---- */
+
+.theme-chrome .drop-rule {
+  background: var(--chrome-acid-dim) !important;
+}
+
+/* ---- HERO MEMORY FIELD ---- */
+
+.theme-chrome .memory-field {
+  opacity: 0.3 !important;
+}
+
+/* ---- FOOTER ---- */
+
+.theme-chrome footer {
+  border-color: var(--chrome-border) !important;
+}
+
+/* ---- ACID BORDER LEFT ---- */
+
+.theme-chrome .y2k-acid-border {
+  border-left-color: rgba(127, 255, 0, 0.35) !important;
+}
+
+/* ---- ACCESSIBILITY ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-chrome .y2k-flicker,
+  .theme-chrome .y2k-glitch-hover:hover {
+    animation: none !important;
+  }
+  .theme-chrome .y2k-chrome:hover {
+    text-shadow: none !important;
+  }
+}

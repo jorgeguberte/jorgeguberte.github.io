@@ -3,41 +3,91 @@ import { useRouter } from "next/router";
 import { ReactNode, useEffect, useState } from "react";
 import { navLinks, profile, thesis, footerContent } from "../data/site-content";
 
+type Theme = "editorial" | "y2k" | "chrome" | "brutalist";
+
+const THEME_CYCLE: Theme[] = ["editorial", "y2k", "chrome", "brutalist"];
+
+const THEME_META: Record<Theme, { label: string; indicator: string; next: string }> = {
+  editorial: {
+    label: "INK",
+    indicator: "bg-brass-400",
+    next: "ACID",
+  },
+  y2k: {
+    label: "ACID",
+    indicator: "bg-[#7fff00]",
+    next: "CHROME",
+  },
+  chrome: {
+    label: "CHROME",
+    indicator: "bg-[#ff00aa]",
+    next: "TERMINAL",
+  },
+  brutalist: {
+    label: "TERMINAL",
+    indicator: "bg-[#e61919]",
+    next: "INK",
+  },
+};
+
 function ThemeToggle() {
-  const [y2k, setY2k] = useState(true);
+  const [theme, setTheme] = useState<Theme>("chrome");
 
   useEffect(() => {
     // Read initial state from DOM (set by inline script before hydration)
-    const active = document.documentElement.classList.contains("y2k-active");
-    setY2k(active);
+    if (document.documentElement.classList.contains("theme-editorial")) {
+      setTheme("editorial");
+    } else if (document.documentElement.classList.contains("theme-chrome")) {
+      setTheme("chrome");
+    } else if (document.documentElement.classList.contains("bt-active")) {
+      setTheme("brutalist");
+    } else {
+      setTheme("y2k");
+    }
   }, []);
 
   const toggle = () => {
-    const next = !y2k;
-    setY2k(next);
-    if (next) {
+    const currentIndex = THEME_CYCLE.indexOf(theme);
+    const nextTheme = THEME_CYCLE[(currentIndex + 1) % THEME_CYCLE.length];
+    setTheme(nextTheme);
+
+    // Clear all theme classes
+    document.documentElement.classList.remove(
+      "y2k-active",
+      "theme-editorial",
+      "theme-chrome",
+      "bt-active"
+    );
+
+    if (nextTheme === "editorial") {
+      localStorage.setItem("theme", "editorial");
+      // No classes needed — editorial is the base theme
+    } else if (nextTheme === "y2k") {
       document.documentElement.classList.add("y2k-active");
       localStorage.setItem("theme", "y2k");
-    } else {
-      document.documentElement.classList.remove("y2k-active");
-      localStorage.setItem("theme", "editorial");
+    } else if (nextTheme === "chrome") {
+      document.documentElement.classList.add("theme-chrome");
+      localStorage.setItem("theme", "chrome");
+    } else if (nextTheme === "brutalist") {
+      document.documentElement.classList.add("bt-active");
+      localStorage.setItem("theme", "brutalist");
     }
   };
+
+  const meta = THEME_META[theme];
 
   return (
     <button
       onClick={toggle}
-      aria-label={y2k ? "Switch to Editorial theme" : "Switch to Y2K theme"}
+      aria-label={`Current: ${meta.label}. Click for ${meta.next}`}
       className="nav-link flex items-center gap-2"
-      title={y2k ? "Y2K Brutalist — click for Editorial" : "High Editorial — click for Y2K"}
+      title={`${meta.label} theme — click for ${meta.next}`}
     >
       <span className="font-mono text-[0.625rem] uppercase tracking-[0.3em]">
-        {y2k ? "ACID" : "INK"}
+        {meta.label}
       </span>
       <span
-        className={`inline-block h-2 w-2 transition-colors duration-300 ${
-          y2k ? "bg-[#7fff00]" : "bg-brass-400"
-        }`}
+        className={`inline-block h-2 w-2 transition-colors duration-300 ${meta.indicator}`}
       />
     </button>
   );
@@ -96,31 +146,105 @@ export function Footer() {
           <div>
             <p className="kicker mb-5">Lab</p>
             <ul className="space-y-2.5">
-              <li><Link href="/lab/loomdb" className="nav-link normal-case tracking-normal font-serif text-base">LoomDB</Link></li>
-              <li><Link href="/lab/epcg" className="nav-link normal-case tracking-normal font-serif text-base">EPCG</Link></li>
-              <li><Link href="/lab/ayvu-talian" className="nav-link normal-case tracking-normal font-serif text-base">Ayvu-Talian</Link></li>
+              <li>
+                <Link
+                  href="/lab/loomdb"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  LoomDB
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/lab/epcg"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  EPCG
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/lab/ayvu-talian"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  Ayvu-Talian
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
             <p className="kicker mb-5">Systems</p>
             <ul className="space-y-2.5">
-              <li><Link href="/systems/pixie" className="nav-link normal-case tracking-normal font-serif text-base">Pixie</Link></li>
-              <li><Link href="/systems/multiverse" className="nav-link normal-case tracking-normal font-serif text-base">Multiverse</Link></li>
+              <li>
+                <Link
+                  href="/systems/pixie"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  Pixie
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/systems/multiverse"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  Multiverse
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
             <p className="kicker mb-5">Writing</p>
             <ul className="space-y-2.5">
-              <li><Link href="/writing" className="nav-link normal-case tracking-normal font-serif text-base">Essays</Link></li>
-              <li><a href="/feed.xml" className="nav-link normal-case tracking-normal font-serif text-base">RSS</a></li>
+              <li>
+                <Link
+                  href="/writing"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  Essays
+                </Link>
+              </li>
+              <li>
+                <a
+                  href="/feed.xml"
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  RSS
+                </a>
+              </li>
             </ul>
           </div>
           <div>
             <p className="kicker mb-5">Elsewhere</p>
             <ul className="space-y-2.5">
-              <li><a href={profile.github} className="nav-link normal-case tracking-normal font-serif text-base" target="_blank" rel="noreferrer">GitHub</a></li>
-              <li><a href={`mailto:${profile.email}`} className="nav-link normal-case tracking-normal font-serif text-base">Email</a></li>
-              <li><a href={profile.linkedin} className="nav-link normal-case tracking-normal font-serif text-base" target="_blank" rel="noreferrer">LinkedIn</a></li>
+              <li>
+                <a
+                  href={profile.github}
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  GitHub
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`mailto:${profile.email}`}
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                >
+                  Email
+                </a>
+              </li>
+              <li>
+                <a
+                  href={profile.linkedin}
+                  className="nav-link normal-case tracking-normal font-serif text-base"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  LinkedIn
+                </a>
+              </li>
             </ul>
           </div>
         </div>
@@ -146,6 +270,10 @@ export function Layout({ children }: { children: ReactNode }) {
       {/* Y2K Decorative Layer — pointer-events:none, aria-hidden */}
       <div className="y2k-scanlines" aria-hidden="true" />
       <div className="y2k-noise" aria-hidden="true" />
+      {/* Brutalist Decorative Layer — pointer-events:none, aria-hidden */}
+      <div className="bt-scanlines" aria-hidden="true" />
+      <div className="bt-noise" aria-hidden="true" />
+      <div className="bt-page-frame" aria-hidden="true" />
       <Nav />
       <main className="flex-1">{children}</main>
       <Footer />

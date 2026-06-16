@@ -1,0 +1,630 @@
+/* ===========================================
+   BRUTALIST — Tactical Telemetry / CRT Terminal Archetype
+   Dark mode exclusive. Monospace dominance. Technical framing.
+   Halftone, scanlines, phosphor glow, mechanical noise.
+   Zero radius. Visible compartments. Semantic rigidity.
+   =========================================== */
+
+:root {
+  /* ===== TACTICAL TELEMETRY PALETTE ===== */
+  /* Dark substrate — deactivated CRT, avoid pure #000 */
+  --bt-bg-deep: #0a0a0a;
+  --bt-bg-surface: #0f0f0f;
+  --bt-bg-elevated: #141414;
+  --bt-bg-panel: #1a1a1a;
+
+  /* Phosphor foreground */
+  --bt-fg-primary: #eaeaea;      /* white phosphor */
+  --bt-fg-secondary: #b0b0b0;    /* dim phosphor */
+  --bt-fg-muted: #6a6a6a;        /* scanline-dimmed */
+
+  /* Aviation/Hazard Red — ONLY accent */
+  --bt-accent-red: #e61919;
+  --bt-accent-red-dim: #8b1010;
+  --bt-accent-red-glow: #ff2a2a;
+
+  /* Terminal Green — SINGLE USE ONLY (one status indicator) */
+  --bt-terminal-green: #4af626;
+  --bt-terminal-green-dim: #2d9e18;
+
+  /* ===== TYPOGRAPHY SCALE — Fluid clamp() ===== */
+  /* Macro: Neo-grotesque heavy sans, tight tracking, compressed leading */
+  --bt-display-xs: clamp(2.5rem, 6vw, 4rem);
+  --bt-display-sm: clamp(3.5rem, 8vw, 6rem);
+  --bt-display-md: clamp(5rem, 10vw, 9rem);
+  --bt-display-lg: clamp(7rem, 12vw, 15rem);
+  --bt-display-xl: clamp(9rem, 15vw, 22rem);
+
+  /* Micro: Monospace technical, generous tracking */
+  --bt-micro-xs: 0.625rem;   /* 10px */
+  --bt-micro-sm: 0.75rem;    /* 12px */
+  --bt-micro-md: 0.875rem;   /* 14px */
+  --bt-micro-lg: 1rem;       /* 16px */
+
+  /* Mono font stack */
+  --bt-font-mono: "JetBrains Mono", "IBM Plex Mono", "VT323", "Space Mono", monospace;
+  --bt-font-sans-heavy: "Neue Haas Grotesk", "Inter", "Archivo Black", "Roboto Flex", sans-serif;
+
+  /* Tracking values */
+  --bt-tracking-tight: -0.04em;
+  --bt-tracking-tighter: -0.06em;
+  --bt-tracking-mono: 0.08em;
+  --bt-tracking-mono-wide: 0.12em;
+
+  /* Leading */
+  --bt-leading-compressed: 0.88;
+  --bt-leading-tight: 0.95;
+  --bt-leading-mono: 1.3;
+
+  /* ===== SPACING — Grid determinism ===== */
+  --bt-gap-hairline: 1px;
+  --bt-gap-unit: 4px;
+  --bt-gap-1: calc(var(--bt-gap-unit) * 1);   /* 4px */
+  --bt-gap-2: calc(var(--bt-gap-unit) * 2);   /* 8px */
+  --bt-gap-3: calc(var(--bt-gap-unit) * 3);   /* 12px */
+  --bt-gap-4: calc(var(--bt-gap-unit) * 4);   /* 16px */
+  --bt-gap-6: calc(var(--bt-gap-unit) * 6);   /* 24px */
+  --bt-gap-8: calc(var(--bt-gap-unit) * 8);   /* 32px */
+  --bt-gap-12: calc(var(--bt-gap-unit) * 12); /* 48px */
+  --bt-gap-16: calc(var(--bt-gap-unit) * 16); /* 64px */
+
+  /* ===== BORDERS — Zero radius, visible compartments ===== */
+  --bt-border-hairline: 1px solid var(--bt-fg-muted);
+  --bt-border-structural: 2px solid var(--bt-fg-secondary);
+  --bt-border-accent: 2px solid var(--bt-accent-red);
+  --bt-border-panel: 1px solid rgba(234, 234, 234, 0.08);
+
+  /* ===== MOTION — Mechanical, not organic ===== */
+  --bt-ease-mechanical: cubic-bezier(0.4, 0, 0.2, 1);
+  --bt-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --bt-duration-fast: 120ms;
+  --bt-duration-base: 200ms;
+  --bt-duration-slow: 350ms;
+
+  /* ===== ASCII FRAMING TOKENS ===== */
+  --bt-ascii-open: "[";
+  --bt-ascii-close: "]";
+  --bt-ascii-angle-open: "<";
+  --bt-ascii-angle-close: ">";
+  --bt-ascii-dir: ">>>";
+  --bt-ascii-slash: "///";
+  --bt-ascii-backslash: "\\\\\\";
+
+  /* ===== INDUSTRIAL MARKERS ===== */
+  --bt-marker-reg: "®";
+  --bt-marker-copy: "©";
+  --bt-marker-tm: "™";
+
+  /* ===== SCANLINE PARAMS ===== */
+  --bt-scanline-height: 4px;
+  --bt-scanline-opacity: 0.06;
+  --bt-scanline-speed: 8s;
+
+  /* ===== NOISE PARAMS ===== */
+  --bt-noise-opacity: 0.04;
+  --bt-noise-size: 180px;
+
+  /* ===== HALFTONE / DITHER ===== */
+  --bt-halftone-frequency: 0.08;
+  --bt-dither-threshold: 0.5;
+}
+
+/* ===========================================
+   GLOBAL BRUTALIST BASE
+   =========================================== */
+
+.bt-base {
+  /* Zero radius EVERYWHERE */
+  border-radius: 0 !important;
+}
+
+.bt-base * {
+  border-radius: 0 !important;
+}
+
+/* Grid determinism — hairline rules via gap + bg contrast */
+.bt-grid {
+  display: grid;
+  gap: var(--bt-gap-hairline);
+  background: var(--bt-border-hairline);
+}
+
+.bt-grid > * {
+  background: var(--bt-bg-panel);
+}
+
+/* Visible compartmentalization */
+.bt-compartment {
+  border: var(--bt-border-panel);
+  background: var(--bt-bg-panel);
+}
+
+.bt-compartment--heavy {
+  border: var(--bt-border-structural);
+}
+
+/* Semantic tags styling */
+bt-data,
+data[value] {
+  font-family: var(--bt-font-mono);
+  font-size: var(--bt-micro-md);
+  letter-spacing: var(--bt-tracking-mono);
+  color: var(--bt-fg-secondary);
+  text-transform: uppercase;
+}
+
+samp,
+kbd,
+output {
+  font-family: var(--bt-font-mono);
+  font-size: var(--bt-micro-sm);
+  letter-spacing: var(--bt-tracking-mono);
+  color: var(--bt-fg-primary);
+  background: var(--bt-bg-surface);
+  padding: 0 var(--bt-gap-1);
+}
+
+dl.bt-dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--bt-gap-2) var(--bt-gap-4);
+  font-family: var(--bt-font-mono);
+  font-size: var(--bt-micro-sm);
+  letter-spacing: var(--bt-tracking-mono);
+}
+
+dl.bt-dl dt {
+  color: var(--bt-fg-muted);
+  text-transform: uppercase;
+}
+
+dl.bt-dl dd {
+  color: var(--bt-fg-primary);
+  margin: 0;
+}
+
+/* ===========================================
+   TYPOGRAPHY — Macro & Micro
+   =========================================== */
+
+.bt-display-macro {
+  font-family: var(--bt-font-sans-heavy);
+  font-weight: 900;
+  font-size: var(--bt-display-md);
+  line-height: var(--bt-leading-compressed);
+  letter-spacing: var(--bt-tracking-tighter);
+  text-transform: uppercase;
+  color: var(--bt-fg-primary);
+}
+
+.bt-display-macro--sm {
+  font-size: var(--bt-display-sm);
+}
+
+.bt-display-macro--lg {
+  font-size: var(--bt-display-lg);
+}
+
+.bt-display-macro--xl {
+  font-size: var(--bt-display-xl);
+}
+
+.bt-micro {
+  font-family: var(--bt-font-mono);
+  font-size: var(--bt-micro-md);
+  line-height: var(--bt-leading-mono);
+  letter-spacing: var(--bt-tracking-mono);
+  text-transform: uppercase;
+  color: var(--bt-fg-secondary);
+}
+
+.bt-micro--primary {
+  color: var(--bt-fg-primary);
+}
+
+.bt-micro--accent {
+  color: var(--bt-accent-red);
+}
+
+.bt-micro--terminal {
+  color: var(--bt-terminal-green);
+}
+
+/* ===========================================
+   ASCII FRAMING COMPONENTS
+   =========================================== */
+
+.bt-frame {
+  position: relative;
+  font-family: var(--bt-font-mono);
+  font-size: var(--bt-micro-sm);
+  letter-spacing: var(--bt-tracking-mono-wide);
+  text-transform: uppercase;
+  color: var(--bt-fg-muted);
+}
+
+.bt-frame::before {
+  content: var(--bt-ascii-open);
+  margin-right: var(--bt-gap-1);
+}
+
+.bt-frame::after {
+  content: var(--bt-ascii-close);
+  margin-left: var(--bt-gap-1);
+}
+
+.bt-frame--angle::before {
+  content: var(--bt-ascii-angle-open);
+}
+
+.bt-frame--angle::after {
+  content: var(--bt-ascii-angle-close);
+}
+
+.bt-frame--dir::before {
+  content: var(--bt-ascii-dir);
+}
+
+.bt-frame--slash::before {
+  content: var(--bt-ascii-slash);
+}
+
+.bt-frame--backslash::before {
+  content: var(--bt-ascii-backslash);
+}
+
+/* Crosshair at grid intersections */
+.bt-crosshair {
+  position: relative;
+}
+
+.bt-crosshair::before,
+.bt-crosshair::after {
+  content: "";
+  position: absolute;
+  background: var(--bt-accent-red);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.bt-crosshair::before {
+  width: 1px;
+  height: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bt-crosshair::after {
+  width: 100%;
+  height: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Barcode vertical lines */
+.bt-barcode {
+  position: relative;
+  overflow: hidden;
+}
+
+.bt-barcode::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 2px,
+    rgba(230, 25, 25, 0.08) 2px,
+    rgba(230, 25, 25, 0.08) 4px
+  );
+}
+
+/* Warning stripes */
+.bt-warning-stripes {
+  position: relative;
+}
+
+.bt-warning-stripes::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 8px,
+    rgba(230, 25, 25, 0.1) 8px,
+    rgba(230, 25, 25, 0.1) 16px
+  );
+}
+
+/* ===========================================
+   SCANLINES — CRT Phosphor Sweep
+   =========================================== */
+
+.bt-scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: var(--bt-scanline-opacity);
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent calc(var(--bt-scanline-height) / 2),
+    rgba(0, 0, 0, 0.25) calc(var(--bt-scanline-height) / 2),
+    rgba(0, 0, 0, 0.25) var(--bt-scanline-height)
+  );
+  animation: bt-scan var(--bt-scanline-speed) linear infinite;
+}
+
+@keyframes bt-scan {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 var(--bt-scanline-height); }
+}
+
+/* ===========================================
+   MECHANICAL NOISE — Global Static
+   =========================================== */
+
+.bt-noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 90;
+  opacity: var(--bt-noise-opacity);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: bt-noise-shift 20s steps(10) infinite;
+}
+
+@keyframes bt-noise-shift {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(2px, 1px); }
+  50% { transform: translate(-1px, -2px); }
+  75% { transform: translate(1px, -1px); }
+}
+
+/* ===========================================
+   HALFTONE / DITHER FILTERS
+   =========================================== */
+
+.bt-halftone {
+  position: relative;
+}
+
+.bt-halftone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpattern id='dots' x='0' y='0' width='8' height='8' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='4' cy='4' r='3' fill='currentColor'/%3E%3C/pattern%3E%3Crect width='100%25' height='100%25' fill='url(%23dots)'/%3E%3C/svg%3E");
+  opacity: 0.15;
+  mix-blend-mode: multiply;
+}
+
+.bt-dither {
+  filter: url(#bt-dither-filter);
+  -webkit-filter: url(#bt-dither-filter);
+}
+
+/* SVG filter for 1-bit dithering (inject in document) */
+/* <svg style="position:absolute;width:0;height:0"><filter id="bt-dither-filter"><feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="4" result="noise"/><feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 20 -10"/><feComponentTransfer><feFuncR type="discrete" tableValues="0 1"/><feFuncG type="discrete" tableValues="0 1"/><feFuncB type="discrete" tableValues="0 1"/></feComponentTransfer><feBlend in="SourceGraphic" mode="multiply"/></filter></svg> */
+
+/* ===========================================
+   INDUSTRIAL MARKERS — Registration symbols as geometry
+   =========================================== */
+
+.bt-marker-reg::before { content: var(--bt-marker-reg); color: var(--bt-accent-red); font-size: 0.5em; vertical-align: super; margin-right: 2px; }
+.bt-marker-copy::before { content: var(--bt-marker-copy); color: var(--bt-fg-muted); font-size: 0.5em; vertical-align: super; margin-right: 2px; }
+.bt-marker-tm::before { content: var(--bt-marker-tm); color: var(--bt-fg-muted); font-size: 0.5em; vertical-align: super; margin-right: 2px; }
+
+/* ===========================================
+   TECHNICAL COORDINATES / UNIT IDs
+   =========================================== */
+
+.bt-coord {
+  font-family: var(--bt-font-mono);
+  font-size: var(--bt-micro-xs);
+  letter-spacing: var(--bt-tracking-mono-wide);
+  color: var(--bt-fg-muted);
+  text-transform: uppercase;
+}
+
+.bt-unit-id {
+  font-family: var(--bt-font-mono);
+  font-size: var(--bt-micro-sm);
+  letter-spacing: var(--bt-tracking-mono);
+  color: var(--bt-accent-red);
+  background: rgba(230, 25, 25, 0.08);
+  padding: 0 var(--bt-gap-2);
+  border: 1px solid rgba(230, 25, 25, 0.2);
+}
+
+.bt-rev-tag {
+  font-family: var(--bt-font-mono);
+  font-size: var(--bt-micro-xs);
+  letter-spacing: var(--bt-tracking-mono);
+  color: var(--bt-fg-muted);
+}
+
+/* ===========================================
+   STATUS INDICATOR — Terminal Green (SINGLE USE)
+   =========================================== */
+
+.bt-status-term {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bt-gap-2);
+  font-family: var(--bt-font-mono);
+  font-size: var(--bt-micro-sm);
+  letter-spacing: var(--bt-tracking-mono);
+  text-transform: uppercase;
+  color: var(--bt-terminal-green);
+}
+
+.bt-status-term::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--bt-terminal-green);
+  box-shadow:
+    0 0 8px var(--bt-terminal-green),
+    0 0 16px var(--bt-terminal-green);
+  animation: bt-pulse 2s ease-in-out infinite;
+}
+
+@keyframes bt-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--bt-terminal-green), 0 0 16px var(--bt-terminal-green); }
+  50% { opacity: 0.5; box-shadow: 0 0 4px var(--bt-terminal-green), 0 0 8px var(--bt-terminal-green); }
+}
+
+/* ===========================================
+   BUTTONS — Flat, mechanical, zero radius
+   =========================================== */
+
+.bt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bt-gap-2);
+  font-family: var(--bt-font-mono);
+  font-size: var(--bt-micro-sm);
+  letter-spacing: var(--bt-tracking-mono-wide);
+  text-transform: uppercase;
+  text-decoration: none;
+  border: var(--bt-border-structural);
+  background: transparent;
+  color: var(--bt-fg-primary);
+  padding: var(--bt-gap-2) var(--bt-gap-4);
+  transition: all var(--bt-duration-base) var(--bt-ease-mechanical);
+  cursor: pointer;
+}
+
+.bt-btn:hover {
+  background: var(--bt-fg-primary);
+  color: var(--bt-bg-deep);
+}
+
+.bt-btn--accent {
+  border-color: var(--bt-accent-red);
+  color: var(--bt-accent-red-glow);
+}
+
+.bt-btn--accent:hover {
+  background: var(--bt-accent-red);
+  color: var(--bt-bg-deep);
+}
+
+.bt-btn--terminal {
+  border-color: var(--bt-terminal-green);
+  color: var(--bt-terminal-green);
+}
+
+/* ===========================================
+   CARDS — Brutalist flat planes
+   =========================================== */
+
+.bt-card {
+  background: var(--bt-bg-panel);
+  border: var(--bt-border-panel);
+  padding: var(--bt-gap-6);
+  transition: border-color var(--bt-duration-base) var(--bt-ease-mechanical);
+}
+
+.bt-card:hover {
+  border-color: var(--bt-accent-red);
+}
+
+.bt-card--heavy {
+  border: var(--bt-border-structural);
+}
+
+/* ===========================================
+   SECTION DIVIDERS — Horizontal rules as compartment separators
+   =========================================== */
+
+.bt-divider {
+  height: 2px;
+  background: var(--bt-accent-red);
+  opacity: 0.3;
+  border: none;
+  margin: var(--bt-gap-12) 0;
+}
+
+.bt-divider--hairline {
+  height: 1px;
+  background: var(--bt-fg-muted);
+  opacity: 0.2;
+  margin: var(--bt-gap-8) 0;
+}
+
+/* ===========================================
+   PAGE FRAME — The printed/declassified edge
+   =========================================== */
+
+.bt-page-frame {
+  position: fixed;
+  inset: 16px;
+  pointer-events: none;
+  z-index: 80;
+  border: 1px solid rgba(234, 234, 234, 0.05);
+}
+
+@media (max-width: 640px) {
+  .bt-page-frame { inset: 8px; }
+}
+
+/* ===========================================
+   SELECTION — Red phosphor
+   =========================================== */
+
+.bt-base ::selection {
+  background: rgba(230, 25, 25, 0.4);
+  color: var(--bt-fg-primary);
+}
+
+/* ===========================================
+   ACCESSIBILITY — Respect reduced motion
+   =========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .bt-scanlines,
+  .bt-noise,
+  .bt-status-term::before,
+  .bt-noise,
+  .bt-drift {
+    animation: none !important;
+  }
+  .bt-btn,
+  .bt-card,
+  .bt-frame {
+    transition: none !important;
+  }
+}
+
+/* ===========================================
+   UTILITY — Drift animation for macro type
+   =========================================== */
+
+.bt-drift {
+  animation: bt-drift 15s ease-in-out infinite;
+}
+
+@keyframes bt-drift {
+  0% { transform: translateX(-1.5%); }
+  50% { transform: translateX(1.5%); }
+  100% { transform: translateX(-1.5%); }
+}
+
+/* ===========================================
+   FOCUS VISIBLE — Mechanical focus ring
+   =========================================== */
+
+.bt-base *:focus-visible {
+  outline: 2px solid var(--bt-accent-red);
+  outline-offset: 2px;
+}
