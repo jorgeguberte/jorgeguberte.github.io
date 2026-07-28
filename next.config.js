@@ -3,8 +3,6 @@ const { build } = require('velite');
 const isDev = process.env.NODE_ENV === 'development' || process.argv.indexOf('dev') !== -1;
 const isBuild = process.argv.indexOf('build') !== -1;
 
-console.log(`[next.config.js] NODE_ENV: ${process.env.NODE_ENV}, isDev: ${isDev}`);
-
 async function buildVelite() {
   if (!process.env.VELITE_STARTED && (isDev || isBuild)) {
     process.env.VELITE_STARTED = '1';
@@ -21,26 +19,12 @@ const nextConfig = {
     ? {
         async redirects() {
           return [
-            {
-              source: '/labs',
-              destination: '/labs/index.html',
-              permanent: false,
-            },
-            {
-              source: '/labs/',
-              destination: '/labs/index.html',
-              permanent: false,
-            },
-            {
-              source: '/labs/y2k-sensory',
-              destination: '/labs/y2k-sensory/index.html',
-              permanent: false,
-            },
-            {
-              source: '/labs/y2k-sensory/',
-              destination: '/labs/y2k-sensory/index.html',
-              permanent: false,
-            },
+            { source: '/labs', destination: '/labs/index.html', permanent: false },
+            { source: '/labs/', destination: '/labs/index.html', permanent: false },
+            { source: '/labs/y2k-sensory', destination: '/labs/y2k-sensory/index.html', permanent: false },
+            { source: '/labs/y2k-sensory/', destination: '/labs/y2k-sensory/index.html', permanent: false },
+            { source: '/blog', destination: '/writing', permanent: true },
+            { source: '/blog/:slug', destination: '/writing/:slug', permanent: true },
           ];
         },
       }

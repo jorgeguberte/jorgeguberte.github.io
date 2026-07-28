@@ -1,102 +1,76 @@
 import Link from "next/link";
 import { aboutPage, profile } from "../data/site-content";
 import { SeoHead } from "../components/SeoHead";
-import { Navbar } from "../components/Navbar";
-import { Footer } from "../components/Footer";
-import { BackToTop } from "../components/BackToTop";
 
-export default function AboutPage() {
+export default function About() {
   return (
     <>
       <SeoHead
         title="About — Jorge Guberte"
-        description="About Jorge Guberte: AI engineer, agent systems architect, and builder of memory-driven software."
+        description="Software engineer and systems builder in São Paulo. One thesis, pursued for years: AI systems should retain context, adapt over time, and remain useful beyond a single interaction."
         path="/about"
       />
 
-      <div className="site-layout">
-        <Navbar />
-
-        <main className="mx-auto max-w-4xl py-4">
-
-        <header className="glass-card mb-12 p-7 md:p-10">
-          <p className="eyebrow mb-5">About</p>
-          <h1 className="gradient-text mb-5 text-5xl font-semibold tracking-[-0.05em] md:text-6xl">
-            {profile.name}
+      <article className="shell py-24 md:py-36">
+        <header>
+          <p className="kicker mb-8">About · The architect</p>
+          <h1 className="display max-w-5xl text-5xl md:text-7xl lg:text-8xl">
+            The work is <em className="font-light text-brass-300">one idea</em>, taken seriously.
           </h1>
-          <p className="max-w-3xl text-lg leading-8 text-neutral-300 md:text-xl">
-            {aboutPage.intro}
-          </p>
         </header>
 
-        <section className="mb-12">
-          <div className="section-kicker">
-            <p className="eyebrow">What I care about</p>
+        <div className="mt-20 grid gap-10 border-t border-ink-700 pt-14 md:grid-cols-12">
+          <p className="kicker md:col-span-2">Origin</p>
+          <div className="max-w-3xl space-y-8 md:col-span-8 md:col-start-4">
+            {aboutPage.lede.map((paragraph, index) => (
+              <p
+                key={paragraph}
+                className={index === 0 ? "font-serif text-2xl leading-snug text-bone-100 md:text-3xl" : "body-text text-lg"}
+              >
+                {paragraph}
+              </p>
+            ))}
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {aboutPage.careAbout.map((item) => (
-              <article key={item} className="glass-card card-hover p-5">
-                <div className="flex gap-3 leading-7 text-neutral-200">
-                  <span className="dot" />
-                  <span>{item}</span>
-                </div>
-              </article>
+        </div>
+
+        <section className="mt-28 grid gap-10 border-t border-ink-700 pt-14 md:grid-cols-12">
+          <h2 className="kicker md:col-span-2">{aboutPage.throughLine.heading}</h2>
+          <div className="max-w-3xl space-y-7 md:col-span-8 md:col-start-4">
+            {aboutPage.throughLine.paragraphs.map((paragraph) => (
+              <p key={paragraph} className="body-text text-lg">{paragraph}</p>
             ))}
           </div>
         </section>
 
-        <section className="mb-12">
-          <div className="section-kicker">
-            <p className="eyebrow">Selected experience</p>
-          </div>
-          <div className="grid gap-4">
-            {aboutPage.work.map((item) => (
-              <article key={item.title} className="glass-card card-hover p-6">
-                <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-baseline md:justify-between">
-                  <h2 className="text-2xl font-semibold tracking-tight text-white">{item.title}</h2>
-                  <p className="font-mono text-sm text-emerald-300">{item.role}</p>
-                </div>
-                <p className="leading-7 text-neutral-400">{item.description}</p>
-              </article>
+        <section className="mt-28 grid gap-10 border-t border-ink-700 pt-14 md:grid-cols-12">
+          <h2 className="kicker md:col-span-2">{aboutPage.practice.heading}</h2>
+          <div className="max-w-3xl space-y-7 md:col-span-8 md:col-start-4">
+            {aboutPage.practice.paragraphs.map((paragraph) => (
+              <p key={paragraph} className="body-text text-lg">{paragraph}</p>
             ))}
           </div>
         </section>
 
-        <section className="mb-12">
-          <div className="section-kicker">
-            <p className="eyebrow">Stack</p>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {aboutPage.stackGroups.map((group) => (
-              <article key={group.title} className="glass-card p-6">
-                <h2 className="eyebrow mb-4">{group.title}</h2>
-                <div className="flex flex-wrap gap-2">
-                  {group.items.map((item) => (
-                    <span key={item} className="chip">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </article>
+        <section className="mt-28 border-t border-ink-700 pt-14">
+          <h2 className="kicker mb-10">{aboutPage.domains.heading}</h2>
+          <ul className="grid overflow-hidden border border-ink-700 sm:grid-cols-2 lg:grid-cols-3">
+            {aboutPage.domains.items.map((item, index) => (
+              <li key={item} className="flex min-h-36 gap-5 border-b border-r border-ink-700 bg-ink-900 p-6 text-bone-300">
+                <span className="card-index pt-1">{String(index + 1).padStart(2, "0")}</span>
+                <span className="leading-7">{item}</span>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
 
-        <section className="glass-card-strong p-7 md:p-8">
-          <p className="max-w-3xl text-xl leading-8 text-neutral-100">{aboutPage.closing}</p>
-          <div className="mt-7 flex flex-wrap gap-4">
-            <Link href="/blog" className="link-arrow">
-              Read the blog →
-            </Link>
-            <a href="https://github.com/jorgeguberte" target="_blank" rel="noopener noreferrer" className="link-arrow">
-              Visit GitHub →
-            </a>
+        <section className="mt-28 border-t border-ink-700 pt-20">
+          <p className="pullquote ml-8 max-w-3xl md:ml-12">{aboutPage.closing}</p>
+          <div className="mt-14 flex flex-wrap gap-4">
+            <Link href="/work-with-me" className="btn-primary">Work with me ↗</Link>
+            <a href={profile.github} target="_blank" rel="noreferrer" className="btn-ghost">GitHub ↗</a>
           </div>
         </section>
-        <Footer />
-        </main>
-        <BackToTop />
-      </div>
+      </article>
     </>
   );
 }
