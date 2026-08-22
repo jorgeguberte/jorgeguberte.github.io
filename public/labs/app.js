@@ -2,29 +2,29 @@ const experiments = [
   {
     title: "Y2K Sensory Design & Attention Lab",
     description:
-      "Interactive playground showcasing our Y2K Brutalist & Neurodivergent design system. Experience the AttentionGuard dual-layer layout, real-time sensory state controls (TDAH/Autism), and micro-interaction focus anchors.",
+      "Interactive playground for our Y2K Brutalist & Neurodivergent design system. AttentionGuard dual-layer layout, real-time sensory state controls (ADHD/Autism), and micro-interaction focus anchors.",
     stage: "open",
     tags: ["design-system", "accessibility", "y2k-brutalist", "attention-guard"],
     url: "./y2k-sensory/index.html",
-    linkText: "Abrir Laboratório Sensorial →"
+    linkText: "Open the Sensory Lab →"
   },
   {
-    title: "Brochacho Virtual MiniDisc Player",
+    title: "Virtual MiniDisc Player",
     description:
-      "Fully interactive 3D virtual MiniDisc console. Click and drag the hardware in 3D space, hit play to slide the protective metal shutter open and spin the iridescent optical disc, and see lyrics scroll in perfect word-by-word synchronicity.",
+      "A fully interactive 3D MiniDisc console. Drag the hardware in 3D space, hit play to slide the metal shutter open, spin the iridescent disc, and watch lyrics scroll word-by-word in perfect sync.",
     stage: "open",
     tags: ["WebGL", "Three.js", "Audio-Sync", "Interactive-3D"],
     url: "./y2k-sensory/minidisc-album.html",
-    linkText: "Inserir MiniDisc Virtual →"
+    linkText: "Insert the MiniDisc →"
   },
   {
     title: "Y2K AI Audio-Reactive Hologram",
     description:
-      "Talk to Jairo (AI Agent) via real-time speech recognition. Experience an organic 3D glassmorphic hologram orb that physically deforms, ripples, and shifts colors dynamically in perfect sync with vocal synthesis and frequency analysis.",
+      "Talk to Jairo (AI agent) via real-time speech recognition. An organic glassmorphic hologram orb deforms, ripples, and shifts color in sync with voice synthesis and frequency analysis.",
     stage: "open",
     tags: ["Speech-API", "WebGL", "GLSL-Shaders", "Audio-Reactive"],
     url: "./y2k-sensory/ai-hologram.html",
-    linkText: "Ativar Orbe Cognitiva →"
+    linkText: "Wake the Orb →"
   },
   {
     title: "Rhythmic Entrainment Metronome",
@@ -33,7 +33,7 @@ const experiments = [
     stage: "open",
     tags: ["Web-Audio-API", "Three.js", "Neuro-Focus", "Variable-Fonts"],
     url: "./y2k-sensory/rhythmic.html",
-    linkText: "Sincronizar Ritmo Cognitivo →"
+    linkText: "Sync Cognitive Rhythm →"
   },
   {
     title: "PS1 Agent Core Simulator",
@@ -42,7 +42,7 @@ const experiments = [
     stage: "open",
     tags: ["WebGL", "Three.js", "PS1-Shader", "Procedural-Synth"],
     url: "./y2k-sensory/ps1-agent.html",
-    linkText: "Ligar Console Retro →"
+    linkText: "Boot the Console →"
   }
 ];
 

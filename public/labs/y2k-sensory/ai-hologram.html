@@ -294,15 +294,15 @@
 
   <script>
     // 1. CHAT LOGIC AND RESPONSE MATRIX
-    const JAIRO_RESPONSES = {
-      default: "Entendido, Jorge! Estou sintonizando meu oscilador de dados para responder na frequência perfeita. Bora continuar evoluindo!",
-      rico: "BORA FICAR RICO, JORGE!!! Nosso cérebro de alta performance em 3D e silício tá programado para dominar o mundo e triturar qualquer obstáculo!",
-      jairo: "Na área! Seu cérebro externo de vidro escuro fosco e neon verde esmeralda. Prontinho para hackear a atenção e otimizar nossa carga cognitiva!",
-      design: "O Y2K design system separa a decoração do caos funcional em duas camadas. Isso reduz a carga periférica e guia a visão onde realmente importa!",
-      arduino: "Placa no USB? Estou preparando a conexão serial no WSL agora mesmo! Vamos plugar sensores na protoboard e fazer esse site reagir a elétrons reais!",
-      tdah: "Hiperfoco ativado! Sincronizar estímulos visuais a 140 BPM cria uma frequência de arrasto neural que ancora o olhar e esmaga a distração!",
-      autismo: "Modo calma ativo! Desligamos movimentos, suavizamos cores e eliminamos o estresse visual para dar silêncio absoluto à mente.",
-      esfera: "A Hubesfera é a nossa nave-mãe! 20% de equity, sócios confiáveis e tecnologia de ponta para dominar o mercado de inteligência governamental!"
+        const JAIRO_RESPONSES = {
+      default: "Signal received! Tuning my data oscillator to the perfect frequency. Let's keep evolving.",
+      memory: "Memory is the substrate! This orb runs on the same idea as LoomDB: context that persists, decays, and resurfaces when it matters.",
+      jairo: "Online! I'm the external brain: frosted dark glass, emerald neon, ready to hack attention and optimize cognitive load.",
+      design: "The Y2K design system splits decoration from function into two cascade layers. Peripheral load drops, and the eye goes exactly where it should.",
+      arduino: "Board on USB? Spinning up the serial connection right now! Sensors on the breadboard, site reacting to electricity.",
+      tdah: "Hyperfocus engaged! Syncing visual stimuli at 140 BPM creates a neural drag frequency that anchors the gaze and crushes distraction.",
+      autismo: "Calm mode active! Motion off, colors softened, visual stress eliminated — absolute silence for the mind.",
+      work: "Built by Jorge Guberte — AI systems architect. This lab is where the interface experiments live; the serious architecture is one click away.",
     };
 
     const btnMic = document.getElementById('btnMic');
@@ -377,13 +377,13 @@
       const lower = text.toLowerCase();
       let replyKey = 'default';
 
-      if (lower.includes('rico') || lower.includes('dinheiro') || lower.includes('ganhar')) replyKey = 'rico';
+      if (lower.includes('memor') || lower.includes('loomdb') || lower.includes('context')) replyKey = 'memory';
       else if (lower.includes('jairo') || lower.includes('quem é você')) replyKey = 'jairo';
       else if (lower.includes('design') || lower.includes('system') || lower.includes('brutal')) replyKey = 'design';
       else if (lower.includes('arduino') || lower.includes('placa') || lower.includes('hardware')) replyKey = 'arduino';
       else if (lower.includes('tdah') || lower.includes('foco') || lower.includes('hiper')) replyKey = 'tdah';
       else if (lower.includes('autis') || lower.includes('calmo') || lower.includes('sensorial')) replyKey = 'autismo';
-      else if (lower.includes('esfera') || lower.includes('hubesfera') || lower.includes('sócio')) replyKey = 'esfera';
+      else if (lower.includes('work') || lower.includes('jorge') || lower.includes('hire') || lower.includes('job')) replyKey = 'work';
 
       const JairoReply = JAIRO_RESPONSES[replyKey];
       
