@@ -1,21 +1,46 @@
 import Link from "next/link";
-import { aboutPage, profile } from "../data/site-content";
+import { aboutPage, profile, experience, skillGroups } from "../data/site-content";
 import { SeoHead } from "../components/SeoHead";
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Jorge Guberte",
+  jobTitle: "Principal AI Systems Architect",
+  email: "mailto:" + profile.email,
+  url: "https://jorgeguberte.com",
+  sameAs: [profile.github, profile.linkedin],
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "São Paulo",
+    addressCountry: "BR",
+  },
+  knowsAbout: [
+    "AI systems architecture",
+    "Agent orchestration",
+    "Agent memory architectures",
+    "Retrieval-augmented generation",
+    "Context engineering",
+    "Generative UI",
+  ],
+  alumniOf: [{ "@type": "CollegeOrUniversity", name: "University of São Paulo" }],
+};
 
 export default function About() {
   return (
     <>
       <SeoHead
         title="About — Jorge Guberte"
-        description="Software engineer and systems builder in São Paulo. One thesis, pursued for years: AI systems should retain context, adapt over time, and remain useful beyond a single interaction."
+        description="Principal AI Systems Architect in São Paulo. 12+ years of production systems; now building AI that persists — agent memory, orchestration, and generative UI."
         path="/about"
       />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
 
       <article className="shell py-24 md:py-36">
         <header>
           <p className="kicker mb-8">About · The architect</p>
           <h1 className="display max-w-5xl text-5xl md:text-7xl lg:text-8xl">
-            The work is <em className="font-light text-brass-300">one idea</em>, taken seriously.
+            Architecture first. <em className="font-light text-brass-300">Always.</em>
           </h1>
         </header>
 
@@ -49,6 +74,43 @@ export default function About() {
               <p key={paragraph} className="body-text text-lg">{paragraph}</p>
             ))}
           </div>
+        </section>
+
+        {/* Professional timeline */}
+        <section className="mt-28 border-t border-ink-700 pt-14">
+          <h2 className="kicker mb-12">The path so far</h2>
+          <ol className="space-y-10">
+            {experience.map((job) => (
+              <li key={job.org + job.period} className="grid gap-3 md:grid-cols-[14rem_1fr]">
+                <div>
+                  <p className="font-mono text-[0.63rem] font-semibold uppercase tracking-[0.15em] text-brass-400">
+                    {job.period}
+                  </p>
+                  <p className="tag mt-1 normal-case">{job.location}</p>
+                </div>
+                <div>
+                  <h3 className="font-serif text-xl text-bone-100">
+                    {job.role} · <span className="text-brass-300">{job.org}</span>
+                  </h3>
+                  <p className="body-text mt-2 max-w-3xl text-base">{job.summary}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <Link href="/cv" className="link-quiet mt-12 inline-flex">Full printable CV →</Link>
+        </section>
+
+        {/* Skills */}
+        <section className="mt-28 border-t border-ink-700 pt-14">
+          <h2 className="kicker mb-10">Toolbox</h2>
+          <dl className="grid gap-x-10 gap-y-6 md:grid-cols-2">
+            {skillGroups.map((group) => (
+              <div key={group.label}>
+                <dt className="tag mb-2">{group.label}</dt>
+                <dd className="body-text text-sm leading-6">{group.items.join(" · ")}</dd>
+              </div>
+            ))}
+          </dl>
         </section>
 
         <section className="mt-28 border-t border-ink-700 pt-14">

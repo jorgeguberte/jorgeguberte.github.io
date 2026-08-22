@@ -409,3 +409,69 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- CV print styles ---------- */
+@media print {
+  :root {
+    --print-ink: #1a2420;
+    --print-paper: #ffffff;
+  }
+
+  html, body {
+    background: #fff !important;
+    color: var(--print-ink) !important;
+  }
+
+  .site-header,
+  .site-footer,
+  .ambient-glow,
+  .skip-link {
+    display: none !important;
+  }
+
+  .site-frame {
+    background: #fff !important;
+    overflow: visible !important;
+  }
+
+  .cv-root {
+    color: var(--print-ink) !important;
+    padding-top: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .cv-root * {
+    color: var(--print-ink) !important;
+    border-color: #c9d4cd !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .cv-root .kicker,
+  .cv-root .text-brass-300,
+  .cv-root .text-brass-400 {
+    color: #3d6b28 !important;
+  }
+
+  .cv-root a {
+    text-decoration: none !important;
+  }
+
+  .cv-root [class*="bg-ink"],
+  .cv-root [class*="border-ink"] {
+    background: transparent !important;
+  }
+
+  @page {
+    margin: 1.6cm 1.4cm;
+  }
+}
+
+.no-print {
+}
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
