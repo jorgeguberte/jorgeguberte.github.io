@@ -36,6 +36,15 @@ const experiments = [
     linkText: "Sync Cognitive Rhythm →"
   },
   {
+    title: "Interaction Research — Seven Prototypes",
+    description:
+      "A curated series of post-chat interaction paradigms: documents with depth (Semantic LOD), visible coherence (Oscilloscope), hand-sculpted text (Chisel), inline counterfactuals (Ghost Diffs), typographic prosody, physical Rust lifetimes, and 3D chaotic attractors.",
+    stage: "open",
+    tags: ["hci", "generative-ui", "direct-manipulation", "research-series"],
+    url: "./interaction/",
+    linkText: "Enter Interaction Research →"
+  },
+  {
     title: "PS1 Agent Core Simulator",
     description:
       "Interactive 3D simulation running a custom vertex-jitter shader to replicate the iconic PlayStation 1 graphics engine. Boot up, control low-poly agent nodes, and interact with the grid.",

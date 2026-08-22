@@ -1,0 +1,526 @@
+<!DOCTYPE html>  
+<html lang="pt">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
+  <title>Cinzel Semântico — Direct Text Morphing</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">  
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1\&family=JetBrains+Mono:wght@400;500;600;700\&family=Plus+Jakarta+Sans:wght@400;500;600;700\&display=swap" rel="stylesheet">
+
+  <style>  
+    :root {  
+      --bg: #09090b;  
+      --card-bg: #121215;  
+      --card-hover: #18181c;  
+      --border: #27272a;  
+      --border-focus: #3f3f46;  
+      --text: #f4f4f5;  
+      --text-muted: #71717a;  
+      --text-faint: #3f3f46;  
+      --accent: #ea580c;  
+      --accent-glow: rgba(234, 88, 12, 0.25);  
+      --accent-dim: rgba(234, 88, 12, 0.1);  
+      --cyan: #06b6d4;  
+      --cyan-dim: rgba(6, 182, 212, 0.1);  
+      --purple: #a855f7;  
+      --purple-dim: rgba(168, 85, 247, 0.1);  
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {  
+      background-color: var(--bg);  
+      color: var(--text);  
+      font-family: 'Plus Jakarta Sans', sans-serif;  
+      min-height: 100vh;  
+      display: flex;  
+      flex-direction: column;  
+      align-items: center;  
+      padding: 48px 20px;  
+      -webkit-font-smoothing: antialiased;  
+    }
+
+    .container {  
+      width: 100%;  
+      max-width: 820px;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 24px;  
+    }
+
+    /* HEADER */  
+    .chisel-header {  
+      border-bottom: 1px solid var(--border);  
+      padding-bottom: 18px;  
+      display: flex;  
+      justify-content: space-between;  
+      align-items: flex-end;  
+    }
+
+    .brand-group {  
+      display: flex;  
+      flex-direction: column;  
+      gap: 4px;  
+    }
+
+    .brand-tag {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      font-weight: 600;  
+      text-transform: uppercase;  
+      letter-spacing: 0.1em;  
+      color: var(--accent);  
+    }
+
+    .doc-title {  
+      font-family: 'Instrument Serif', Georgia, serif;  
+      font-size: 30px;  
+      color: #fff;  
+    }
+
+    .reset-btn {  
+      background: transparent;  
+      border: 1px solid var(--border);  
+      color: var(--text-muted);  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      padding: 6px 12px;  
+      border-radius: 5px;  
+      cursor: pointer;  
+      transition: all 0.15s;  
+    }
+
+    .reset-btn:hover {  
+      border-color: var(--accent);  
+      color: #fff;  
+    }
+
+    /* BARRA DE DICAS DE GESTO */  
+    .gestures-hint {  
+      display: flex;  
+      justify-content: space-between;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      color: var(--text-faint);  
+      padding: 0 4px;  
+    }
+
+    /* PALCO DE BLOCOS */  
+    .chisel-stage {  
+      display: flex;  
+      flex-direction: column;  
+      gap: 20px;  
+      position: relative;  
+    }
+
+    /* BLOCO EDITORIAL COM SUPORTE AO CINZEL */  
+    .morph-block {  
+      background: var(--card-bg);  
+      border: 1px solid var(--border);  
+      border-radius: 10px;  
+      padding: 24px 28px;  
+      position: relative;  
+      transition: border-color 0.25s, background 0.25s, box-shadow 0.25s, transform 0.25s;  
+      cursor: pointer;  
+    }
+
+    .morph-block:hover {  
+      border-color: var(--border-focus);  
+    }
+
+    .morph-block.focused {  
+      border-color: var(--accent);  
+      box-shadow: 0 0 20px -5px var(--accent-glow);  
+    }
+
+    .block-tag {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10.5px;  
+      text-transform: uppercase;  
+      letter-spacing: 0.08em;  
+      color: var(--text-muted);  
+      margin-bottom: 12px;  
+      display: flex;  
+      justify-content: space-between;  
+      align-items: center;  
+    }
+
+    .block-state-pill {  
+      font-size: 9.5px;  
+      font-weight: 600;  
+      padding: 1px 6px;  
+      border-radius: 3px;  
+      background: rgba(255,255,255,0.05);  
+      color: var(--text-muted);  
+    }
+
+    /* MOLDURA DO CINZEL (ALÇAS VETORIAIS DE MANIPULAÇÃO) */  
+    .chisel-rig {  
+      position: absolute;  
+      inset: -1px;  
+      border: 1px dashed var(--accent);  
+      border-radius: 10px;  
+      pointer-events: none;  
+      opacity: 0;  
+      transition: opacity 0.2s ease;  
+      display: flex;  
+      align-items: center;  
+      justify-content: space-between;  
+    }
+
+    .morph-block.focused .chisel-rig {  
+      opacity: 1;  
+      pointer-events: auto;  
+    }
+
+    /* AS ALÇAS FÍSICAS (HANDLES) */  
+    .handle {  
+      position: absolute;  
+      background: var(--surface);  
+      border: 1px solid var(--accent);  
+      color: var(--accent);  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10px;  
+      font-weight: 700;  
+      border-radius: 4px;  
+      display: flex;  
+      align-items: center;  
+      justify-content: center;  
+      cursor: pointer;  
+      transition: all 0.15s ease;  
+      z-index: 10;  
+      box-shadow: 0 4px 10px rgba(0,0,0,0.6);  
+      background: #18181c;  
+    }
+
+    .handle:hover {  
+      background: var(--accent);  
+      color: #fff;  
+      transform: scale(1.08);  
+    }
+
+    /* Handle Esquerdo & Direito (Comprimir) */  
+    .handle-squeeze-left {  
+      left: -14px;  
+      top: 50%;  
+      transform: translateY(-50%);  
+      padding: 10px 4px;  
+      writing-mode: vertical-rl;  
+    }
+
+    .handle-squeeze-right {  
+      right: -14px;  
+      top: 50%;  
+      transform: translateY(-50%);  
+      padding: 10px 4px;  
+      writing-mode: vertical-rl;  
+    }
+
+    /* Handle Superior (Bifurcar / Split) */  
+    .handle-split-top {  
+      top: -12px;  
+      left: 50%;  
+      transform: translateX(-50%);  
+      padding: 2px 10px;  
+    }
+
+    /* Handle Inferior (Fundir / Merge) */  
+    .handle-merge-bottom {  
+      bottom: -12px;  
+      left: 50%;  
+      transform: translateX(-50%);  
+      padding: 2px 10px;  
+      color: var(--purple);  
+      border-color: var(--purple);  
+    }
+
+    .handle-merge-bottom:hover {  
+      background: var(--purple);  
+      color: #fff;  
+    }
+
+    /* CONTEÚDO MUTÁVEL (MORPHING STATES) */  
+    .content-canvas {  
+      font-size: 15.5px;  
+      line-height: 1.7;  
+      color: #d4d4d8;  
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);  
+    }
+
+    /* 1. ESTADO SKELETON (COMPRIMIDO) */  
+    .morph-block.state-skeleton .content-canvas {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 13.5px;  
+      line-height: 1.6;  
+      color: #fafafa;  
+      background: #09090b;  
+      padding: 14px 16px;  
+      border-radius: 6px;  
+      border: 1px solid var(--border);  
+    }
+
+    .morph-block.state-skeleton .fluff {  
+      display: none;  
+    }
+
+    .morph-block.state-skeleton .core-fact {  
+      color: var(--accent);  
+      font-weight: 600;  
+    }
+
+    /* 2. ESTADO SPLIT (BIFURCADO EM COLUNAS) */  
+    .split-layout {  
+      display: grid;  
+      grid-template-columns: 1fr 1fr;  
+      gap: 16px;  
+      padding-top: 4px;  
+    }
+
+    .split-col {  
+      background: #0d0d10;  
+      border: 1px solid var(--border);  
+      border-radius: 6px;  
+      padding: 14px 16px;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 8px;  
+    }
+
+    .split-col.thesis { border-left: 3px solid var(--cyan); }  
+    .split-col.antithesis { border-left: 3px solid var(--accent); }
+
+    .split-tag {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10px;  
+      text-transform: uppercase;  
+      font-weight: 700;  
+    }
+
+    .split-tag.thesis { color: var(--cyan); }  
+    .split-tag.antithesis { color: var(--accent); }
+
+    .split-body {  
+      font-size: 13.5px;  
+      line-height: 1.55;  
+      color: #d4d4d8;  
+    }
+
+    /* 3. ESTADO MERGED (FUSÃO DE DOIS BLOCOS) */  
+    .morph-block.state-merged {  
+      border-color: var(--purple);  
+      background: rgba(168, 85, 247, 0.03);  
+    }
+
+    .merged-banner {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10px;  
+      text-transform: uppercase;  
+      color: var(--purple);  
+      margin-bottom: 8px;  
+      font-weight: 600;  
+    }  
+  </style>  
+</head>  
+<body>
+
+  <div class="container">  
+      
+    <header class="chisel-header">  
+      <div class="brand-group">  
+        <span class="brand-tag">// Direct Text Morphing</span>  
+        <h1 class="doc-title">Cinzel Semântico & Deformação In-Place</h1>  
+      </div>
+
+      <button class="reset-btn" onclick="resetAllBlocks()">Restaurar Original ↺</button>  
+    </header>
+
+    <div class="gestures-hint">  
+      <span>Clica num bloco para ativar a moldura com as 4 alças do cinzel</span>  
+      <span>Manipulação direta sem modais</span>  
+    </div>
+
+    <main class="chisel-stage" id="stage">  
+        
+      <article class="morph-block focused" id="block-1" onclick="focusBlock(1)">  
+          
+        <div class="chisel-rig">  
+          <div class="handle handle-squeeze-left" onclick="toggleSqueeze(1, event)" title="Comprimir para Esqueleto Lógico">◄ COMPRIMIR</div>  
+          <div class="handle handle-split-top" onclick="toggleSplit(1, event)" title="Bifurcar Tese e Antítese">◫ BIFURCAR DIALÉTICA ◫</div>  
+          <div class="handle handle-squeeze-right" onclick="toggleSqueeze(1, event)" title="Comprimir para Esqueleto Lógico">COMPRIMIR ►</div>  
+          <div class="handle handle-merge-bottom" onclick="mergeWithNext(1, 2, event)" title="Fundir com o Parágrafo Seguinte">▼ FUNDIR COM BLOCO 02 ▼</div>  
+        </div>
+
+        <div class="block-tag">  
+          <span>01. Enquadramento e Montante</span>  
+          <span class="block-state-pill" id="state-pill-1">Prosa Completa</span>  
+        </div>
+
+        <div class="content-canvas" id="canvas-1">  
+          <span class="fluff">Com base nas análises de aderência regulatória, </span>  
+          o município foi formalmente enquadrado no   
+          <span class="core-fact">Eixo 2 de Drenagem Sustentável</span>,   
+          <span class="fluff">garantindo a elegibilidade técnica para a </span>  
+          captação integral de   
+          <span class="core-fact">R$ 6.240.000,00</span>   
+          <span class="fluff">junto aos fundos federais de infraestrutura, com cláusula de </span>  
+          <span class="core-fact">contrapartida zero</span>  
+          <span class="fluff"> do orçamento municipal.</span>  
+        </div>
+
+      </article>
+
+      <article class="morph-block" id="block-2" onclick="focusBlock(2)">  
+          
+        <div class="chisel-rig">  
+          <div class="handle handle-squeeze-left" onclick="toggleSqueeze(2, event)" title="Comprimir para Esqueleto Lógico">◄ COMPRIMIR</div>  
+          <div class="handle handle-split-top" onclick="toggleSplit(2, event)" title="Bifurcar Tese e Antítese">◫ BIFURCAR DIALÉTICA ◫</div>  
+          <div class="handle handle-squeeze-right" onclick="toggleSqueeze(2, event)" title="Comprimir para Esqueleto Lógico">COMPRIMIR ►</div>  
+        </div>
+
+        <div class="block-tag">  
+          <span>02. Prazos e Execução Técnica</span>  
+          <span class="block-state-pill" id="state-pill-2">Prosa Completa</span>  
+        </div>
+
+        <div class="content-canvas" id="canvas-2">  
+          <span class="fluff">Para assegurar a liberação dos recursos sem bloqueios burocráticos, a submissão dos laudos de engenharia deve ocorrer impreterivelmente em </span>  
+          <span class="core-fact">11 dias úteis</span>  
+          <span class="fluff">, exigindo a designação imediata de </span>  
+          <span class="core-fact">3 engenheiros efetivos</span>  
+          <span class="fluff"> para acompanhar a tramitação no sistema de convênios.</span>  
+        </div>
+
+      </article>
+
+    </main>
+
+  </div>
+
+  <script>  
+    /* TEXTOS BASE E TRANSFORMAÇÕES SEMÂNTICAS */  
+    const originalContent = {  
+      1: `<span class="fluff">Com base nas análises de aderência regulatória, </span>o município foi formalmente enquadrado no <span class="core-fact">Eixo 2 de Drenagem Sustentável</span>, <span class="fluff">garantindo a elegibilidade técnica para a </span>captação integral de <span class="core-fact">R$ 6.240.000,00</span> <span class="fluff">junto aos fundos federais de infraestrutura, com cláusula de </span><span class="core-fact">contrapartida zero</span><span class="fluff"> do orçamento municipal.</span>`,  
+      2: `<span class="fluff">Para assegurar a liberação dos recursos sem bloqueios burocráticos, a submissão dos laudos de engenharia deve ocorrer impreterivelmente em </span><span class="core-fact">11 dias úteis</span><span class="fluff">, exigindo a designação imediata de </span><span class="core-fact">3 engenheiros efetivos</span><span class="fluff"> para acompanhar a tramitação no sistema de convênios.</span>`  
+    };
+
+    const skeletonContent = {  
+      1: `[ESQUELETO LÓGICO]: Enquadramento: Eixo 2 // Montante: R$ 6.240.000,00 // Contrapartida: R$ 0,00 (Isento).`,  
+      2: `[ESQUELETO LÓGICO]: Janela: 11 dias úteis // Recursos Humanos: 3 engenheiros // Ação: Protocolo de laudos.`  
+    };
+
+    const splitContent = {  
+      1: `  
+        <div class="split-layout">  
+          <div class="split-col thesis">  
+            <span class="split-tag thesis">// TESE: CAPTAÇÃO MÁXIMA</span>  
+            <p class="split-body">Submeter o teto integral de R$ 6.240.000 sem contrapartida aproveita o orçamento federal antes da virada do exercício.</p>  
+          </div>  
+          <div class="split-col antithesis">  
+            <span class="split-tag antithesis">// ANTÍTESE: RISCO DE GLOSA</span>  
+            <p class="split-body">Executar volume recorde sem margem de contingência pode saturar a secretaria e gerar apontamentos no TCE.</p>  
+          </div>  
+        </div>  
+      `,  
+      2: `  
+        <div class="split-layout">  
+          <div class="split-col thesis">  
+            <span class="split-tag thesis">// TESE: PROTOCOLO ACELERADO</span>  
+            <p class="split-body">Finalizar laudos nos 11 dias úteis garante prioridade na primeira fila de empenho federal.</p>  
+          </div>  
+          <div class="split-col antithesis">  
+            <span class="split-tag antithesis">// ANTÍTESE: SOBRECARGA TÉCNICA</span>  
+            <p class="split-body">Alocar 3 servidores em regime exclusivo paralisa as vistorias de rotina das obras municipais em andamento.</p>  
+          </div>  
+        </div>  
+      `  
+    };
+
+    function focusBlock(id) {  
+      document.querySelectorAll('.morph-block').forEach(b => b.classList.remove('focused'));  
+      const target = document.getElementById(`block-${id}`);  
+      if (target) target.classList.add('focused');  
+    }
+
+    /* 1. GESTO: COMPRIMIR / SQUEEZE */  
+    function toggleSqueeze(id, e) {  
+      e.stopPropagation();  
+      const block = document.getElementById(`block-${id}`);  
+      const canvas = document.getElementById(`canvas-${id}`);  
+      const pill = document.getElementById(`state-pill-${id}`);
+
+      if (block.classList.contains('state-skeleton')) {  
+        block.classList.remove('state-skeleton');  
+        canvas.innerHTML = originalContent[id];  
+        pill.textContent = "Prosa Completa";  
+      } else {  
+        block.classList.remove('state-split');  
+        block.classList.add('state-skeleton');  
+        canvas.innerHTML = skeletonContent[id];  
+        pill.textContent = "Esqueleto Lógico";  
+      }  
+    }
+
+    /* 2. GESTO: BIFURCAR / SPLIT */  
+    function toggleSplit(id, e) {  
+      e.stopPropagation();  
+      const block = document.getElementById(`block-${id}`);  
+      const canvas = document.getElementById(`canvas-${id}`);  
+      const pill = document.getElementById(`state-pill-${id}`);
+
+      if (block.classList.contains('state-split')) {  
+        block.classList.remove('state-split');  
+        canvas.innerHTML = originalContent[id];  
+        pill.textContent = "Prosa Completa";  
+      } else {  
+        block.classList.remove('state-skeleton');  
+        block.classList.add('state-split');  
+        canvas.innerHTML = splitContent[id];  
+        pill.textContent = "Bifurcação Dialética";  
+      }  
+    }
+
+    /* 3. GESTO: FUNDIR / MERGE */  
+    function mergeWithNext(id1, id2, e) {  
+      e.stopPropagation();  
+      const block1 = document.getElementById(`block-${id1}`);  
+      const block2 = document.getElementById(`block-${id2}`);  
+      const canvas1 = document.getElementById(`canvas-${id1}`);  
+      const pill1 = document.getElementById(`state-pill-${id1}`);
+
+      block1.classList.add('state-merged');  
+      pill1.textContent = "Síntese Fundida (Bloco 01 + 02)";  
+      pill1.style.color = "var(--purple)";
+
+      canvas1.innerHTML = `  
+        <div class="merged-banner">// SÍNTESE COGNITIVA UNIFICADA:</div>  
+        O município formalizou a captação de <strong>R$ 6.240.000,00</strong> (Eixo 2 / Contrapartida Zero), condicionada à entrega dos laudos técnicos por <strong>3 engenheiros</strong> na janela improrrogável de <strong>11 dias úteis</strong>.  
+      `;
+
+      // Oculta suavemente o Bloco 2 que foi absorvido  
+      block2.style.transition = "all 0.3s ease";  
+      block2.style.opacity = "0.25";  
+      block2.style.pointerEvents = "none";  
+      block2.style.transform = "scale(0.98)";  
+    }
+
+    /* RESTAURAR ESTADO ORIGINAL */  
+    function resetAllBlocks() {  
+      [1, 2].forEach(id => {  
+        const block = document.getElementById(`block-${id}`);  
+        const canvas = document.getElementById(`canvas-${id}`);  
+        const pill = document.getElementById(`state-pill-${id}`);
+
+        block.className = "morph-block" + (id === 1 ? " focused" : "");  
+        block.style.opacity = "1";  
+        block.style.pointerEvents = "auto";  
+        block.style.transform = "none";  
+        canvas.innerHTML = originalContent[id];  
+        pill.textContent = "Prosa Completa";  
+        pill.style.color = "var(--text-muted)";  
+      });  
+    }  
+  </script>  
+</body>  
+</html>

@@ -1,0 +1,466 @@
+<!DOCTYPE html>  
+<html lang="pt">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
+  <title>Ghost Diffs — Inline Cherry-Picking</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">  
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1\&family=JetBrains+Mono:wght@400;500;600;700\&family=Plus+Jakarta+Sans:wght@400;500;600;700\&display=swap" rel="stylesheet">
+
+  <style>  
+    :root {  
+      --bg: #09090b;  
+      --card-bg: #121215;  
+      --card-hover: #18181c;  
+      --border: #27272a;  
+      --border-focus: #3f3f46;  
+      --text: #f4f4f5;  
+      --text-muted: #71717a;  
+      --text-faint: #3f3f46;  
+      --accent: #ea580c;  
+      --accent-glow: rgba(234, 88, 12, 0.25);  
+      --ghost-color: #06b6d4;  
+      --ghost-dim: rgba(6, 182, 212, 0.12);  
+      --ghost-border: rgba(6, 182, 212, 0.35);  
+      --accepted-color: #22c55e;  
+      --accepted-dim: rgba(34, 197, 94, 0.12);  
+      --danger: #ef4444;  
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {  
+      background-color: var(--bg);  
+      color: var(--text);  
+      font-family: 'Plus Jakarta Sans', sans-serif;  
+      min-height: 100vh;  
+      display: flex;  
+      flex-direction: column;  
+      align-items: center;  
+      padding: 48px 20px;  
+      -webkit-font-smoothing: antialiased;  
+    }
+
+    .container {  
+      width: 100%;  
+      max-width: 860px;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 22px;  
+    }
+
+    /* HEADER & SELETOR DE HIPÓTESE FANTASMA */  
+    .diff-header {  
+      border-bottom: 1px solid var(--border);  
+      padding-bottom: 18px;  
+      display: flex;  
+      justify-content: space-between;  
+      align-items: flex-end;  
+    }
+
+    .brand-group {  
+      display: flex;  
+      flex-direction: column;  
+      gap: 4px;  
+    }
+
+    .brand-tag {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      font-weight: 600;  
+      text-transform: uppercase;  
+      letter-spacing: 0.1em;  
+      color: var(--ghost-color);  
+    }
+
+    .doc-title {  
+      font-family: 'Instrument Serif', Georgia, serif;  
+      font-size: 30px;  
+      color: #fff;  
+    }
+
+    .hypothesis-selector {  
+      display: flex;  
+      align-items: center;  
+      gap: 8px;  
+      background: var(--card-bg);  
+      border: 1px solid var(--border);  
+      border-radius: 6px;  
+      padding: 4px 8px;  
+    }
+
+    .hypo-label {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10px;  
+      text-transform: uppercase;  
+      color: var(--text-muted);  
+    }
+
+    .hypo-btn {  
+      background: transparent;  
+      border: 1px solid transparent;  
+      color: var(--text-muted);  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      padding: 4px 10px;  
+      border-radius: 4px;  
+      cursor: pointer;  
+      transition: all 0.15s;  
+    }
+
+    .hypo-btn:hover { color: #fff; }
+
+    .hypo-btn.active {  
+      background: var(--ghost-dim);  
+      border-color: var(--ghost-color);  
+      color: var(--ghost-color);  
+      font-weight: 600;  
+    }
+
+    /* PAINEL DE CONTROLO DE CHERRY-PICK */  
+    .telemetry-bar {  
+      display: flex;  
+      justify-content: space-between;  
+      align-items: center;  
+      background: #0d0d10;  
+      border: 1px solid var(--border);  
+      border-radius: 8px;  
+      padding: 10px 16px;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11.5px;  
+    }
+
+    .pick-counter {  
+      display: flex;  
+      align-items: center;  
+      gap: 8px;  
+    }
+
+    .pick-badge {  
+      background: rgba(255,255,255,0.06);  
+      padding: 2px 7px;  
+      border-radius: 4px;  
+      font-weight: 600;  
+      color: #fff;  
+    }
+
+    .actions-group {  
+      display: flex;  
+      gap: 8px;  
+    }
+
+    .action-btn {  
+      background: transparent;  
+      border: 1px solid var(--border);  
+      color: var(--text-muted);  
+      font-family: inherit;  
+      font-size: 11px;  
+      padding: 4px 10px;  
+      border-radius: 4px;  
+      cursor: pointer;  
+      transition: all 0.15s;  
+    }
+
+    .action-btn:hover { color: #fff; border-color: #52525b; }
+
+    /* PALCO DE DOCUMENTO */  
+    .document-stage {  
+      background: var(--card-bg);  
+      border: 1px solid var(--border);  
+      border-radius: 12px;  
+      padding: 36px 40px;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 24px;  
+      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.6);  
+    }
+
+    .doc-paragraph {  
+      font-size: 16px;  
+      line-height: 1.85;  
+      color: #d4d4d8;  
+      position: relative;  
+    }
+
+    /* O ÁTOMO DE GHOST DIFF (O COMPONENTE ENTRELAÇADO) */  
+    .ghost-diff-atom {  
+      display: inline-flex;  
+      align-items: baseline;  
+      gap: 4px;  
+      position: relative;  
+      margin: 0 2px;  
+      vertical-align: baseline;  
+    }
+
+    /* Texto Base (Original) */  
+    .base-token {  
+      transition: all 0.2s ease;  
+      color: #f4f4f5;  
+      font-weight: 500;  
+    }
+
+    /* Estado quando a sugestão fantasma é aceita */  
+    .ghost-diff-atom.accepted .base-token {  
+      display: none;  
+    }
+
+    .ghost-diff-atom.accepted .ghost-token {  
+      background: var(--accepted-dim);  
+      border-color: var(--accepted-color);  
+      color: #86efac;  
+      text-decoration: none;  
+      cursor: default;  
+    }
+
+    .ghost-diff-atom.accepted .ghost-token::after {  
+      content: " ✓";  
+      font-size: 10px;  
+      color: var(--accepted-color);  
+    }
+
+    /* Texto Fantasma Sugerido (Projeção Alternativa) */  
+    .ghost-token {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 13.5px;  
+      color: var(--ghost-color);  
+      background: var(--ghost-dim);  
+      border: 1px dashed var(--ghost-border);  
+      padding: 1px 7px;  
+      border-radius: 4px;  
+      cursor: pointer;  
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);  
+      display: inline-flex;  
+      align-items: center;  
+      gap: 4px;  
+    }
+
+    .ghost-token:hover {  
+      background: var(--ghost-color);  
+      color: #000;  
+      border-style: solid;  
+      transform: translateY(-1px);  
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);  
+    }
+
+    .ghost-token::before {  
+      content: "⇋";  
+      font-size: 11px;  
+      opacity: 0.7;  
+    }
+
+    /* Estado quando o original foi rejeitado em favor do fantasma */  
+    .ghost-diff-atom:not(.accepted) .base-token {  
+      border-bottom: 1px dotted #52525b;  
+    }
+
+    .ghost-diff-atom:hover .base-token {  
+      text-decoration: line-through;  
+      color: var(--text-faint);  
+    }
+
+    /* DICA DE RODAPÉ */  
+    .footer-hint {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      color: var(--text-faint);  
+      display: flex;  
+      justify-content: space-between;  
+      padding: 0 4px;  
+    }  
+  </style>  
+</head>  
+<body>
+
+  <div class="container">  
+      
+    <header class="diff-header">  
+      <div class="brand-group">  
+        <span class="brand-tag">// Inline Cherry-Picking</span>  
+        <h1 class="doc-title">Minuta Estratégica & Projeção Contrafactual</h1>  
+      </div>
+
+      <div class="hypothesis-selector">  
+        <span class="hypo-label">Hipótese:</span>  
+        <button class="hypo-btn active" id="btnHypo1" onclick="switchHypothesis(1)">Op. Crédito (BNDES)</button>  
+        <button class="hypo-btn" id="btnHypo2" onclick="switchHypothesis(2)">Modelo Concessão (PPP)</button>  
+      </div>  
+    </header>
+
+    <div class="telemetry-bar">  
+      <div class="pick-counter">  
+        <span style="color: var(--text-muted);">Estado:</span>  
+        <span class="pick-badge" id="hybridBadge">Texto Original</span>  
+        <span style="color: var(--text-muted);">•</span>  
+        <span id="pickedCount" style="color: var(--ghost-color); font-weight: 600;">0 átomos adotados</span>  
+      </div>
+
+      <div class="actions-group">  
+        <button class="action-btn" onclick="acceptAll()">Adotar Tudo (Merge Total)</button>  
+        <button class="action-btn" onclick="resetAll()">Restaurar Original ↺</button>  
+      </div>  
+    </div>
+
+    <main class="document-stage">  
+        
+      <p class="doc-paragraph" id="p1">  
+        O plano de mobilidade urbana fixa a operação na modalidade de  
+          
+        <span class="ghost-diff-atom" id="atom-1">  
+          <span class="base-token">repasse a fundo perdido</span>  
+          <span class="ghost-token" onclick="toggleAtom(1)" title="Clique para adotar esta cláusula na minuta">financiamento subsidiado</span>  
+        </span>,  
+          
+        assegurando o montante integral de  
+          
+        <span class="ghost-diff-atom" id="atom-2">  
+          <span class="base-token">R$ 6.240.000,00</span>  
+          <span class="ghost-token" onclick="toggleAtom(2)" title="Clique para adotar este valor">R$ 11.500.000,00</span>  
+        </span>  
+          
+        para a revitalização do corredor viário leste.  
+      </p>
+
+      <p class="doc-paragraph" id="p2">  
+        A viabilização orçamentária do projeto prevê  
+          
+        <span class="ghost-diff-atom" id="atom-3">  
+          <span class="base-token">isenção total de contrapartida</span>  
+          <span class="ghost-token" onclick="toggleAtom(3)" title="Clique para adotar esta regra">aporte municipal de 12%</span>  
+        </span>,  
+          
+        com prazo de análise técnica estimado em  
+          
+        <span class="ghost-diff-atom" id="atom-4">  
+          <span class="base-token">11 dias úteis</span>  
+          <span class="ghost-token" onclick="toggleAtom(4)" title="Clique para adotar este prazo">45 dias com carência de 24 meses</span>  
+        </span>,  
+          
+        vinculando a execução à fiscalização direta do conselho de desenvolvimento metropolitano.  
+      </p>
+
+      <p class="doc-paragraph" id="p3">  
+        Para a fase de obras, a secretaria municipal optará por  
+          
+        <span class="ghost-diff-atom" id="atom-5">  
+          <span class="base-token">licitação por lote único via pregão</span>  
+          <span class="ghost-token" onclick="toggleAtom(5)" title="Clique para adotar este modelo">contratação integrada por desempenho</span>  
+        </span>,  
+          
+        mitigando o risco de paralisações operacionais.  
+      </p>
+
+    </main>
+
+    <div class="footer-hint">  
+      <span>Clica em qualquer cápsula azul para adotar uma alteração cirúrgica no texto base.</span>  
+      <span>Mistura de hipóteses em tempo real • Zero poluição de branches</span>  
+    </div>
+
+  </div>
+
+  <script>  
+    /* DADOS DAS HIPÓTESES CONTRAFACTUAIS */  
+    const hypothesesData = {  
+      1: {  
+        name: "Op. Crédito (BNDES)",  
+        atoms: {  
+          1: "financiamento subsidiado",  
+          2: "R$ 11.500.000,00",  
+          3: "aporte municipal de 12%",  
+          4: "45 dias com carência de 24 meses",  
+          5: "contratação integrada por desempenho"  
+        }  
+      },  
+      2: {  
+        name: "Modelo Concessão (PPP)",  
+        atoms: {  
+          1: "concessão administrativa patrocinada",  
+          2: "R$ 28.000.000,00 (Capex Privado)",  
+          3: "outorga indexada ao IPCA",  
+          4: "prazo de concessão de 15 anos",  
+          5: "regime de Sociedade de Propósito Específico (SPE)"  
+        }  
+      }  
+    };
+
+    let currentHypothesis = 1;  
+    let acceptedAtoms = new Set();
+
+    /* ALTERNAR HIPÓTESES ALTERNATIVAS */  
+    function switchHypothesis(hypoId) {  
+      currentHypothesis = hypoId;  
+      document.getElementById('btnHypo1').classList.toggle('active', hypoId === 1);  
+      document.getElementById('btnHypo2').classList.toggle('active', hypoId === 2);
+
+      // Reseta aceitações ao trocar de hipótese fantasma  
+      acceptedAtoms.clear();
+
+      // Atualiza os textos dos átomos fantasmas na tela  
+      const data = hypothesesData[hypoId];  
+      for (let i = 1; i <= 5; i++) {  
+        const atomEl = document.getElementById(`atom-${i}`);  
+        atomEl.classList.remove('accepted');  
+        const ghostToken = atomEl.querySelector('.ghost-token');  
+        ghostToken.textContent = data.atoms[i];  
+      }
+
+      updateTelemetry();  
+    }
+
+    /* TOGGLE DE UM ÁTOMO INDIVIDUAL (CHERRY-PICK) */  
+    function toggleAtom(atomId) {  
+      const atomEl = document.getElementById(`atom-${atomId}`);  
+        
+      if (acceptedAtoms.has(atomId)) {  
+        acceptedAtoms.delete(atomId);  
+        atomEl.classList.remove('accepted');  
+      } else {  
+        acceptedAtoms.add(atomId);  
+        atomEl.classList.add('accepted');  
+      }
+
+      updateTelemetry();  
+    }
+
+    /* ATUALIZA TELEMETRIA */  
+    function updateTelemetry() {  
+      const count = acceptedAtoms.size;  
+      const counterEl = document.getElementById('pickedCount');  
+      const badgeEl = document.getElementById('hybridBadge');
+
+      counterEl.textContent = `${count} átomo${count !== 1 ? 's' : ''} adotado${count !== 1 ? 's' : ''}`;
+
+      if (count === 0) {  
+        badgeEl.textContent = "Texto Original";  
+        badgeEl.style.color = "var(--text-muted)";  
+      } else if (count === 5) {  
+        badgeEl.textContent = `Fusão Completa (${hypothesesData[currentHypothesis].name})`;  
+        badgeEl.style.color = "var(--accepted-color)";  
+      } else {  
+        badgeEl.textContent = "Minuta Híbrida Sintetizada";  
+        badgeEl.style.color = "#fb923c";  
+      }  
+    }
+
+    /* ACEITAR TUDO */  
+    function acceptAll() {  
+      for (let i = 1; i <= 5; i++) {  
+        acceptedAtoms.add(i);  
+        document.getElementById(`atom-${i}`).classList.add('accepted');  
+      }  
+      updateTelemetry();  
+    }
+
+    /* RESTAURAR ORIGINAL */  
+    function resetAll() {  
+      acceptedAtoms.clear();  
+      for (let i = 1; i <= 5; i++) {  
+        document.getElementById(`atom-${i}`).classList.remove('accepted');  
+      }  
+      updateTelemetry();  
+    }  
+  </script>  
+</body>  
+</html>

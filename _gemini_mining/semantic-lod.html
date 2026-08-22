@@ -1,0 +1,557 @@
+<!DOCTYPE html>  
+<html lang="pt">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
+  <title>Semantic LOD — Nível de Detalhe Fractal</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">  
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1\&family=JetBrains+Mono:wght@400;500;600\&family=Plus+Jakarta+Sans:wght@400;500;600;700\&display=swap" rel="stylesheet">
+
+  <style>  
+    :root {  
+      --bg: #09090b;  
+      --card-bg: #121215;  
+      --card-hover: #18181c;  
+      --border: #27272a;  
+      --border-active: #3f3f46;  
+      --text: #f4f4f5;  
+      --text-muted: #71717a;  
+      --text-faint: #3f3f46;  
+      --accent: #ea580c;  
+      --accent-glow: rgba(234, 88, 12, 0.25);  
+      --accent-dim: rgba(234, 88, 12, 0.1);  
+      --cyan: #06b6d4;  
+      --cyan-dim: rgba(6, 182, 212, 0.08);  
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {  
+      background-color: var(--bg);  
+      color: var(--text);  
+      font-family: 'Plus Jakarta Sans', sans-serif;  
+      min-height: 100vh;  
+      display: flex;  
+      flex-direction: column;  
+      align-items: center;  
+      padding: 48px 20px;  
+      -webkit-font-smoothing: antialiased;  
+    }
+
+    .container {  
+      width: 100%;  
+      max-width: 760px;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 24px;  
+    }
+
+    /* HEADER COM CONTROLO GLOBAL */  
+    .document-header {  
+      border-bottom: 1px solid var(--border);  
+      padding-bottom: 20px;  
+      display: flex;  
+      justify-content: space-between;  
+      align-items: flex-end;  
+    }
+
+    .doc-meta {  
+      display: flex;  
+      flex-direction: column;  
+      gap: 6px;  
+    }
+
+    .doc-tag {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      font-weight: 600;  
+      text-transform: uppercase;  
+      letter-spacing: 0.1em;  
+      color: var(--accent);  
+    }
+
+    .doc-title {  
+      font-family: 'Instrument Serif', Georgia, serif;  
+      font-size: 32px;  
+      line-height: 1.15;  
+      color: #fff;  
+      font-weight: 400;  
+    }
+
+    .global-lod-bar {  
+      display: flex;  
+      align-items: center;  
+      gap: 8px;  
+      background: var(--card-bg);  
+      border: 1px solid var(--border);  
+      border-radius: 6px;  
+      padding: 4px 8px;  
+    }
+
+    .global-label {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10px;  
+      text-transform: uppercase;  
+      color: var(--text-muted);  
+    }
+
+    .global-btn {  
+      background: transparent;  
+      border: none;  
+      color: var(--text-muted);  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      padding: 4px 8px;  
+      border-radius: 4px;  
+      cursor: pointer;  
+      transition: all 0.15s;  
+    }
+
+    .global-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+    /* INSTRUÇÕES SUTIS */  
+    .hint-bar {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      color: var(--text-faint);  
+      display: flex;  
+      justify-content: space-between;  
+      padding: 0 4px;  
+    }
+
+    /* LISTA DE BLOCOS COM LOD FRACTAL */  
+    .blocks-stream {  
+      display: flex;  
+      flex-direction: column;  
+      gap: 16px;  
+    }
+
+    /* O BLOCO FRACTAL */  
+    .lod-block {  
+      background: var(--card-bg);  
+      border: 1px solid var(--border);  
+      border-radius: 10px;  
+      padding: 22px 24px;  
+      position: relative;  
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.2s;  
+      cursor: default;  
+    }
+
+    .lod-block:hover {  
+      border-color: var(--border-active);  
+      background: var(--card-hover);  
+    }
+
+    /* Estado de foco em Z (elevação visual) */  
+    .lod-block.active-wheel {  
+      border-color: var(--accent);  
+      box-shadow: 0 12px 30px -10px var(--accent-glow);  
+    }
+
+    .block-header {  
+      display: flex;  
+      justify-content: space-between;  
+      align-items: center;  
+      margin-bottom: 12px;  
+    }
+
+    .block-topic {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10.5px;  
+      text-transform: uppercase;  
+      letter-spacing: 0.08em;  
+      color: var(--text-muted);  
+    }
+
+    /* SELETOR DE LOD POR BLOCO */  
+    .lod-stepper {  
+      display: flex;  
+      align-items: center;  
+      gap: 3px;  
+      background: #09090b;  
+      border: 1px solid var(--border);  
+      border-radius: 5px;  
+      padding: 2px;  
+    }
+
+    .lod-pill {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10px;  
+      font-weight: 600;  
+      color: var(--text-faint);  
+      padding: 2px 7px;  
+      border-radius: 3px;  
+      cursor: pointer;  
+      transition: all 0.15s;  
+    }
+
+    .lod-pill:hover { color: var(--text); }
+
+    .lod-pill.active {  
+      background: var(--accent);  
+      color: #fff;  
+    }
+
+    /* CONTEÚDO EXPANSÍVEL (Z-LAYERS) */  
+    .lod-content {  
+      position: relative;  
+      overflow: hidden;  
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);  
+    }
+
+    /* NÍVEL 1: SÍNTESE / DISPLAY */  
+    .view-l1 {  
+      font-family: 'Instrument Serif', Georgia, serif;  
+      font-size: 24px;  
+      line-height: 1.25;  
+      color: #fafafa;  
+      letter-spacing: -0.015em;  
+    }
+
+    /* NÍVEL 2: RACIOCÍNIO / CORPO SANS */  
+    .view-l2 {  
+      font-size: 15px;  
+      line-height: 1.65;  
+      color: #d4d4d8;  
+    }
+
+    .view-l2 strong { color: #fff; font-weight: 600; }
+
+    /* NÍVEL 3: EVIDÊNCIA / DADOS & REGRAS */  
+    .view-l3 {  
+      display: flex;  
+      flex-direction: column;  
+      gap: 12px;  
+      font-size: 14px;  
+      line-height: 1.6;  
+      color: #a1a1aa;  
+    }
+
+    .evidence-grid {  
+      display: grid;  
+      grid-template-columns: repeat(2, 1fr);  
+      gap: 10px;  
+      margin-top: 4px;  
+    }
+
+    .evidence-card {  
+      background: #09090b;  
+      border: 1px solid var(--border);  
+      padding: 10px 12px;  
+      border-radius: 6px;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11.5px;  
+    }
+
+    .evidence-label {  
+      font-size: 9.5px;  
+      text-transform: uppercase;  
+      color: var(--text-faint);  
+      margin-bottom: 3px;  
+    }
+
+    .evidence-val {  
+      font-weight: 600;  
+      color: #f4f4f5;  
+    }
+
+    /* NÍVEL 4: SUBSTRATO / PROVENANCE / QUERIES */  
+    .view-l4 {  
+      background: #09090b;  
+      border: 1px solid var(--border);  
+      border-radius: 6px;  
+      padding: 12px 14px;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11.5px;  
+      line-height: 1.6;  
+      color: #71717a;  
+      overflow-x: auto;  
+    }
+
+    .view-l4 code { color: #38bdf8; }  
+    .view-l4 .kw { color: #f43f5e; }  
+    .view-l4 .val { color: #fb923c; }
+
+    /* BADGE DE PROFUNDIDADE ATUAL */  
+    .depth-indicator {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10px;  
+      color: var(--text-faint);  
+      margin-top: 10px;  
+      display: flex;  
+      justify-content: space-between;  
+      border-top: 1px dashed rgba(255,255,255,0.05);  
+      padding-top: 8px;  
+    }
+
+    .depth-name { color: var(--accent); font-weight: 500; }  
+  </style>  
+</head>  
+<body>
+
+  <div class="container">  
+      
+    <header class="document-header">  
+      <div class="doc-meta">  
+        <span class="doc-tag">// Diagnóstico Territorial & Funding</span>  
+        <h1 class="doc-title">Enquadramento Estratégico Municipal</h1>  
+      </div>
+
+      <div class="global-lod-bar">  
+        <span class="global-label">Zoom Global:</span>  
+        <button class="global-btn" onclick="setGlobalLOD(1)">L1</button>  
+        <button class="global-btn" onclick="setGlobalLOD(2)">L2</button>  
+        <button class="global-btn" onclick="setGlobalLOD(3)">L3</button>  
+        <button class="global-btn" onclick="setGlobalLOD(4)">L4</button>  
+      </div>  
+    </header>
+
+    <div class="hint-bar">  
+      <span>Roda do rato (scroll) sobre o bloco ou atalhos [1-4]</span>  
+      <span>Profundidade semântica in-place</span>  
+    </div>
+
+    <main class="blocks-stream">  
+        
+      <article class="lod-block" id="block-1" data-lod="1">  
+        <div class="block-header">  
+          <span class="block-topic">01. Captação de Recursos</span>  
+          <div class="lod-stepper">  
+            <span class="lod-pill active" onclick="setBlockLOD(1, 1)">L1</span>  
+            <span class="lod-pill" onclick="setBlockLOD(1, 2)">L2</span>  
+            <span class="lod-pill" onclick="setBlockLOD(1, 3)">L3</span>  
+            <span class="lod-pill" onclick="setBlockLOD(1, 4)">L4</span>  
+          </div>  
+        </div>
+
+        <div class="lod-content" id="content-1">  
+          <div class="view-l1">  
+            Município elegível para repasse de R$ 6.240.000 a fundo perdido na pasta de drenagem.  
+          </div>  
+        </div>
+
+        <div class="depth-indicator">  
+          <span>Resolução: <span class="depth-name" id="depth-name-1">L1 • Síntese Executiva</span></span>  
+          <span>Scroll para aprofundar ↕</span>  
+        </div>  
+      </article>
+
+      <article class="lod-block" id="block-2" data-lod="2">  
+        <div class="block-header">  
+          <span class="block-topic">02. Análise de Risco & Execução</span>  
+          <div class="lod-stepper">  
+            <span class="lod-pill" onclick="setBlockLOD(2, 1)">L1</span>  
+            <span class="lod-pill active" onclick="setBlockLOD(2, 2)">L2</span>  
+            <span class="lod-pill" onclick="setBlockLOD(2, 3)">L3</span>  
+            <span class="lod-pill" onclick="setBlockLOD(2, 4)">L4</span>  
+          </div>  
+        </div>
+
+        <div class="lod-content" id="content-2">  
+          <div class="view-l2">  
+            Apesar da pontuação favorável, o histórico de liquidação de obras nos últimos 24 meses ficou em <strong>64.2%</strong>. A recomendação técnica exige constituição de um comitê especial para evitar atrasos licitatórios.  
+          </div>  
+        </div>
+
+        <div class="depth-indicator">  
+          <span>Resolução: <span class="depth-name" id="depth-name-2">L2 • Raciocínio Contextual</span></span>  
+          <span>Scroll para aprofundar ↕</span>  
+        </div>  
+      </article>
+
+      <article class="lod-block" id="block-3" data-lod="1">  
+        <div class="block-header">  
+          <span class="block-topic">03. Intervenção Territorial</span>  
+          <div class="lod-stepper">  
+            <span class="lod-pill active" onclick="setBlockLOD(3, 1)">L1</span>  
+            <span class="lod-pill" onclick="setBlockLOD(3, 2)">L2</span>  
+            <span class="lod-pill" onclick="setBlockLOD(3, 3)">L3</span>  
+            <span class="lod-pill" onclick="setBlockLOD(3, 4)">L4</span>  
+          </div>  
+        </div>
+
+        <div class="lod-content" id="content-3">  
+          <div class="view-l1">  
+            Prioridade de intervenção concentrada no nó viário da Avenida Central.  
+          </div>  
+        </div>
+
+        <div class="depth-indicator">  
+          <span>Resolução: <span class="depth-name" id="depth-name-3">L1 • Síntese Executiva</span></span>  
+          <span>Scroll para aprofundar ↕</span>  
+        </div>  
+      </article>
+
+    </main>
+
+  </div>
+
+  <script>  
+    /* DEFINIÇÃO DOS NÍVEIS SEMÂNTICOS POR BLOCO */  
+    const blockData = {  
+      1: {  
+        1: `<div class="view-l1">Município elegível para repasse de R$ 6.240.000 a fundo perdido na pasta de drenagem.</div>`,  
+        2: `<div class="view-l2">A proposta obteve pontuação máxima no eixo de drenagem e pavimentação permeável. O enquadramento dispensa contrapartida inicial do tesouro municipal, viabilizando submissão imediata no ciclo federal.</div>`,  
+        3: `<div class="view-l3">  
+              <div>Portaria Interministerial nº 402/2026 — Enquadramento no Eixo 2 (Resiliência Climática Urbana).</div>  
+              <div class="evidence-grid">  
+                <div class="evidence-card">  
+                  <div class="evidence-label">Teto Orçamental</div>  
+                  <div class="evidence-val">R$ 6.240.000,00</div>  
+                </div>  
+                <div class="evidence-card">  
+                  <div class="evidence-label">Janela Limite</div>  
+                  <div class="evidence-val">04/Set (11 dias úteis)</div>  
+                </div>  
+                <div class="evidence-card">  
+                  <div class="evidence-label">Score FNDE</div>  
+                  <div class="evidence-val">98.4% (Apto)</div>  
+                </div>  
+                <div class="evidence-card">  
+                  <div class="evidence-label">Contrapartida</div>  
+                  <div class="evidence-val">R$ 0,00 (Isento)</div>  
+                </div>  
+              </div>  
+            </div>`,  
+        4: `<div class="view-l4">  
+              <span class="kw">SELECT</span> edital_id, score, max_ceiling, counterpart_req<br/>  
+              <span class="kw">FROM</span> strata_lake.fnde_edicts_2026<br/>  
+              <span class="kw">WHERE</span> ibge_code = <span class="val">'3550308'</span> <span class="kw">AND</span> axis = <span class="val">'drainage_urban'</span>;<br/>  
+              <span style="color: #4ade80;">// Digest SHA256: 7f8a91c49b01e23a (DuckDB in-memory query, elapsed 1.8ms)</span>  
+            </div>`  
+      },  
+      2: {  
+        1: `<div class="view-l1">Risco moderado na pasta de obras devido ao histórico recente de liquidação (64.2%).</div>`,  
+        2: `<div class="view-l2">Apesar da pontuação favorável, o histórico de liquidação de obras nos últimos 24 meses ficou em <strong>64.2%</strong>. A recomendação técnica exige constituição de um comitê especial para evitar atrasos licitatórios.</div>`,  
+        3: `<div class="view-l3">  
+              <div>Auditoria de Capacidade Técnica — Base TCE/SISTN referente aos exercícios 2024–2025.</div>  
+              <div class="evidence-grid">  
+                <div class="evidence-card">  
+                  <div class="evidence-label">Execução Média</div>  
+                  <div class="evidence-val">64.2% da dotação</div>  
+                </div>  
+                <div class="evidence-card">  
+                  <div class="evidence-label">Tempo Licitação</div>  
+                  <div class="evidence-val">42 dias úteis</div>  
+                </div>  
+                <div class="evidence-card">  
+                  <div class="evidence-label">Engenheiros Alocados</div>  
+                  <div class="evidence-val">3 servidores efetivos</div>  
+                </div>  
+                <div class="evidence-card">  
+                  <div class="evidence-label">Risco de Glosa</div>  
+                  <div class="evidence-val">12% (Nível Médio)</div>  
+                </div>  
+              </div>  
+            </div>`,  
+        4: `<div class="view-l4">  
+              <span class="kw">WITH</span> fiscal_history <span class="kw">AS</span> (<br/>  
+                <span class="kw">SELECT</span> avg(executed / budget) <span class="kw">AS</span> rate <span class="kw">FROM</span> datalake.tce_sp_reports<br/>  
+              )<br/>  
+              <span class="kw">EVAL</span> compliance_gate(fiscal_history.rate) <span style="color: #f43f5e;">-> WARN(RequiresSupervision)</span>;<br/>  
+              <span style="color: #4ade80;">// Invariant: LiquidacaoMinima >= 60.0% [PROVED]</span>  
+            </div>`  
+      },  
+      3: {  
+        1: `<div class="view-l1">Prioridade de intervenção concentrada no nó viário da Avenida Central.</div>`,  
+        2: `<div class="view-l2">A convergência entre o tráfego intermunicipal e os pontos críticos de alagamento torna o <strong>nó viário leste</strong> o alvo prioritário para aplicação integral dos recursos captados.</div>`,  
+        3: `<div class="view-l3">  
+              <div>Mapeamento de Manchas de Inundação e Volume de Tráfego Diário (VMD).</div>  
+              <div class="evidence-grid">  
+                <div class="evidence-card">  
+                  <div class="evidence-label">Extensão Crítica</div>  
+                  <div class="evidence-val">4.8 km de corredor</div>  
+                </div>  
+                <div class="evidence-card">  
+                  <div class="evidence-label">Impacto Direto</div>  
+                  <div class="evidence-val">34.000 munícipes/dia</div>  
+                </div>  
+                <div class="evidence-card">  
+                  <div class="evidence-label">Pontos de Alagamento</div>  
+                  <div class="evidence-val">6 ocorrências / ano</div>  
+                </div>  
+                <div class="evidence-card">  
+                  <div class="evidence-label">Índice de Retenção</div>  
+                  <div class="evidence-val">+42 min em pico</div>  
+                </div>  
+              </div>  
+            </div>`,  
+        4: `<div class="view-l4">  
+              <span class="kw">LOAD</span> geojson_network(<span class="val">'/spatial/corredor_leste.geojson'</span>);<br/>  
+              <span class="kw">RUN</span> topology_stress_model --rain-event 80mm --traffic-peak;<br/>  
+              <span style="color: #4ade80;">// Result: Critical Bottleneck at Node #402 (Lat -23.550, Long -46.633)</span>  
+            </div>`  
+      }  
+    };
+
+    const lodNames = {  
+      1: "L1 • Síntese Executiva",  
+      2: "L2 • Raciocínio Contextual",  
+      3: "L3 • Evidências & Parâmetros",  
+      4: "L4 • Substrato & Proveniência"  
+    };
+
+    /* APLICAÇÃO DO NÍVEL DE LOD A UM BLOCO INDIVIDUAL */  
+    function setBlockLOD(blockId, lodLevel) {  
+      const blockEl = document.getElementById(`block-${blockId}`);  
+      const contentEl = document.getElementById(`content-${blockId}`);  
+      const depthLabel = document.getElementById(`depth-name-${blockId}`);
+
+      blockEl.setAttribute('data-lod', lodLevel);  
+      contentEl.innerHTML = blockData[blockId][lodLevel];  
+      depthLabel.textContent = lodNames[lodLevel];
+
+      // Atualiza os pills visuais  
+      const pills = blockEl.querySelectorAll('.lod-pill');  
+      pills.forEach((p, i) => {  
+        p.classList.toggle('active', i + 1 === lodLevel);  
+      });  
+    }
+
+    /* APLICAÇÃO GLOBAL PARA TODO O DOCUMENTO */  
+    function setGlobalLOD(lodLevel) {  
+      [1, 2, 3].forEach(id => setBlockLOD(id, lodLevel));  
+    }
+
+    /* NAVEGAÇÃO POR RODA DO RATO (WHEEL GESTURE IN-PLACE) */  
+    document.querySelectorAll('.lod-block').forEach(block => {  
+      let wheelTimeout = null;
+
+      block.addEventListener('wheel', (e) => {  
+        e.preventDefault(); // Impede o scroll de página enquanto estiver focado em modular o LOD
+
+        block.classList.add('active-wheel');  
+        clearTimeout(wheelTimeout);  
+        wheelTimeout = setTimeout(() => block.classList.remove('active-wheel'), 400);
+
+        const currentLOD = parseInt(block.getAttribute('data-lod'));  
+        const blockId = parseInt(block.id.replace('block-', ''));
+
+        // Scroll para baixo: aprofunda (LOD aumenta)  
+        // Scroll para cima: resume (LOD diminui)  
+        if (e.deltaY > 0 && currentLOD < 4) {  
+          setBlockLOD(blockId, currentLOD + 1);  
+        } else if (e.deltaY < 0 && currentLOD > 1) {  
+          setBlockLOD(blockId, currentLOD - 1);  
+        }  
+      }, { passive: false });
+
+      // Atalhos de teclado quando o rato estiver sobre o bloco (1, 2, 3, 4)  
+      block.addEventListener('mouseenter', () => {  
+        window.activeHoverBlock = parseInt(block.id.replace('block-', ''));  
+      });  
+      block.addEventListener('mouseleave', () => {  
+        window.activeHoverBlock = null;  
+      });  
+    });
+
+    window.addEventListener('keydown', (e) => {  
+      if (window.activeHoverBlock && ['1', '2', '3', '4'].includes(e.key)) {  
+        setBlockLOD(window.activeHoverBlock, parseInt(e.key));  
+      }  
+    });  
+  </script>  
+</body>  
+</html>

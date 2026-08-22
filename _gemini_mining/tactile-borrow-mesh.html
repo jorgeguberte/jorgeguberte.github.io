@@ -1,0 +1,629 @@
+<!DOCTYPE html>  
+<html lang="pt">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
+  <title>Tactile Borrow Mesh — Física de Lifetimes & Concorrência</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">  
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700\&family=Plus+Jakarta+Sans:wght@400;500;600;700\&display=swap" rel="stylesheet">
+
+  <style>  
+    :root {  
+      --bg: #09090b;  
+      --panel-bg: #121215;  
+      --surface: #18181c;  
+      --border: #27272a;  
+      --border-focus: #3f3f46;  
+      --text: #f4f4f5;  
+      --text-muted: #71717a;  
+      --text-faint: #3f3f46;  
+      --immut-color: #06b6d4;      /* Ciano: Empréstimo partilhado (\&T) */  
+      --immut-dim: rgba(6, 182, 212, 0.15);  
+      --mut-color: #ea580c;        /* Laranja: Empréstimo exclusivo (\&mut T) */  
+      --mut-dim: rgba(234, 88, 12, 0.15);  
+      --danger: #ef4444;           /* Vermelho: Fricção / Aliasing violation */  
+      --danger-glow: rgba(239, 68, 68, 0.35);  
+      --success: #22c55e;  
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+    body {  
+      background-color: var(--bg);  
+      color: var(--text);  
+      font-family: 'Plus Jakarta Sans', sans-serif;  
+      min-height: 100vh;  
+      display: flex;  
+      flex-direction: column;  
+      align-items: center;  
+      padding: 36px 20px;  
+      -webkit-font-smoothing: antialiased;  
+    }
+
+    .container {  
+      width: 100%;  
+      max-width: 960px;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 18px;  
+    }
+
+    /* CABEÇALHO & TELEMETRIA DO BORROW CHECKER */  
+    .mesh-header {  
+      background: var(--panel-bg);  
+      border: 1px solid var(--border);  
+      border-radius: 10px;  
+      padding: 16px 24px;  
+      display: flex;  
+      justify-content: space-between;  
+      align-items: center;  
+    }
+
+    .brand-group {  
+      display: flex;  
+      flex-direction: column;  
+      gap: 4px;  
+    }
+
+    .brand-tag {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      font-weight: 700;  
+      letter-spacing: 0.1em;  
+      text-transform: uppercase;  
+      color: var(--mut-color);  
+    }
+
+    .doc-title {  
+      font-size: 20px;  
+      font-weight: 700;  
+      color: #fff;  
+      letter-spacing: -0.01em;  
+    }
+
+    .telemetry-status {  
+      display: flex;  
+      align-items: center;  
+      gap: 20px;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 12px;  
+    }
+
+    .metric-pill {  
+      display: flex;  
+      flex-direction: column;  
+      align-items: flex-end;  
+      gap: 2px;  
+    }
+
+    .metric-label {  
+      font-size: 9.5px;  
+      text-transform: uppercase;  
+      color: var(--text-muted);  
+    }
+
+    .metric-val {  
+      font-weight: 700;  
+      color: var(--success);  
+      transition: color 0.2s;  
+    }
+
+    .metric-val.alert { color: var(--danger); }
+
+    /* PRESETS RÁPIDOS DE ESTADO */  
+    .scenario-bar {  
+      display: flex;  
+      align-items: center;  
+      justify-content: space-between;  
+      background: #0d0d10;  
+      border: 1px solid var(--border);  
+      border-radius: 6px;  
+      padding: 8px 14px;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+    }
+
+    .scenario-group {  
+      display: flex;  
+      gap: 8px;  
+      align-items: center;  
+    }
+
+    .scenario-btn {  
+      background: transparent;  
+      border: 1px solid var(--border);  
+      color: var(--text-muted);  
+      padding: 4px 10px;  
+      border-radius: 4px;  
+      cursor: pointer;  
+      font-family: inherit;  
+      font-size: 11px;  
+      transition: all 0.15s;  
+    }
+
+    .scenario-btn:hover { color: #fff; border-color: #52525b; }
+
+    .scenario-btn.active {  
+      background: rgba(255,255,255,0.06);  
+      color: #fff;  
+      border-color: #71717a;  
+      font-weight: 600;  
+    }
+
+    /* WORKSPACE: EDITOR DE CÓDIGO + CAMADA DE CABOS */  
+    .editor-wrapper {  
+      position: relative;  
+      background: var(--panel-bg);  
+      border: 1px solid var(--border);  
+      border-radius: 10px;  
+      padding: 24px 28px 24px 16px;  
+      display: grid;  
+      grid-template-columns: 46px 1fr;  
+      gap: 16px;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 14px;  
+      line-height: 2.2;  
+      overflow: hidden;  
+      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.7);  
+    }
+
+    /* NÚMEROS DE LINHA COM CALHA DE LIFETIME */  
+    .line-numbers {  
+      display: flex;  
+      flex-direction: column;  
+      color: var(--text-faint);  
+      text-align: right;  
+      padding-right: 12px;  
+      border-right: 1px solid var(--border);  
+      position: relative;  
+    }
+
+    /* CÓDIGO FONTE COM TOKENS ÂNCORA */  
+    .code-stage {  
+      position: relative;  
+      z-index: 2;  
+      color: #d4d4d8;  
+    }
+
+    .code-line {  
+      display: flex;  
+      align-items: center;  
+      gap: 8px;  
+      white-space: pre;  
+    }
+
+    /* TOKENS DE MEMÓRIA ÂNCORA */  
+    .token {  
+      display: inline-block;  
+      padding: 1px 6px;  
+      border-radius: 4px;  
+      font-weight: 600;  
+      position: relative;  
+      transition: all 0.2s;  
+    }
+
+    .token-root {  
+      background: rgba(255,255,255,0.08);  
+      color: #fff;  
+      border: 1px solid rgba(255,255,255,0.2);  
+    }
+
+    .token-immut {  
+      background: var(--immut-dim);  
+      color: var(--immut-color);  
+      border: 1px solid var(--immut-color);  
+    }
+
+    .token-mut {  
+      background: var(--mut-dim);  
+      color: var(--mut-color);  
+      border: 1px solid var(--mut-color);  
+    }
+
+    .kw { color: #f43f5e; }  
+    .fn { color: #38bdf8; }  
+    .type { color: #a855f7; }  
+    .comment { color: #52525b; font-style: italic; }
+
+    /* O CANVAS FÍSICO DAS CORDOALHAS */  
+    #cableCanvas {  
+      position: absolute;  
+      top: 0;  
+      left: 0;  
+      width: 100%;  
+      height: 100%;  
+      z-index: 1;  
+      pointer-events: none;  
+    }
+
+    /* CONTROLOS DE LIFETIME (DRAGGABLE DROP HANDLES) */  
+    .lifetime-gutter {  
+      position: absolute;  
+      left: 60px;  
+      top: 0;  
+      bottom: 0;  
+      width: 14px;  
+      z-index: 10;  
+      pointer-events: none;  
+    }
+
+    .drop-handle {  
+      position: absolute;  
+      left: -4px;  
+      width: 22px;  
+      height: 16px;  
+      background: #18181c;  
+      border: 1px solid var(--immut-color);  
+      border-radius: 3px;  
+      cursor: ns-resize;  
+      display: flex;  
+      align-items: center;  
+      justify-content: center;  
+      font-size: 9px;  
+      color: var(--immut-color);  
+      font-weight: 700;  
+      pointer-events: auto;  
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);  
+      transition: transform 0.1s, border-color 0.2s;  
+    }
+
+    .drop-handle:hover {  
+      transform: scale(1.15);  
+      background: var(--immut-color);  
+      color: #000;  
+    }
+
+    .drop-handle.handle-mut {  
+      border-color: var(--mut-color);  
+      color: var(--mut-color);  
+    }
+
+    .drop-handle.handle-mut:hover {  
+      background: var(--mut-color);  
+      color: #000;  
+    }
+
+    /* PAINEL DE DIAGNÓSTICO RUSTC */  
+    .terminal-diagnostic {  
+      background: #0d0d10;  
+      border: 1px solid var(--border);  
+      border-radius: 8px;  
+      padding: 16px 20px;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 12px;  
+      line-height: 1.6;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 6px;  
+    }
+
+    .diag-title {  
+      font-size: 10.5px;  
+      text-transform: uppercase;  
+      letter-spacing: 0.08em;  
+      color: var(--text-muted);  
+      margin-bottom: 2px;  
+    }
+
+    .diag-output {  
+      color: var(--success);  
+    }
+
+    .diag-output.error {  
+      color: #fca5a5;  
+    }
+
+    .diag-error-code {  
+      background: rgba(239, 68, 68, 0.2);  
+      color: var(--danger);  
+      font-weight: 700;  
+      padding: 1px 6px;  
+      border-radius: 3px;  
+      margin-right: 6px;  
+    }
+
+    /* RODAPÉ INFORMATIVO */  
+    .footer-hint {  
+      display: flex;  
+      justify-content: space-between;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      color: var(--text-faint);  
+      padding: 0 4px;  
+    }  
+  </style>  
+</head>  
+<body>
+
+  <div class="container">  
+      
+    <header class="mesh-header">  
+      <div class="brand-group">  
+        <span class="brand-tag">// Affordance de Memória & Concorrência</span>  
+        <h1 class="doc-title">Cordoalha Tátil de Empréstimos (Rust Lifetimes)</h1>  
+      </div>
+
+      <div class="telemetry-status">  
+        <div class="metric-pill">  
+          <span class="metric-label">Aliasing XOR Mutability</span>  
+          <span class="metric-val" id="borrowStatus">NOMINAL (0 CONFLITOS)</span>  
+        </div>  
+        <div class="metric-pill">  
+          <span class="metric-label">Tensão Estrutural</span>  
+          <span class="metric-val" id="stressVal">0.00 N (Livre)</span>  
+        </div>  
+      </div>  
+    </header>
+
+    <div class="scenario-bar">  
+      <div class="scenario-group">  
+        <span style="color: var(--text-muted);">Cenários de Tensão:</span>  
+        <button class="scenario-btn active" id="btnScenConflict" onclick="loadScenario('conflict')">01. Conflito E0502 (\&T + \&mut T)</button>  
+        <button class="scenario-btn" id="btnScenResolved" onclick="loadScenario('resolved')">02. Escopo Encurtado (NLL Válido)</button>  
+        <button class="scenario-btn" id="btnScenMultiReader" onclick="loadScenario('multi')">03. Múltiplos Leitores (\&T Partilhado)</button>  
+      </div>
+
+      <span style="color: var(--text-faint);">[Arrasta as alças na calha de linhas para modular o drop]</span>  
+    </div>
+
+    <main class="editor-wrapper" id="editorWrapper">  
+        
+      <div class="line-numbers">  
+        <div>01</div>  
+        <div>02</div>  
+        <div>03</div>  
+        <div>04</div>  
+        <div>05</div>  
+        <div>06</div>  
+        <div>07</div>  
+        <div>08</div>  
+      </div>
+
+      <div class="code-stage">  
+        <div class="code-line"><span class="kw">fn</span> <span class="fn">process_packet_pipeline</span>() {</div>  
+        <div class="code-line">    <span class="kw">let mut</span> <span class="token token-root" id="rootBuffer">buffer</span>: <span class="type">Vec<u8></span> = <span class="type">Vec</span>::<span class="fn">new</span>();</div>  
+        <div class="code-line">    <span class="kw">let</span> <span class="token token-immut" id="refReader">reader</span> = &<span class="token" id="targetReader">buffer</span>;        <span class="comment">// Empréstimo Imutável (\&T)</span></div>  
+        <div class="code-line">    <span class="fn">inspect_header</span>(<span class="token" id="useReader">reader</span>);</div>  
+        <div class="code-line">    <span class="kw">let</span> <span class="token token-mut" id="refWriter">writer</span> = &<span class="kw">mut</span> <span class="token" id="targetWriter">buffer</span>;   <span class="comment">// Empréstimo Mutável Exclusivo (\&mut T)</span></div>  
+        <div class="code-line">    <span class="fn">mutate_payload</span>(<span class="token" id="useWriter">writer</span>);</div>  
+        <div class="code-line" id="lineReaderLate">    <span class="fn">consume_cached</span>(<span class="token" id="useReaderLate">reader</span>);        <span class="comment" id="commentLate">// Leitura tardia conflitante</span></div>  
+        <div class="code-line">}</div>  
+      </div>
+
+      <div class="lifetime-gutter">  
+        <div class="drop-handle" id="dropReaderHandle" title="Arrasta para alterar a linha de encerramento (drop) do reader">⇕</div>  
+      </div>
+
+      <canvas id="cableCanvas"></canvas>
+
+    </main>
+
+    <section class="terminal-diagnostic" id="diagnosticBox">  
+      <span class="diag-title">// Rustc Compiler Diagnostic Output</span>  
+      <div class="diag-output" id="diagOutput">  
+        Compilação concluída com sucesso. Zero colisões de memória no grafo de ownership.  
+      </div>  
+    </section>
+
+    <div class="footer-hint">  
+      <span>Cabos em ciano = empréstimos partilhados • Cabos em laranja = exclusividade mutável</span>  
+      <span>Vibração harmónica = violação das regras de aliasing e concorrência</span>  
+    </div>
+
+  </div>
+
+  <script>  
+    /* ESTADO GLOBAL DO BORROW CHECKER & FÍSICA */  
+    const state = {  
+      readerDropLine: 7, // Em que linha o reader é utilizado pela última vez (4 = OK, 7 = Conflito)  
+      writerLine: 5,  
+      isDraggingDrop: false,  
+      hasMultiReaders: false,  
+      totalStress: 0  
+    };
+
+    const canvas = document.getElementById('cableCanvas');  
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {  
+      const rect = document.getElementById('editorWrapper').getBoundingClientRect();  
+      canvas.width = rect.width;  
+      canvas.height = rect.height;  
+    }  
+    resizeCanvas();  
+    window.addEventListener('resize', resizeCanvas);
+
+    /* OBTÉM AS COORDENADAS RELATIVAS DE UM ELEMENTO NO EDITOR */  
+    function getAnchorCoords(elementId) {  
+      const el = document.getElementById(elementId);  
+      if (!el) return { x: 0, y: 0 };  
+      const wrapperRect = document.getElementById('editorWrapper').getBoundingClientRect();  
+      const rect = el.getBoundingClientRect();  
+      return {  
+        x: rect.left - wrapperRect.left + rect.width / 2,  
+        y: rect.top - wrapperRect.top + rect.height / 2  
+      };  
+    }
+
+    /* CONTROLO DA ALÇA DE LIFETIME (DRAGGABLE NO GUTTER) */  
+    const dropHandle = document.getElementById('dropReaderHandle');  
+      
+    function updateHandlePosition() {  
+      // Cada linha tem ~30.8px de altura no line-height 2.2 com padding inicial de 24px  
+      const lineY = 24 + (state.readerDropLine - 1) * 30.8 + 15;  
+      dropHandle.style.top = `${lineY - 8}px`;  
+    }  
+    updateHandlePosition();
+
+    dropHandle.addEventListener('mousedown', (e) => {  
+      state.isDraggingDrop = true;  
+      window.addEventListener('mousemove', onHandleDrag);  
+      window.addEventListener('mouseup', onHandleStop);  
+    });
+
+    function onHandleDrag(e) {  
+      if (!state.isDraggingDrop) return;  
+      const wrapperRect = document.getElementById('editorWrapper').getBoundingClientRect();  
+      const relY = e.clientY - wrapperRect.top - 24;  
+      let targetLine = Math.round(relY / 30.8) + 1;  
+      targetLine = Math.max(4, Math.min(7, targetLine)); // Limite entre linha 4 e 7  
+        
+      if (targetLine !== state.readerDropLine) {  
+        state.readerDropLine = targetLine;  
+        updateCodeView();  
+        updateHandlePosition();  
+      }  
+    }
+
+    function onHandleStop() {  
+      state.isDraggingDrop = false;  
+      window.removeEventListener('mousemove', onHandleDrag);  
+      window.removeEventListener('mouseup', onHandleStop);  
+    }
+
+    /* ATUALIZA O CÓDIGO E O TERMINAL COM BASE NA LINHA DE DROP */  
+    function updateCodeView() {  
+      const lineLate = document.getElementById('lineReaderLate');  
+      const commentLate = document.getElementById('commentLate');  
+      const statusEl = document.getElementById('borrowStatus');  
+      const stressEl = document.getElementById('stressVal');  
+      const diagOutput = document.getElementById('diagOutput');
+
+      const isConflicting = state.readerDropLine >= state.writerLine;
+
+      if (state.readerDropLine <= 4) {  
+        lineLate.style.opacity = "0.2";  
+        commentLate.textContent = "// reader já sofreu drop (sem conflito)";  
+      } else {  
+        lineLate.style.opacity = "1";  
+        commentLate.textContent = "// Leitura tardia conflitante";  
+      }
+
+      if (isConflicting) {  
+        statusEl.textContent = "CONFLITO ATIVO (E0502)";  
+        statusEl.classList.add('alert');  
+        diagOutput.className = "diag-output error";  
+        diagOutput.innerHTML = `  
+          <span class="diag-error-code">error[E0502]</span>: cannot borrow `buffer` as mutable because it is also borrowed as immutable<br/>  
+           --> src/pipeline.rs:5:27<br/>  
+            |<br/>  
+           3| let reader = \&buffer;              -- immutable borrow occurs here<br/>  
+           5| let writer = \&mut buffer;          ^^ mutable borrow occurs here<br/>  
+           7| consume_cached(reader);            -- immutable borrow later used here  
+        `;  
+      } else {  
+        statusEl.textContent = "NOMINAL (0 CONFLITOS)";  
+        statusEl.classList.remove('alert');  
+        diagOutput.className = "diag-output";  
+        diagOutput.innerHTML = "Compilação concluída com sucesso. Zero colisões de memória no grafo de ownership.";  
+      }  
+    }
+
+    /* CENÁRIOS PRESET */  
+    function loadScenario(type) {  
+      document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));  
+      event.target.classList.add('active');
+
+      if (type === 'conflict') {  
+        state.readerDropLine = 7;  
+        state.hasMultiReaders = false;  
+      } else if (type === 'resolved') {  
+        state.readerDropLine = 4;  
+        state.hasMultiReaders = false;  
+      } else if (type === 'multi') {  
+        state.readerDropLine = 4;  
+        state.hasMultiReaders = true;  
+      }
+
+      updateCodeView();  
+      updateHandlePosition();  
+    }
+
+    /* RENDERIZAÇÃO DA CORDOALHA FÍSICA NO CANVAS (60FPS) */  
+    function renderCables() {  
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const root = getAnchorCoords('rootBuffer');  
+      const targetR = getAnchorCoords('targetReader');  
+      const useR = state.readerDropLine >= 5 ? getAnchorCoords('useReaderLate') : getAnchorCoords('useReader');  
+      const targetW = getAnchorCoords('targetWriter');  
+      const useW = getAnchorCoords('useWriter');
+
+      const isConflicting = state.readerDropLine >= state.writerLine;  
+      const tick = Date.now() * 0.04;
+
+      // Se houver conflito, gera vibração harmónica senoidal de atrito  
+      const frictionJitter = isConflicting ? Math.sin(tick * 3.5) * 4.5 : 0;  
+      state.totalStress = isConflicting ? (14.8 + Math.sin(tick) * 2.2) : 0.0;
+
+      document.getElementById('stressVal').textContent = isConflicting   
+        ? `${state.totalStress.toFixed(2)} N (Sobrecarga)`   
+        : `0.00 N (Livre)`;  
+      document.getElementById('stressVal').style.color = isConflicting ? "var(--danger)" : "var(--success)";
+
+      /* 1. DESENHA O CABO MUTÁVEL (\&mut buffer -> writer) */  
+      ctx.beginPath();  
+      ctx.moveTo(root.x, root.y);  
+      const cp1Wx = root.x + 80 + frictionJitter;  
+      const cp1Wy = (root.y + targetW.y) / 2;  
+      ctx.bezierCurveTo(cp1Wx, cp1Wy, targetW.x - 60, targetW.y, targetW.x, targetW.y);  
+      ctx.lineTo(useW.x, useW.y);  
+        
+      ctx.strokeStyle = isConflicting ? "#ef4444" : "#ea580c";  
+      ctx.lineWidth = isConflicting ? 4.5 : 3;  
+      ctx.shadowColor = isConflicting ? "rgba(239, 68, 68, 0.6)" : "rgba(234, 88, 12, 0.3)";  
+      ctx.shadowBlur = isConflicting ? 16 : 8;  
+      ctx.stroke();  
+      ctx.shadowBlur = 0;
+
+      /* 2. DESENHA O CABO IMUTÁVEL (\&buffer -> reader) */  
+      ctx.beginPath();  
+      ctx.moveTo(root.x, root.y);  
+      const cp1Rx = root.x + 40 - frictionJitter;  
+      const cp1Ry = (root.y + targetR.y) / 2;  
+      ctx.bezierCurveTo(cp1Rx, cp1Ry, targetR.x - 40, targetR.y, targetR.x, targetR.y);  
+        
+      // Prolonga o cabo até onde o reader é utilizado  
+      const cp2Rx = targetR.x - 30;  
+      const cp2Ry = (targetR.y + useR.y) / 2 + frictionJitter;  
+      ctx.bezierCurveTo(cp2Rx, cp2Ry, useR.x - 40, useR.y, useR.x, useR.y);
+
+      ctx.strokeStyle = isConflicting ? "#ef4444" : "#06b6d4";  
+      ctx.lineWidth = isConflicting ? 3 : 2;  
+      ctx.setLineDash(isConflicting ? [6, 3] : []);  
+      ctx.shadowColor = isConflicting ? "rgba(239, 68, 68, 0.6)" : "rgba(6, 182, 212, 0.3)";  
+      ctx.shadowBlur = isConflicting ? 14 : 6;  
+      ctx.stroke();  
+      ctx.setLineDash([]);  
+      ctx.shadowBlur = 0;
+
+      /* 3. PONTO DE FRICÇÃO / COLISÃO VISUAL */  
+      if (isConflicting) {  
+        const midX = (root.x + targetW.x) / 2 + frictionJitter;  
+        const midY = (targetR.y + targetW.y) / 2;
+
+        ctx.beginPath();  
+        ctx.arc(midX, midY, 8 + Math.sin(tick * 4) * 3, 0, Math.PI * 2);  
+        ctx.fillStyle = "rgba(239, 68, 68, 0.8)";  
+        ctx.shadowColor = "#ef4444";  
+        ctx.shadowBlur = 20;  
+        ctx.fill();  
+        ctx.shadowBlur = 0;
+
+        ctx.font = "10px JetBrains Mono";  
+        ctx.fillStyle = "#fff";  
+        ctx.fillText("! ALIASING COLLISION", midX + 16, midY + 4);  
+      }
+
+      requestAnimationFrame(renderCables);  
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {  
+      updateCodeView();  
+      renderCables();  
+    });  
+  </script>  
+</body>  
+</html>

@@ -1,0 +1,565 @@
+<!DOCTYPE html>  
+<html lang="pt">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
+  <title>Coherence Probes — The Semantic Oscilloscope</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">  
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1\&family=JetBrains+Mono:wght@400;500;600;700\&family=Plus+Jakarta+Sans:wght@400;500;600;700\&display=swap" rel="stylesheet">
+
+  <style>  
+    :root {  
+      --bg: #09090b;  
+      --card-bg: #121215;  
+      --card-hover: #18181c;  
+      --border: #27272a;  
+      --border-subtle: #1f1f23;  
+      --text: #f4f4f5;  
+      --text-muted: #71717a;  
+      --text-faint: #3f3f46;  
+      --probe-a: #ea580c; /* Laranja - Orçamento */  
+      --probe-b: #06b6d4; /* Ciano - Prazo */  
+      --probe-c: #a855f7; /* Roxo - Governação */  
+      --danger: #ef4444;  
+      --success: #22c55e;  
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {  
+      background-color: var(--bg);  
+      color: var(--text);  
+      font-family: 'Plus Jakarta Sans', sans-serif;  
+      min-height: 100vh;  
+      display: flex;  
+      flex-direction: column;  
+      align-items: center;  
+      padding: 40px 20px;  
+      -webkit-font-smoothing: antialiased;  
+    }
+
+    .container {  
+      width: 100%;  
+      max-width: 960px;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 20px;  
+    }
+
+    /* HEADER & TELEMETRIA DO OSCILOSCÓPIO */  
+    .telemetry-header {  
+      background: var(--card-bg);  
+      border: 1px solid var(--border);  
+      border-radius: 10px;  
+      padding: 16px 24px;  
+      display: flex;  
+      justify-content: space-between;  
+      align-items: center;  
+    }
+
+    .doc-branding {  
+      display: flex;  
+      flex-direction: column;  
+      gap: 4px;  
+    }
+
+    .brand-tag {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      font-weight: 600;  
+      letter-spacing: 0.1em;  
+      text-transform: uppercase;  
+      color: var(--probe-a);  
+    }
+
+    .doc-title {  
+      font-family: 'Instrument Serif', Georgia, serif;  
+      font-size: 26px;  
+      color: #fff;  
+    }
+
+    .telemetry-status {  
+      display: flex;  
+      align-items: center;  
+      gap: 20px;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 12px;  
+    }
+
+    .metric-pill {  
+      display: flex;  
+      flex-direction: column;  
+      align-items: flex-end;  
+      gap: 2px;  
+    }
+
+    .metric-label {  
+      font-size: 9.5px;  
+      text-transform: uppercase;  
+      color: var(--text-muted);  
+    }
+
+    .metric-val {  
+      font-weight: 600;  
+      color: var(--success);  
+      transition: color 0.2s;  
+    }
+
+    .metric-val.alert { color: var(--danger); }
+
+    /* PRESETS RÁPIDOS DE TESTE */  
+    .scenario-bar {  
+      display: flex;  
+      align-items: center;  
+      gap: 8px;  
+      background: #0d0d10;  
+      border: 1px solid var(--border);  
+      border-radius: 6px;  
+      padding: 8px 14px;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+    }
+
+    .scenario-btn {  
+      background: transparent;  
+      border: 1px solid var(--border);  
+      color: var(--text-muted);  
+      padding: 4px 10px;  
+      border-radius: 4px;  
+      cursor: pointer;  
+      font-family: inherit;  
+      font-size: 11px;  
+      transition: all 0.15s;  
+    }
+
+    .scenario-btn:hover {  
+      color: #fff;  
+      border-color: #52525b;  
+    }
+
+    .scenario-btn.active {  
+      background: rgba(255,255,255,0.06);  
+      color: #fff;  
+      border-color: #71717a;  
+    }
+
+    /* WORKSPACE: MARGEM DAS SONDAS + DOCUMENTO */  
+    .workspace-layout {  
+      display: grid;  
+      grid-template-columns: 240px 1fr;  
+      gap: 20px;  
+      position: relative;  
+    }
+
+    /* COLUNA DA MARGEM (AS SONDAS ATIVAS) */  
+    .probes-margin {  
+      display: flex;  
+      flex-direction: column;  
+      gap: 12px;  
+    }
+
+    .probe-card {  
+      background: var(--card-bg);  
+      border: 1px solid var(--border);  
+      border-radius: 8px;  
+      padding: 12px 14px;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 8px;  
+      transition: all 0.2s ease;  
+      cursor: pointer;  
+      position: relative;  
+      overflow: hidden;  
+    }
+
+    .probe-card:hover {  
+      border-color: var(--border-focus);  
+      background: var(--card-hover);  
+    }
+
+    .probe-card::before {  
+      content: "";  
+      position: absolute;  
+      top: 0;  
+      left: 0;  
+      bottom: 0;  
+      width: 3px;  
+    }
+
+    .probe-card.probe-a::before { background: var(--probe-a); }  
+    .probe-card.probe-b::before { background: var(--probe-b); }  
+    .probe-card.probe-c::before { background: var(--probe-c); }
+
+    .probe-card.in-conflict {  
+      border-color: var(--danger);  
+      background: rgba(239, 68, 68, 0.05);  
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);  
+    }
+
+    .probe-card.in-conflict::before {  
+      background: var(--danger) !important;  
+    }
+
+    .probe-meta {  
+      display: flex;  
+      justify-content: space-between;  
+      align-items: center;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10px;  
+    }
+
+    .probe-channel {  
+      font-weight: 700;  
+      text-transform: uppercase;  
+      letter-spacing: 0.05em;  
+    }
+
+    .probe-card.probe-a .probe-channel { color: var(--probe-a); }  
+    .probe-card.probe-b .probe-channel { color: var(--probe-b); }  
+    .probe-card.probe-c .probe-channel { color: var(--probe-c); }  
+    .probe-card.in-conflict .probe-channel { color: var(--danger); }
+
+    .probe-status {  
+      font-size: 9px;  
+      padding: 1px 5px;  
+      border-radius: 3px;  
+      background: rgba(255,255,255,0.04);  
+      color: var(--text-muted);  
+    }
+
+    .probe-card.in-conflict .probe-status {  
+      background: rgba(239, 68, 68, 0.2);  
+      color: #fca5a5;  
+      font-weight: 600;  
+    }
+
+    .probe-invariant {  
+      font-size: 12px;  
+      font-weight: 600;  
+      color: #fff;  
+      line-height: 1.35;  
+    }
+
+    /* O OSCILOGRAMA SVG DA SONDA */  
+    .probe-scope {  
+      width: 100%;  
+      height: 24px;  
+      background: #09090b;  
+      border-radius: 4px;  
+      border: 1px solid var(--border-subtle);  
+      overflow: hidden;  
+    }
+
+    /* COLUNA DO DOCUMENTO EDITÁVEL */  
+    .document-stage {  
+      background: var(--card-bg);  
+      border: 1px solid var(--border);  
+      border-radius: 10px;  
+      padding: 32px;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 20px;  
+      position: relative;  
+    }
+
+    .doc-paragraph {  
+      font-size: 15.5px;  
+      line-height: 1.7;  
+      color: #d4d4d8;  
+      padding: 12px 16px;  
+      border-radius: 6px;  
+      border: 1px solid transparent;  
+      outline: none;  
+      transition: all 0.2s;  
+      position: relative;  
+    }
+
+    .doc-paragraph:focus {  
+      background: #0d0d10;  
+      border-color: var(--border);  
+    }
+
+    /* Realce de quebra semântica no texto */  
+    .doc-paragraph.conflict-highlight {  
+      border-color: rgba(239, 68, 68, 0.4);  
+      background: rgba(239, 68, 68, 0.04);  
+    }
+
+    .doc-paragraph.conflict-highlight::after {  
+      content: attr(data-violation);  
+      position: absolute;  
+      right: 12px;  
+      top: -10px;  
+      background: var(--danger);  
+      color: #fff;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10px;  
+      font-weight: 600;  
+      padding: 2px 6px;  
+      border-radius: 3px;  
+      letter-spacing: 0.04em;  
+    }
+
+    .probe-anchor-tag {  
+      display: inline-flex;  
+      align-items: center;  
+      gap: 4px;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10.5px;  
+      font-weight: 600;  
+      padding: 1px 6px;  
+      border-radius: 3px;  
+      margin-right: 4px;  
+      vertical-align: middle;  
+    }
+
+    .probe-anchor-tag.probe-a { background: rgba(234, 88, 12, 0.15); color: var(--probe-a); border: 1px solid rgba(234, 88, 12, 0.4); }  
+    .probe-anchor-tag.probe-b { background: rgba(6, 182, 212, 0.15); color: var(--probe-b); border: 1px solid rgba(6, 182, 212, 0.4); }  
+    .probe-anchor-tag.probe-c { background: rgba(168, 85, 247, 0.15); color: var(--probe-c); border: 1px solid rgba(168, 85, 247, 0.4); }
+
+    /* FOOTER COM EXPLICAÇÃO DO CONCEITO */  
+    .footer-hint {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      color: var(--text-faint);  
+      display: flex;  
+      justify-content: space-between;  
+      padding: 0 4px;  
+    }  
+  </style>  
+</head>  
+<body>
+<div style="position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 16px;background:rgba(9,9,11,.92);backdrop-filter:blur(10px);border-bottom:1px solid #27272a;font-family:'JetBrains Mono',monospace;font-size:11px;">
+  <span style="color:#71717a;">SEMANTIC OSCILLOSCOPE // inject scenarios; probes go turbulent on broken premises</span>
+  <a href="./index.html" style="color:#ea580c;text-decoration:none;white-space:nowrap;">← Interaction Research</a>
+</div>
+
+  <div class="container">  
+      
+    <header class="telemetry-header">  
+      <div class="doc-branding">  
+        <span class="brand-tag">// Sensor Semântico Passivo</span>  
+        <h1 class="doc-title">Minuta de Captação e Mobilidade Urbana</h1>  
+      </div>
+
+      <div class="telemetry-status">  
+        <div class="metric-pill">  
+          <span class="metric-label">Índice de Coerência</span>  
+          <span class="metric-val" id="coherenceIndex">100% NOMINAL</span>  
+        </div>  
+        <div class="metric-pill">  
+          <span class="metric-label">Sondas Ativas</span>  
+          <span class="metric-val" style="color: #f4f4f5;">3 / 3 Bloqueadas</span>  
+        </div>  
+      </div>  
+    </header>
+
+    <div class="scenario-bar">  
+      <span style="color: var(--text-muted);">Injetar Cenário:</span>  
+      <button class="scenario-btn active" onclick="loadScenario('nominal')">01. Nominal (Sem Conflito)</button>  
+      <button class="scenario-btn" onclick="loadScenario('budget_overflow')">02. Estouro Orçamental (Sonda α)</button>  
+      <button class="scenario-btn" onclick="loadScenario('deadline_risk')">03. Risco de Prazo (Sonda β)</button>  
+      <button class="scenario-btn" onclick="loadScenario('double_fault')">04. Falha Dupla (α + β)</button>  
+    </div>
+
+    <main class="workspace-layout">  
+        
+      <aside class="probes-margin">  
+          
+        <div class="probe-card probe-a" id="probeCardA">  
+          <div class="probe-meta">  
+            <span class="probe-channel">CH 01 // SONDA α</span>  
+            <span class="probe-status" id="probeStatusA">EM FASE</span>  
+          </div>  
+          <div class="probe-invariant">Teto de Repasse ≤ R$ 6.240.000</div>  
+          <canvas class="probe-scope" id="scopeA" width="210" height="24"></canvas>  
+        </div>
+
+        <div class="probe-card probe-b" id="probeCardB">  
+          <div class="probe-meta">  
+            <span class="probe-channel">CH 02 // SONDA β</span>  
+            <span class="probe-status" id="probeStatusB">EM FASE</span>  
+          </div>  
+          <div class="probe-invariant">Janela Protocolo: 11 Dias Úteis</div>  
+          <canvas class="probe-scope" id="scopeB" width="210" height="24"></canvas>  
+        </div>
+
+        <div class="probe-card probe-c" id="probeCardC">  
+          <div class="probe-meta">  
+            <span class="probe-channel">CH 03 // SONDA γ</span>  
+            <span class="probe-status" id="probeStatusC">EM FASE</span>  
+          </div>  
+          <div class="probe-invariant">Isenção de Contrapartida Fiscal</div>  
+          <canvas class="probe-scope" id="scopeC" width="210" height="24"></canvas>  
+        </div>
+
+      </aside>
+
+      <section class="document-stage">  
+          
+        <div class="doc-paragraph" id="p1" contenteditable="true" spellcheck="false" oninput="evaluateDocument()">  
+          <span class="probe-anchor-tag probe-a">§ α</span>  
+          <span class="probe-anchor-tag probe-b">§ β</span>  
+          <span class="probe-anchor-tag probe-c">§ γ</span>  
+          A presente proposta formaliza a adesão do município ao edital federal de mobilidade urbana resiliente, fixando a dotação solicitada no teto de <strong>R$ 6.240.000,00</strong> com encerramento de submissão improrrogável em <strong>11 dias úteis</strong> e cláusula expressa de contrapartida zero do tesouro municipal.  
+        </div>
+
+        <div class="doc-paragraph" id="p2" contenteditable="true" spellcheck="false" oninput="evaluateDocument()">  
+          O plano de intervenção prioriza a pavimentação permeável e drenagem estrutural na bacia do corredor leste. O enquadramento no Eixo 2 dispensa desapropriações de solo privado, garantindo execução com equipas próprias de engenharia sem dilatação de custos indiretos.  
+        </div>
+
+        <div class="doc-paragraph" id="p3" contenteditable="true" spellcheck="false" oninput="evaluateDocument()">  
+          O cronograma físico-financeiro distribui o desembolso em 3 etapas de 60 dias, mantendo o montante contratado dentro da capacidade orçamental aprovada de R$ 6.240.000,00 e o início dos protocolos preparatórios para dentro da janela de 11 dias.  
+        </div>
+
+      </section>
+
+    </main>
+
+    <div class="footer-hint">  
+      <span>Edita o texto no Parágrafo 3 ou clica nos botões de cenário para ver as sondas a reagirem.</span>  
+      <span>Nenhum popup invasivo • Linting de coerência semântica passivo</span>  
+    </div>
+
+  </div>
+
+  <script>  
+    /* ESTADO DAS SONDAS DO OSCILOSCÓPIO */  
+    const probes = {  
+      a: { inConflict: false, freq: 0.06, amp: 6, color: "#ea580c", phase: 0 },  
+      b: { inConflict: false, freq: 0.06, amp: 6, color: "#06b6d4", phase: 2 },  
+      c: { inConflict: false, freq: 0.06, amp: 6, color: "#a855f7", phase: 4 }  
+    };
+
+    /* AVALIAÇÃO SEMÂNTICA DO TEXTO (LINTING DE COERÊNCIA) */  
+    function evaluateDocument() {  
+      const fullText = document.getElementById('p1').innerText + " " +  
+                       document.getElementById('p2').innerText + " " +  
+                       document.getElementById('p3').innerText;
+
+      const p3 = document.getElementById('p3');
+
+      // 1. Verificação Sonda Alpha (Orçamento > 6.24M)  
+      const hasBudgetOverflow = /8.500.000|7.[0-9]{3}.[0-9]{3}|9.[0-9]{3}.[0-9]{3}/.test(fullText);  
+        
+      // 2. Verificação Sonda Beta (Prazo > 11 dias úteis / 30 dias / outubro)  
+      const hasDeadlineRisk = /30 dias|45 dias|outubro|novembro/.test(fullText.toLowerCase());
+
+      // Atualiza Sonda Alpha  
+      probes.a.inConflict = hasBudgetOverflow;  
+      updateProbeUI('A', hasBudgetOverflow, "DESFASADA // TETO ULTRAPASSADO");
+
+      // Atualiza Sonda Beta  
+      probes.b.inConflict = hasDeadlineRisk;  
+      updateProbeUI('B', hasDeadlineRisk, "DESFASADA // PRAZO INCOMPATÍVEL");
+
+      // Destaque no Parágrafo com conflito  
+      if (hasBudgetOverflow || hasDeadlineRisk) {  
+        p3.classList.add('conflict-highlight');  
+        let violations = [];  
+        if (hasBudgetOverflow) violations.push("ESTOURO ORÇAMENTAL [SONDA α]");  
+        if (hasDeadlineRisk) violations.push("PRAZO EXCEDIDO [SONDA β]");  
+        p3.setAttribute('data-violation', violations.join(' • '));  
+      } else {  
+        p3.classList.remove('conflict-highlight');  
+        p3.removeAttribute('data-violation');  
+      }
+
+      // Atualiza Telemetria Global  
+      const totalConflicts = (hasBudgetOverflow ? 1 : 0) + (hasDeadlineRisk ? 1 : 0);  
+      const coherenceEl = document.getElementById('coherenceIndex');  
+      if (totalConflicts === 0) {  
+        coherenceEl.textContent = "100% NOMINAL";  
+        coherenceEl.classList.remove('alert');  
+      } else if (totalConflicts === 1) {  
+        coherenceEl.textContent = "68% TENSÃO SEMÂNTICA";  
+        coherenceEl.classList.add('alert');  
+      } else {  
+        coherenceEl.textContent = "34% COLAPSO CRÍTICO";  
+        coherenceEl.classList.add('alert');  
+      }  
+    }
+
+    function updateProbeUI(channel, inConflict, errorMsg) {  
+      const card = document.getElementById(`probeCard${channel}`);  
+      const status = document.getElementById(`probeStatus${channel}`);  
+        
+      card.classList.toggle('in-conflict', inConflict);  
+      status.textContent = inConflict ? errorMsg : "EM FASE";
+
+      // Modula a física da onda no osciloscópio  
+      const probeObj = probes[channel.toLowerCase()];  
+      if (inConflict) {  
+        probeObj.freq = 0.28; // Alta frequência / agitação  
+        probeObj.amp = 9;  
+        probeObj.color = "#ef4444";  
+      } else {  
+        probeObj.freq = 0.06; // Onda suave e nominal  
+        probeObj.amp = 6;  
+        probeObj.color = channel === 'A' ? "#ea580c" : channel === 'B' ? "#06b6d4" : "#a855f7";  
+      }  
+    }
+
+    /* INJEÇÃO DE CENÁRIOS DE TESTE */  
+    function loadScenario(scenario) {  
+      const p3 = document.getElementById('p3');  
+      const buttons = document.querySelectorAll('.scenario-btn');  
+        
+      buttons.forEach(b => b.classList.remove('active'));  
+      event.target.classList.add('active');
+
+      if (scenario === 'nominal') {  
+        p3.innerHTML = `O cronograma físico-financeiro distribui o desembolso em 3 etapas de 60 dias, mantendo o montante contratado dentro da capacidade orçamental aprovada de R$ 6.240.000,00 e o início dos protocolos preparatórios para dentro da janela de 11 dias.`;  
+      } else if (scenario === 'budget_overflow') {  
+        p3.innerHTML = `Para cobrir a expansão do viaduto leste, a equipa técnica reajustou a dotação de desembolso para <strong>R$ 8.500.000,00</strong>, mantendo o cronograma de protocolo nos 11 dias úteis previstos.`;  
+      } else if (scenario === 'deadline_risk') {  
+        p3.innerHTML = `Devido aos prazos de aprovação no conselho municipal, a entrega formal da proposta fica agendada para <strong>30 dias</strong> úteis, preservando o montante integral de R$ 6.240.000,00 sem contrapartida.`;  
+      } else if (scenario === 'double_fault') {  
+        p3.innerHTML = `A revisão orçamental elevou o projeto para <strong>R$ 8.500.000,00</strong> e dilatou o prazo limite de protocolo para <strong>outubro</strong> (45 dias úteis).`;  
+      }
+
+      evaluateDocument();  
+    }
+
+    /* RENDERIZAÇÃO DOS OSCILOGRAMAS (CANVAS 60FPS) */  
+    function initScopes() {  
+      const scopeA = document.getElementById('scopeA').getContext('2d');  
+      const scopeB = document.getElementById('scopeB').getContext('2d');  
+      const scopeC = document.getElementById('scopeC').getContext('2d');
+
+      let tick = 0;
+
+      function drawWave(ctx, probe) {  
+        ctx.clearRect(0, 0, 210, 24);  
+        ctx.beginPath();  
+        ctx.strokeStyle = probe.color;  
+        ctx.lineWidth = probe.inConflict ? 2 : 1.5;
+
+        for (let x = 0; x < 210; x++) {  
+          const y = 12 + Math.sin(x * probe.freq + tick + probe.phase) * probe.amp;  
+          if (x === 0) ctx.moveTo(x, y);  
+          else ctx.lineTo(x, y);  
+        }  
+        ctx.stroke();  
+      }
+
+      function loop() {  
+        tick += 0.08;  
+        drawWave(scopeA, probes.a);  
+        drawWave(scopeB, probes.b);  
+        drawWave(scopeC, probes.c);  
+        requestAnimationFrame(loop);  
+      }
+
+      loop();  
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {  
+      initScopes();  
+      evaluateDocument();  
+    });  
+  </script>  
+</body>  
+</html>

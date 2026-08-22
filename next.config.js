@@ -23,6 +23,8 @@ const nextConfig = {
             { source: '/labs/', destination: '/labs/index.html', permanent: false },
             { source: '/labs/y2k-sensory', destination: '/labs/y2k-sensory/index.html', permanent: false },
             { source: '/labs/y2k-sensory/', destination: '/labs/y2k-sensory/index.html', permanent: false },
+          { source: '/labs/interaction', destination: '/labs/interaction/index.html', permanent: false },
+          { source: '/labs/interaction/', destination: '/labs/interaction/index.html', permanent: false },
             { source: '/blog', destination: '/writing', permanent: true },
             { source: '/blog/:slug', destination: '/writing/:slug', permanent: true },
           ];

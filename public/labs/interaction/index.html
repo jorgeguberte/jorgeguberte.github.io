@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interaction Research — Jorge Guberte</title>
+  <meta name="description" content="Seven working prototypes of new interaction paradigms for reading, editing, and reasoning with AI-generated information." />
+  <link rel="canonical" href="https://jorgeguberte.com/labs/interaction/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #09090b;
+      --panel: #121215;
+      --surface: #18181c;
+      --border: #27272a;
+      --text: #f4f4f5;
+      --muted: #71717a;
+      --faint: #3f3f46;
+      --accent: #ea580c;
+      --accent-dim: rgba(234, 88, 12, 0.12);
+      --cyan: #06b6d4;
+      --purple: #a855f7;
+      --emerald: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh; padding: 48px 24px 80px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .topbar a { color: var(--muted); text-decoration: none; transition: color .15s; }
+    .topbar a:hover { color: var(--text); }
+    header.hero { display: flex; flex-direction: column; gap: 14px; border-bottom: 1px solid var(--border); padding-bottom: 32px; }
+    .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+    h1 { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: clamp(2.4rem, 6vw, 3.8rem); line-height: 1.05; letter-spacing: -0.02em; max-width: 16ch; }
+    h1 em { font-style: italic; color: var(--accent); }
+    .lead { color: var(--muted); font-size: 16px; line-height: 1.7; max-width: 62ch; font-weight: 300; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+    a.card {
+      display: flex; flex-direction: column; gap: 10px; text-decoration: none;
+      background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+      padding: 26px 26px 22px; min-height: 210px; color: inherit;
+      transition: transform .25s cubic-bezier(.16,1,.3,1), border-color .2s, background .2s, box-shadow .25s;
+    }
+    a.card:hover { transform: translateY(-4px); border-color: rgba(234,88,12,.55); background: #15151a; box-shadow: 0 18px 40px -18px rgba(234,88,12,.35); }
+    .card-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display:flex; justify-content: space-between;}
+    .card-title { font-family: 'Instrument Serif', Georgia, serif; font-size: 25px; line-height: 1.15; color: #fff; }
+    .card-desc { font-size: 13.5px; line-height: 1.6; color: var(--muted); font-weight: 300; flex: 1; }
+    .card-gesture { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); }
+    .footnote { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--faint); border-top: 1px solid var(--border); padding-top: 20px; line-height: 1.7; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="topbar">
+      <a href="/labs/">← labs</a>
+      <a href="/">jorgeguberte.com</a>
+    </nav>
+
+    <header class="hero">
+      <p class="eyebrow">Interaction Research // Seven Working Prototypes</p>
+      <h1>Interfaces that think in <em>space,</em> not timelines.</h1>
+      <p class="lead">
+        A research series on post-chat interaction design: what if documents had depth,
+        coherence was visible, text could be sculpted by hand, and hypotheses diffed
+        word by word? Each prototype below is fully functional — open one and interact.
+      </p>
+    </header>
+
+    <main class="grid">
+
+      <a class="card" href="./prosodic-typography.html">
+        <span class="card-tag"><span>Generative UI</span><span>01</span></span>
+        <h3 class="card-title">Prosodic Typography</h3>
+        <p class="card-desc">Rhythm resolved in space instead of time: semantic blocks settle as an editorial score — serif thesis, sans reasoning, percussive mono data. No typewriter effects.</p>
+        <span class="card-gesture">→ Compile three payloads live</span>
+      </a>
+
+      <a class="card" href="./semantic-lod.html">
+        <span class="card-tag"><span>Progressive Depth</span><span>02</span></span>
+        <h3 class="card-title">Semantic LOD</h3>
+        <p class="card-desc">Every paragraph carries its own z-axis. Scroll over a block to descend from executive headline to raw query and provenance — without modals or page jumps.</p>
+        <span class="card-gesture">→ Scroll on any block (L1–L4)</span>
+      </a>
+
+      <a class="card" href="./semantic-oscilloscope.html">
+        <span class="card-tag"><span>Passive Coherence</span><span>03</span></span>
+        <h3 class="card-title">Semantic Oscilloscope</h3>
+        <p class="card-desc">Pin probes to critical premises in the margin. Edit freely — when text breaks an invariant, its waveform goes turbulent. Semantic linting without popups.</p>
+        <span class="card-gesture">→ Inject conflict scenarios</span>
+      </a>
+
+      <a class="card" href="./semantic-chisel.html">
+        <span class="card-tag"><span>Direct Manipulation</span><span>04</span></span>
+        <h3 class="card-title">Semantic Chisel</h3>
+        <p class="card-desc">Vector handles applied directly onto paragraphs: squeeze to logical skeleton, fork into thesis/antithesis, merge distant blocks. No context menus.</p>
+        <span class="card-gesture">→ Drag the chisel handles</span>
+      </a>
+
+      <a class="card" href="./ghost-diffs.html">
+        <span class="card-tag"><span>Counterfactuals</span><span>05</span></span>
+        <h3 class="card-title">Ghost Diffs</h3>
+        <p class="card-desc">Alternative hypotheses projected inside the paragraph as ghost tokens. Cherry-pick individual words from a counterfactual without branching the document.</p>
+        <span class="card-gesture">→ Click ghost capsules ⇋</span>
+      </a>
+
+      <a class="card" href="./borrow-mesh.html">
+        <span class="card-tag"><span>Systems Literacy</span><span>06</span></span>
+        <h3 class="card-title">Tactile Borrow Mesh</h3>
+        <p class="card-desc">Rust ownership as physical cables: shared borrows flow in cyan, exclusive &amp;mut in orange — collide them and the mesh vibrates at error E0502. Drag lifetime handles to fix it.</p>
+        <span class="card-gesture">→ Drag the drop handle ⇕</span>
+      </a>
+
+      <a class="card" href="./attractor-collider.html">
+        <span class="card-tag"><span>Dynamical Systems · 3D</span><span>07</span></span>
+        <h3 class="card-title">Strange Attractor Collider</h3>
+        <p class="card-desc">3,500 particles riding Lorenz, Aizawa, and Rössler attractors. Drag gravity wells through phase space to bend the chaos — with live FM sonification.</p>
+        <span class="card-gesture">→ Drag the colored wells (WebGL)</span>
+      </a>
+
+    </main>
+
+    <footer class="footnote">
+      Prototyped across a long ideation session with Gemini (Aug 2026), curated &amp; shipped by Jorge Guberte.<br/>
+      Part of the Y2K Sensory / Attention Lab research line: ambitious interfaces that stay cognitively kind.
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>  
+<html lang="pt-BR">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
+  <title>Prosodic Typography &amp; Generative UI</title>  
+    
+  <link rel="preconnect" href="https://fonts.googleapis.com">  
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1\&family=JetBrains+Mono:wght@400;500;600\&family=Plus+Jakarta+Sans:wght@400;500;600\&display=swap" rel="stylesheet">
+
+  <style>  
+    :root {  
+      --bg: #09090b;  
+      --surface: #121215;  
+      --surface-elevated: #18181c;  
+      --border: #27272a;  
+      --border-subtle: #1f1f23;  
+      --text-main: #f4f4f5;  
+      --text-muted: #a1a1aa;  
+      --text-faint: #52525b;  
+      --accent: #ea580c;  
+      --accent-muted: rgba(234, 88, 12, 0.15);  
+      --accent-glow: rgba(234, 88, 12, 0.3);  
+    }
+
+    * {  
+      box-sizing: border-box;  
+      margin: 0;  
+      padding: 0;  
+    }
+
+    body {  
+      background-color: var(--bg);  
+      color: var(--text-main);  
+      font-family: 'Plus Jakarta Sans', sans-serif;  
+      min-height: 100vh;  
+      display: flex;  
+      flex-direction: column;  
+      align-items: center;  
+      justify-content: center;  
+      padding: 40px 20px;  
+      -webkit-font-smoothing: antialiased;  
+    }
+
+    .wrapper {  
+      width: 100%;  
+      max-width: 740px;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 20px;  
+    }
+
+    /* Barra de Controle / Simulador de Payload */  
+    .controls {  
+      display: flex;  
+      align-items: center;  
+      justify-content: space-between;  
+      background: var(--surface);  
+      border: 1px solid var(--border);  
+      border-radius: 8px;  
+      padding: 10px 16px;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 12px;  
+    }
+
+    .payload-selector {  
+      display: flex;  
+      gap: 8px;  
+    }
+
+    .tab-btn {  
+      background: transparent;  
+      border: 1px solid var(--border);  
+      color: var(--text-muted);  
+      padding: 6px 12px;  
+      border-radius: 4px;  
+      cursor: pointer;  
+      font-family: inherit;  
+      font-size: 11px;  
+      text-transform: uppercase;  
+      letter-spacing: 0.05em;  
+      transition: all 0.15s ease;  
+    }
+
+    .tab-btn:hover {  
+      border-color: var(--accent);  
+      color: var(--text-main);  
+    }
+
+    .tab-btn.active {  
+      background: var(--accent-muted);  
+      border-color: var(--accent);  
+      color: var(--accent);  
+      font-weight: 600;  
+    }
+
+    .btn-render {  
+      background: var(--accent);  
+      color: #fff;  
+      border: none;  
+      border-radius: 6px;  
+      padding: 8px 16px;  
+      font-family: 'Plus Jakarta Sans', sans-serif;  
+      font-size: 13px;  
+      font-weight: 600;  
+      cursor: pointer;  
+      transition: background 0.15s ease;  
+      box-shadow: 0 2px 10px var(--accent-glow);  
+    }
+
+    .btn-render:hover {  
+      background: #c2410c;  
+    }
+
+    /* Container Principal da Interface Editorial */  
+    .prosodic-stage {  
+      background: var(--surface);  
+      border: 1px solid var(--border);  
+      border-radius: 14px;  
+      padding: 44px 40px;  
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);  
+      min-height: 380px;  
+      position: relative;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 28px;  
+    }
+
+    .empty-state {  
+      margin: auto;  
+      text-align: center;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 13px;  
+      color: var(--text-faint);  
+    }
+
+    /* 1. Registro Grave / Tese: Display Serif */  
+    .section-thesis {  
+      opacity: 0;  
+      transform: translateY(12px);  
+      animation: settleIn 420ms cubic-bezier(0.16, 1, 0.3, 1) 40ms forwards;  
+    }
+
+    .thesis-tag {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      font-weight: 600;  
+      text-transform: uppercase;  
+      letter-spacing: 0.12em;  
+      color: var(--accent);  
+      margin-bottom: 12px;  
+      display: flex;  
+      align-items: center;  
+      gap: 8px;  
+    }
+
+    .thesis-tag::before {  
+      content: "";  
+      display: inline-block;  
+      width: 6px;  
+      height: 6px;  
+      background: var(--accent);  
+      border-radius: 50%;  
+    }
+
+    .thesis-statement {  
+      font-family: 'Instrument Serif', Georgia, serif;  
+      font-size: 38px;  
+      line-height: 1.12;  
+      color: #fafafa;  
+      letter-spacing: -0.025em;  
+      font-weight: 400;  
+    }
+
+    .thesis-statement em {  
+      font-style: italic;  
+      color: #e4e4e7;  
+    }
+
+    /* 2. Registro Médio / Contexto: Sans Balanceada */  
+    .section-narrative {  
+      opacity: 0;  
+      transform: translateY(12px);  
+      animation: settleIn 420ms cubic-bezier(0.16, 1, 0.3, 1) 180ms forwards;  
+      border-left: 2px solid var(--border);  
+      padding-left: 20px;  
+    }
+
+    .narrative-body {  
+      font-size: 15.5px;  
+      line-height: 1.7;  
+      color: var(--text-muted);  
+      max-width: 64ch;  
+    }
+
+    .narrative-body strong {  
+      color: var(--text-main);  
+      font-weight: 600;  
+    }
+
+    /* 3. Registro Percussivo / Fatos: Monospace Grid */  
+    .section-metrics {  
+      opacity: 0;  
+      transform: translateY(12px);  
+      animation: settleIn 420ms cubic-bezier(0.16, 1, 0.3, 1) 320ms forwards;  
+      display: grid;  
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));  
+      gap: 12px;  
+      padding-top: 8px;  
+    }
+
+    .metric-card {  
+      background: var(--surface-elevated);  
+      border: 1px solid var(--border-subtle);  
+      border-radius: 8px;  
+      padding: 14px 16px;  
+      display: flex;  
+      flex-direction: column;  
+      justify-content: space-between;  
+      gap: 6px;  
+      position: relative;  
+      overflow: hidden;  
+    }
+
+    .metric-card::after {  
+      content: "";  
+      position: absolute;  
+      top: 0;  
+      left: 0;  
+      bottom: 0;  
+      width: 3px;  
+      background: var(--border);  
+    }
+
+    .metric-card.accented::after {  
+      background: var(--accent);  
+    }
+
+    .metric-label {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10.5px;  
+      text-transform: uppercase;  
+      letter-spacing: 0.08em;  
+      color: var(--text-faint);  
+    }
+
+    .metric-value {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 18px;  
+      font-weight: 600;  
+      letter-spacing: -0.02em;  
+      color: var(--text-main);  
+    }
+
+    .metric-value.accented {  
+      color: #fb923c;  
+    }
+
+    .metric-sub {  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 10px;  
+      color: var(--text-muted);  
+    }
+
+    /* Animação Física de Assentamento */  
+    @keyframes settleIn {  
+      0% {  
+        opacity: 0;  
+        transform: translateY(12px);  
+      }  
+      100% {  
+        opacity: 1;  
+        transform: translateY(0);  
+      }  
+    }
+
+    /* Rodapé Informativo */  
+    .footer-note {  
+      display: flex;  
+      justify-content: space-between;  
+      align-items: center;  
+      font-family: 'JetBrains Mono', monospace;  
+      font-size: 11px;  
+      color: var(--text-faint);  
+      padding: 0 4px;  
+    }  
+  </style>  
+</head>  
+<body>
+<div style="position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 16px;background:rgba(9,9,11,.92);backdrop-filter:blur(10px);border-bottom:1px solid #27272a;font-family:'JetBrains Mono',monospace;font-size:11px;">
+  <span style="color:#71717a;">PROSODIC TYPOGRAPHY // rhythm in space, not time — compile payloads below</span>
+  <a href="./index.html" style="color:#ea580c;text-decoration:none;white-space:nowrap;">← Interaction Research</a>
+</div>
+
+  <div class="wrapper">  
+      
+    <div class="controls">  
+      <div class="payload-selector">  
+        <button class="tab-btn active" onclick="selectPayload(0)">Funding Municipal</button>  
+        <button class="tab-btn" onclick="selectPayload(1)">Alerta de Infra</button>  
+        <button class="tab-btn" onclick="selectPayload(2)">Auditoria Fiscal</button>  
+      </div>  
+      <button class="btn-render" onclick="renderCurrentPayload()">Compilar Layout</button>  
+    </div>
+
+    <main class="prosodic-stage" id="stage">  
+      <div class="empty-state">  
+        // Selecione um payload e clique em "Compilar Layout" para renderizar  
+      </div>  
+    </main>
+
+    <div class="footer-note">  
+      <span>Tessitura: Serif (38px) × Sans (15.5px) × Mono (18px)</span>  
+      <span>Status: Zero Typewriter / Atomic Settle</span>  
+    </div>
+
+  </div>
+
+  <script>  
+    // Payloads semânticos estruturados (exatamente como sairiam de um pipeline agêntico)  
+    const mockPayloads = [  
+      {  
+        tag: "Diagnóstico de Funding // Strata Engine",  
+        thesis: "Oportunidade crítica de <em>repasse federal</em> identificada para o setor de mobilidade.",  
+        narrative: "O município atingiu a pontuação máxima de elegibilidade no eixo de drenagem e pavimentação sustentável. O enquadramento dispensa contrapartida financeira inicial, viabilizando <strong>submissão imediata</strong> antes da virada do ciclo orçamentário.",  
+        metrics: [  
+          { label: "Volume Estimado", value: "R$ 6.240.000", sub: "100% a fundo perdido", status: "accent" },  
+          { label: "Janela de Envio", value: "11 dias úteis", sub: "Encerramento 04/Set", status: "nominal" },  
+          { label: "Aderência FNDE", value: "98.4%", sub: "Score de conformidade", status: "nominal" }  
+        ]  
+      },  
+      {  
+        tag: "Monitoramento Urbano // Sensor Topológico",  
+        thesis: "Anomalia térmica e sobrecarga detectada na <em>malha viária leste</em>.",  
+        narrative: "A convergência entre o desvio de tráfego intermunicipal e o recapeamento inacabado gerou <strong>retenção 34% acima da média histórica</strong>. Recomenda-se remanejamento de agentes de trânsito para o nó da Av. Central.",  
+        metrics: [  
+          { label: "Atraso Médio", value: "+42 min", sub: "Pico às 18h15", status: "accent" },  
+          { label: "Extensão Afetada", value: "4.8 km", sub: "Corredor estrutural", status: "nominal" },  
+          { label: "Índice de Fluidez", value: "0.22", sub: "Nível Crítico (F)", status: "accent" }  
+        ]  
+      },  
+      {  
+        tag: "Auditoria Contábil // Compliance Municipal",  
+        thesis: "Regularidade atestada com <em>ressalva técnica</em> no cronograma da pasta de obras.",  
+        narrative: "A conciliação bancária entre os repasses estaduais e as notas fiscais emitidas confere com o plano diretor. A única pendência consiste no envio do <strong>laudo geotécnico complementar</strong> para liquidação da parcela.",  
+        metrics: [  
+          { label: "Execução Orçamentária", value: "87.6%", sub: "Dentro do previsto", status: "nominal" },  
+          { label: "Glosa Preventiva", value: "R$ 0,00", sub: "Nenhum bloqueio ativo", status: "nominal" },  
+          { label: "Pendências Formais", value: "1 item", sub: "Laudo de engenharia", status: "accent" }  
+        ]  
+      }  
+    ];
+
+    let currentPayloadIndex = 0;
+
+    function selectPayload(index) {  
+      currentPayloadIndex = index;  
+      const tabs = document.querySelectorAll('.tab-btn');  
+      tabs.forEach((tab, i) => {  
+        tab.classList.toggle('active', i === index);  
+      });  
+      renderCurrentPayload();  
+    }
+
+    function renderCurrentPayload() {  
+      const stage = document.getElementById('stage');  
+      const data = mockPayloads[currentPayloadIndex];
+
+      // Limpa e remonta os blocos sem reflows caóticos  
+      stage.innerHTML = `  
+        <header class="section-thesis">  
+          <div class="thesis-tag">${data.tag}</div>  
+          <h1 class="thesis-statement">${data.thesis}</h1>  
+        </header>
+
+        <div class="section-narrative">  
+          <p class="narrative-body">${data.narrative}</p>  
+        </div>
+
+        <footer class="section-metrics">  
+          ${data.metrics.map(m => `  
+            <div class="metric-card ${m.status === 'accent' ? 'accented' : ''}">  
+              <div class="metric-label">${m.label}</div>  
+              <div class="metric-value ${m.status === 'accent' ? 'accented' : ''}">${m.value}</div>  
+              <div class="metric-sub">${m.sub}</div>  
+            </div>  
+          `).join('')}  
+        </footer>  
+      `;  
+    }
+
+    // Renderiza o primeiro payload automaticamente ao carregar  
+    window.addEventListener('DOMContentLoaded', () => {  
+      renderCurrentPayload();  
+    });  
+  </script>  
+</body>  
+</html>
