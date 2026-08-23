@@ -33,7 +33,7 @@ export const proofStats = [
   { value: "12+", label: "Years shipping software", note: "Platforms, distributed systems, data pipelines" },
   { value: "Production", label: "B2G AI platform live", note: "Strata serves city profiles incl. Porto Alegre/RS" },
   { value: "2.8M ops/s", label: "State-fork allocation", note: "multiverse-js benchmarked at 430ns per fork" },
-  { value: "5.39M", label: "Param LLM from scratch", note: "Ayvu-Talian: tokenizer, training, inference" },
+  { value: "+50pp", label: "Typed memory vs flat retrieval", note: "Blind validation, p < 10\u207b\u2077 \u2014 EPCG Memory Access Model" },
 ];
 
 export type WorkItem = {
@@ -116,6 +116,22 @@ export const featuredWork: WorkItem[] = [
     href: "https://github.com/jorgeguberte/ayvu-talian-base",
     external: true,
   },
+  {
+    slug: "epcg",
+    name: "EPCG",
+    kind: "Research \u00b7 Empirically validated",
+    oneLiner: "Typed memory interfaces for agents that must remember over months.",
+    description:
+      "Emergent Personal Cognitive Graphs: a category-theoretic architecture for persistent cognition. Its first validated result: decomposing agent memory access into four typed operations beats flat top-k retrieval by 50+ percentage points in blind, cross-domain testing.",
+    highlights: [
+      "+50pp over flat retrieval in blind validation (N=200, p < 10\u207b\u2077)",
+      "External AMA-Bench pilots: 72.5% vs BM25 70.0%, LongContext 50.0%",
+      "Four categorical layers with functorial bridges and a monadic orchestration core",
+    ],
+    stack: ["Rust", "Category theory", "AMA-Bench"],
+    status: "Validated model \u00b7 ongoing research",
+    href: "/lab/epcg",
+  },
 ];
 
 export type ExperienceItem = {
@@ -151,7 +167,8 @@ export const experience: ExperienceItem[] = [
     summary:
       "Ongoing applied R&D across agent memory, state management, generative UI, and multimodal AI \u2014 from experimental architectures to production-ready open-source libraries.",
     bullets: [
-      "LoomDB: graph-based temporal memory substrate (Rust/WASM) implementing biological decay models to reduce context bloat while preserving retrieval precision.",
+      "EPCG Memory Access Model: falsified flat retrieval as a universal memory interface; four typed operations beat it by +50pp in blind cross-domain validation (p < 10\u207b\u2077), with external AMA-Bench pilots audited end-to-end.",
+      "LoomDB: temporal memory as a formally bounded dissipative system (asymptotic saturation, sub-stochastic propagation) in Rust/WASM; hybrid retrieval policies optimized by evolutionary search instead of hand-tuned constants.",
       "multiverse-js: Git-style branching state library \u2014 fork allocation at 2.8M ops/s, LWW merge optimized from O(N) scan to 44.9K ops/s.",
       "CBR Audiotech / Prosodia: full async audio-intelligence pipeline (Next.js, BullMQ, Modal GPU, Cloudflare R2) with a prosodic adaptation engine for cross-cultural music generation; validated across two active music labels.",
       "AYVU-Talian: decoder-only transformer from scratch on Talian \u2014 data curation, custom tokenizer, training, inference.",
@@ -191,10 +208,10 @@ export const skillGroups = [
     label: "AI systems",
     items: [
       "Agentic workflows & orchestration",
+      "Typed memory interfaces & temporal retrieval",
       "Advanced RAG \u00b7 Context engineering",
-      "Semantic & working memory",
       "Model Context Protocol (MCP)",
-      "Agent observability & evaluation",
+      "Agent observability, benchmarks & behavioral QA",
     ],
   },
   {
@@ -242,17 +259,19 @@ export const labPrograms: LabProgram[] = [
   {
     slug: "loomdb",
     name: "LoomDB",
-    oneLiner: "A graph-based temporal memory architecture.",
+    oneLiner: "A graph-based temporal memory engine with formal stability guarantees.",
     description:
-      "Context as a living graph: activation spreads, attention decays, relevance is a function of time. Memory that behaves less like a database and more like a mind \u2014 recency, frequency, and association shaping what surfaces and what fades.",
-    status: "Active research",
+      "Memory as a nonlinear dissipative dynamical system over a mutable directed graph \u2014 not a passive vector store. Activation saturates asymptotically, stability grows sublinearly, and sub-stochastic edge weights guarantee bounded signal under arbitrarily long horizons: repeated stimulation and cycles cannot explode the state.",
+    status: "Active research \u00b7 Rust core \u00b7 paper in draft",
     themes: ["agent memory", "retrieval", "temporal graphs"],
     question:
       "Can memory retrieval be modeled as spreading activation over a temporal graph \u2014 where forgetting is a feature, not a failure?",
     approach: [
-      "Activation decay: memories lose energy over time unless reinforced, mirroring human salience.",
-      "Active context graph: the working set is a live subgraph, continuously re-weighted as the conversation moves.",
-      "Rust core compiled to WASM \u2014 the same memory engine runs server-side, in the browser, and embedded in desktop agents.",
+      "Asymptotic saturation: a_v(t+1) = a_v(t) + (1 - a_v(t))\u03b1 \u2014 every stimulus contributes a fraction of the remaining distance to the ceiling, so energy never accumulates unbounded.",
+      "Lazy decay modulated by consolidated stability: frequently reinforced memories resist forgetting; neglected ones fade on a multiplicative schedule.",
+      "Sub-stochastic propagation: outgoing weights sum to ≤1, making boundedness a structural property of the graph, not a runtime hope.",
+      "Evolutionary policy optimization: the hybrid semantic+activation reranking policy is treated as an evolvable program \u2014 a small interpretable router over query features discovers when to trust text similarity vs. activation energy, instead of fixed magic numbers.",
+      "Rust core compiled to WASM \u2014 the same engine runs server-side, in the browser, and embedded in desktop agents.",
     ],
     openProblems: [
       "Consolidation: when should episodic traces merge into semantic structure?",
@@ -264,24 +283,25 @@ export const labPrograms: LabProgram[] = [
   {
     slug: "epcg",
     name: "EPCG",
-    oneLiner: "An emergent personality framework for AI agents.",
+    oneLiner: "Emergent Personal Cognitive Graphs \u2014 a category-theoretic foundation for persistent agents, with an empirically validated memory access model.",
     description:
-      "Personality as structure, not system prompt. EPCG composes agent identity from three interacting layers \u2014 Behavior, Belief, and Biography \u2014 drawing on category theory to make the composition lawful, inspectable, and stable over time.",
-    status: "Early research",
-    themes: ["cognitive architectures", "agent identity", "category theory"],
+      "EPCG models persistent cognition in four categorical layers \u2014 semantic memory, relational memory, executive supervision, and an orchestration endofunctor. Its first falsifiable claim is already validated: flat retrieval (`retrieve(query) -> top-k`) is the wrong interface for agent memory. The Memory Access Model decomposes recall into four typed operations and beat flat retrieval by 50+ percentage points in blind generalization spikes (p < 10\u207b\u2077).",
+    status: "Validated memory model \u00b7 external pilots on AMA-Bench",
+    themes: ["cognitive architectures", "typed memory interfaces", "category theory", "empirical evaluation"],
     question:
-      "What is the minimal formal structure from which a coherent, persistent agent personality can emerge \u2014 and survive thousands of interactions without drifting?",
+      "What are the minimal typed interfaces through which an agent must access its own past \u2014 and can that decomposition be proven to generalize outside its training domain?",
     approach: [
-      "The BBB model: Behavior (what the agent does), Belief (what it holds true), Biography (what it has lived). Each layer constrains the others.",
-      "Category-theoretic composition: personality traits as morphisms, identity as the structure preserved across transformations.",
-      "Biography accumulates from real interaction history \u2014 personality is grown, not authored.",
+      "Memory Access Model v0: four typed operations selected autonomously by the agent \u2014 EpisodicAt(turn) for discrete events, StateAt(entity, dim, T) for point-in-time validity, StateHistory(entity, dim, range) for transitions, SemanticRetrieve(query) for open discovery.",
+      "Blind validation: N=200 tasks across two domains; flat retrieval scored 19.5% vs 70% for typed access (+50pp, p < 10\u207b\u2077) \u2014 zero LLM in the loop, isolating the architecture variable.",
+      "External audit on AMA-Bench: EPCG-T at 72.5% vs BM25 70.0% and LongContext 50.0%, with paired analysis and full provenance (frozen commits, raw JSONs, SHA256 manifests).",
+      "Category-theoretic composition: layers as categories, cross-layer bridges as functors, orchestration as a monad \u2014 making identity preservation provable rather than aspirational.",
     ],
     openProblems: [
-      "Drift detection: distinguishing healthy character development from degradation.",
-      "Belief revision under contradiction without identity collapse.",
-      "Evaluation: how do you measure that a personality is the same one, six months later?",
+      "Relational construction: current pilots run EPCG-T (temporal/selective); graph spreading between episodes remains untested territory.",
+      "Closing the gap to dense baselines on semantic-only queries without losing the temporal guarantees.",
+      "Governance of evolving memory: write-gates and reconciliation before self-edited memory compounds errors.",
     ],
-    stack: "Formal framework",
+    stack: "Rust \u00b7 formal methods \u00b7 AMA-Bench",
   },
   {
     slug: "y2k-sensory",
@@ -403,8 +423,8 @@ export const aboutPage = {
   throughLine: {
     heading: "The through-line",
     paragraphs: [
-      "The work splits into a workshop and a lab. In the workshop: Strata, a B2G municipal intelligence platform running in production at Hub Esfera; Pixie, an embodied learning companion testing the research in the hardest arena there is \u2014 a child's attention. In the lab: LoomDB, a temporal memory architecture where context behaves like a living graph; EPCG, a formal framework for persistent agent personality; Ayvu-Talian, language modeling where the stakes of forgetting are cultural.",
-      "None of these are side projects. They are one program with multiple instruments.",
+      "The work splits into a workshop and a lab. In the workshop: Strata, a B2G municipal intelligence platform running in production at Hub Esfera; Pixie, an embodied learning companion testing the research in the hardest arena there is \u2014 a child's attention. In the lab: LoomDB, memory engineered as a formally bounded dynamical system; EPCG, a categorical foundation for persistent agents whose memory access model already carries blind empirical validation; Ayvu-Talian, language modeling where the stakes of forgetting are cultural.",
+      "None of these are side projects. They are one program with multiple instruments \u2014 and every claim that matters gets a benchmark.",
     ],
   },
   practice: {
@@ -418,9 +438,9 @@ export const aboutPage = {
     heading: "Where I operate",
     items: [
       "Agent memory & temporal context architectures",
-      "Context engineering & retrieval systems",
+      "Typed retrieval interfaces beyond flat top-k",
       "Agentic orchestration for long-running applications",
-      "Advanced RAG & semantic search infrastructure",
+      "Context engineering with verifiable evidence trails",
       "Generative UI & human-AI interaction",
       "Accessibility-first, neurodivergent-first design",
     ],
