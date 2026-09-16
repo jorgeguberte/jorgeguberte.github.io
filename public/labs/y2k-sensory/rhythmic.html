@@ -620,6 +620,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <link rel="stylesheet" href="../experiment.css">
 <script src="../experiment.js" defer></script>
+<link rel="stylesheet" href="./rhythmic-polish.css">
 </head>
 <body>
 
@@ -635,17 +636,14 @@
     <a href="../index.html" class="back-link">← INDEX // SYSTEM</a>
 
     <header class="header-zone">
-      <h1>🎵 Sincronização Rítmica (Entrainment)</h1>
-      <p>
-        O uso de estímulos rítmicos sincronizados (130-170 BPM) atua como um ancorador de atenção. 
-        Mentes com TDAH usam esse ritmo como uma frequência de arrasto neural, estabilizando o foco 
-        cognitivo periférico sem gerar sobrecarga na leitura do texto principal.
-      </p>
+      <p class="rhythm-kicker">BROCHACHO RECORDS / RHYTHM MACHINE 01</p>
+      <h1>Encontre o seu <em>ritmo.</em></h1>
+      <p>Um pequeno aparelho para ouvir, ler e entrar no compasso. Escolha a velocidade, marque o pulso na mão e deixe o disco girar.</p>
     </header>
 
     <!-- Lab Dashboard -->
     <main class="dashboard">
-      <h2 class="section-title">Laboratório de Frequência Perceptual</h2>
+      <h2 class="section-title">STEREO LAB / CONTROLE DE PULSO</h2>
 
       <div class="dashboard-grid">
         
@@ -657,7 +655,7 @@
             <div class="beat-bar-indicator" id="beatIndicator"></div>
           </div>
           <div style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase; font-weight: bold;">
-            Metrônomo Brochacho Records v.02 (Three.js PRO CD)
+            DIRECT DRIVE / DIGITAL RHYTHM
           </div>
         </div>
 
@@ -669,9 +667,17 @@
               <span style="text-transform: uppercase; font-size: var(--text-xs); color: var(--text-secondary)">Batidas por Minuto</span>
               <span id="bpmValue" style="color: var(--acid-500); font-weight: bold; font-size: var(--text-md)">140 BPM</span>
             </div>
-            <input type="range" min="60" max="180" value="140" class="bpm-slider" id="bpmSlider">
+            <input type="range" min="60" max="180" value="140" class="bpm-slider" id="bpmSlider" aria-label="Batidas por minuto">
           </div>
 
+          <div class="tempo-presets" role="group" aria-label="Tempos de referência">
+            <button type="button" data-tempo="90">90 <span>CHILL</span></button>
+            <button type="button" data-tempo="120">120 <span>GROOVE</span></button>
+            <button type="button" data-tempo="140" aria-pressed="true">140 <span>FLOW</span></button>
+            <button type="button" data-tempo="170">170 <span>RUSH</span></button>
+          </div>
+          <div class="tap-row"><button type="button" id="tapTempo">◎ TAP TEMPO</button><span id="tapHint" aria-live="polite">Toque algumas vezes no seu ritmo.</span></div>
+          <div class="beat-steps" aria-label="Compasso de quatro tempos"><span>1</span><span>2</span><span>3</span><span>4</span></div>
           <div class="button-group">
             <button class="btn-action active" id="playPauseBtn" title="Pausar todas as animações e metrônomos">
               <span id="playIcon">⏸</span> <span id="playText">Pausa</span>
@@ -1029,18 +1035,38 @@
 
     // Update dynamic CSS custom property
     function updateBpm(bpm) {
-      currentBpm = parseInt(bpm);
+      const value = Number(bpm);
+      if (!Number.isFinite(value)) return;
+      currentBpm = Math.max(60, Math.min(180, Math.round(value)));
+      bpmSlider.value = currentBpm;
+      document.querySelectorAll('[data-tempo]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.tempo) === currentBpm)));
       bpmValue.textContent = `${currentBpm} BPM`;
       document.documentElement.style.setProperty('--bpm', currentBpm);
     }
 
-    bpmSlider.addEventListener('input', (e) => {
+    let taps = [];
+    document.querySelectorAll('[data-tempo]').forEach(button => button.addEventListener('click', () => {
+      taps = []; updateBpm(button.dataset.tempo);
+      document.getElementById('tapHint').textContent = 'Preset selecionado. Ou marque seu próprio pulso.';
+    }));
+    document.getElementById('tapTempo').addEventListener('click', () => {
+      const now = performance.now();
+      if (taps.length && now - taps[taps.length - 1] > 2000) taps = [];
+      taps.push(now); if (taps.length > 6) taps.shift();
+      if (taps.length < 2) { document.getElementById('tapHint').textContent = 'Mais um toque…'; return; }
+      const interval = (now - taps[0]) / (taps.length - 1);
+      updateBpm(60000 / Math.max(interval, 1));
+      document.getElementById('tapHint').textContent = currentBpm + ' BPM · ' + taps.length + ' toques (60–180 BPM)';
+    });
+
+    bpmSlider.addEventListener('input' , (e) => {
       updateBpm(e.target.value);
     });
 
     // Pause/Resume movements (compliance WCAG 2.2.2)
     playPauseBtn.addEventListener('click', () => {
       isPlaying = !isPlaying;
+      playPauseBtn.setAttribute('aria-pressed', String(!isPlaying));
       if (isPlaying) {
         body.classList.remove('animations-paused');
         playText.textContent = "Pausar Movimento";
@@ -1117,8 +1143,10 @@
     const lookahead = 15.0; // milliseconds
     const scheduleAheadTime = 0.1; // seconds
 
+    let schedulerGeneration = 0;
+    function clockTime() { return audioCtx && audioCtx.state === 'running' ? audioCtx.currentTime : performance.now() / 1000; }
     function scheduler() {
-      while (nextBeatTime < audioCtx.currentTime + scheduleAheadTime) {
+      while (nextBeatTime < clockTime() + scheduleAheadTime) {
         scheduleBeat(beatIndex, nextBeatTime);
         advanceBeat();
       }
@@ -1127,14 +1155,16 @@
 
     function scheduleBeat(beatNum, time) {
       // Trigger Synthesizer
-      if (isAudioActive) {
+      if (isAudioActive && audioCtx && audioCtx.state === 'running') {
         playSynthPluck(time, beatNum);
       }
 
       // Sync visual metronome bar flash exactly on beat
-      const delayMs = (time - audioCtx.currentTime) * 1000;
+      const delayMs = (time - clockTime()) * 1000;
+      const generation = schedulerGeneration;
       setTimeout(() => {
-        if (!isPlaying) return;
+        if (!isPlaying || generation !== schedulerGeneration) return;
+        document.querySelectorAll('.beat-steps span').forEach((step, i) => step.classList.toggle('on', i === beatNum));
         
         // Trigger visual bar metronome flash
         beatIndicator.classList.remove('fade');
@@ -1160,28 +1190,26 @@
     }
 
     function startAudioScheduler() {
-      if (!audioCtx) initAudio();
-      
-      // Resume audio context if suspended (browser security policy)
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-
-      nextBeatTime = audioCtx.currentTime + 0.05;
+      stopAudioScheduler();
+      nextBeatTime = clockTime() + 0.05;
       beatIndex = 0;
       scheduler();
     }
-
     function stopAudioScheduler() {
+      schedulerGeneration++;
       clearTimeout(schedulerTimer);
       schedulerTimer = null;
+      document.querySelectorAll('.beat-steps span').forEach(step => step.classList.remove('on'));
     }
 
     // Toggle Audio Pluck
-    audioToggleBtn.addEventListener('click', () => {
+    audioToggleBtn.addEventListener('click', async () => {
       if (!audioCtx) initAudio();
 
+      if (audioCtx.state !== 'running') await audioCtx.resume();
+      if (isPlaying) startAudioScheduler();
       isAudioActive = !isAudioActive;
+      audioToggleBtn.setAttribute('aria-pressed', String(isAudioActive));
       if (isAudioActive) {
         audioToggleBtn.textContent = "🔊 Synth: LIGADO";
         audioToggleBtn.classList.add('active');
@@ -1473,17 +1501,27 @@
       });
     }
 
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) { stopAudioScheduler(); if (audioCtx) audioCtx.suspend(); }
+      else if (isPlaying) {
+        if (audioCtx && isAudioActive) audioCtx.resume().then(startAudioScheduler);
+        else startAudioScheduler();
+      }
+    });
     // Initialize scheduler on load to sync the visual metronome flash
     window.addEventListener('load', () => {
       // Create Context and start the silent clock loop just for visual flash syncing
-      initAudio();
       startAudioScheduler();
       
       // Setup Three.js PRO CD
-      initThreeCD();
+      try { initThreeCD(); } catch (_) {
+        document.getElementById('cdContainer').classList.add('disc-fallback');
+      }
       
       // Setup TTS token boundaries
       prepareTTS();
+      updateBpm(currentBpm);
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches && isPlaying) playPauseBtn.click();
 
       // Brochacho Records Easter Egg
       console.log(
