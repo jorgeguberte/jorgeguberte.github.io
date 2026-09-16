@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-sensory="balanced">
+<html lang="en" data-sensory="balanced">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,122 +34,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     
     <link rel="stylesheet" href="./styles.css" />
-    <!-- Three.js for immersive 3D background grid on Labs Portal -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
   </head>
   <body>
-    <!-- LAYER 1: CHAOS LAYER (z-index: 0, pointer-events none, hidden from assistants) -->
-    <div class="chaos-layer" aria-hidden="true">
-      <!-- 3D Interactive Background Canvas -->
-      <div id="canvas3d-container" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 1; transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1);"></div>
-
-      <!-- High-End Radial Orbs -->
-      <div class="orb orb-green"></div>
-      <div class="orb orb-blue"></div>
-      
-      <!-- Scanlines & Noise Texture -->
-      <div class="scanlines"></div>
-      <div class="noise-overlay"></div>
-    </div>
-
-    <!-- LAYER 2: FUNCTIONAL LAYER (z-index: 100+) -->
+    <a class="skip" href="#experiments">Skip to experiments</a>
     <div class="functional-layer">
-      <!-- Floating Header -->
-      <header class="topbar">
-        <a href="/" class="back-link">← home</a>
-        <nav class="top-links">
-          <a href="/about">about</a>
-          <a href="/writing">writing</a>
-          <a href="https://github.com/jorgeguberte" target="_blank" rel="noopener noreferrer">github</a>
-        </nav>
-      </header>
-
-      <!-- Sensory Control Dock (Floating glass capsule matching the design skills) -->
-      <div class="sensory-dock transition-spring" id="sensory-dock">
-        <button class="dock-btn transition-spring" data-target="high-stim" title="ADHD: subtle motion to anchor scattered attention">
-          High-Stim
-        </button>
-        <button class="dock-btn transition-spring active" data-target="balanced" title="Padrão: Equilíbrio translúcido e foco focado">
-          Balanced
-        </button>
-        <button class="dock-btn transition-spring" data-target="calm" title="Autismo: Movimento zero e cores descansadas">
-          Calm Mode
-        </button>
-      </div>
-
-      <!-- Main Layout -->
+      <header class="topbar"><a href="/" class="wordmark">JG<span> / LABS</span></a><nav aria-label="Main"><a href="/about">About</a><a href="https://github.com/jorgeguberte">GitHub ↗</a></nav></header>
       <main>
-        <!-- Hero Section (Variable Serif + Spacious whitespace) -->
-        <section class="hero transition-spring">
-          <p class="eyebrow">Prototypes // Labs</p>
-          <h1>Raw ideas, simulations, and other strange utilities.</h1>
-          <p class="lead">
-            This is where concepts at the start of their cognitive life cycle take shape. A static, focused playground where ideas about cognition, agent memory, and human-machine interaction get a body before they become real systems.
-          </p>
+        <section class="hero">
+          <div><p class="eyebrow">Independent experiments · Jorge Guberte</p><h1>Curiosity,<br>with <em>controls.</em></h1><p class="lead">Small worlds. Strange interfaces. Ideas you can touch.<br>A workbench for sound, simulation and life beyond the chat box.</p><a class="primary-link" href="#experiments">Find something to play with <span>↓</span></a></div>
+          <div class="hero-art" aria-hidden="true"><div class="art disc"><i></i><i></i><i></i></div><span class="art-label">FIG. 001 / IDEAS IN ROTATION</span></div>
         </section>
-
-        <!-- Bento Two-Up Section -->
-        <section class="grid two-up" style="margin-bottom: 4rem;">
-          <!-- Left Bento (span-8) -->
-          <div class="double-bezel col-8 transition-spring">
-            <div class="double-bezel-inner">
-              <div>
-                <p class="eyebrow">Sensory Manifesto // Accessibility</p>
-              <h2>Integrated Cognitive Design</h2>
-              <p style="margin-bottom: 1.5rem; font-size: 13px; font-weight: 300;">
-                The interface should adapt to the mind, not the other way around. Unifying high-craft aesthetics with active sensory modulation proves that ambitious visual design and cognitive accessibility are not enemies.
-              </p>
-              <ul class="bullet-list">
-                <li><strong>Dual-layer architecture:</strong> strict separation of decoration (chaos) and action (functional).</li>
-                <li><strong>AttentionGuard presets:</strong> instant saturation and motion modulation for ADHD/Autism.</li>
-                <li><strong>Physical attention anchors:</strong> reduced gaze drift through calm micro-interactions.</li>
-              </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right Bento (span-4) -->
-          <div class="double-bezel col-4 transition-spring">
-            <div class="double-bezel-inner" style="justify-content: space-between; height: 100%;">
-              <div>
-                <p class="eyebrow">System Status</p>
-                <h2>Active Signals</h2>
-              </div>
-              
-              <div class="status-stack">
-                <div class="status-item">
-                  <span class="status-dot live"></span>
-                  <div class="status-text">
-                    <h4>Sensory-Reactive Grid</h4>
-                    <p>This layout reacts dynamically to the Sensory Dock commands above.</p>
-                  </div>
-                </div>
-                <div class="status-item">
-                  <span class="status-dot building"></span>
-                  <div class="status-text">
-                    <h4>Temporal Persistence</h4>
-                    <p>Upcoming experiments will model forgetting and dynamic decay of local signals.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Section Header for Experiments -->
-        <section class="section-header" id="experiments">
-          <p class="eyebrow">Experiment Board // Active</p>
-          <h2>The Attention Lab</h2>
-        </section>
-
-        <!-- Grid of Experiments (Only our sensory lab featured) -->
-        <section class="grid card-grid" id="card-grid">
-          <!-- Populated dynamically via app.js -->
+        <div class="bench-note"><span><b>12</b> experiments / <b>03</b> territories</span><span>Open in your browser. Pull a lever. See what happens.</span></div>
+        <section id="experiments" aria-labelledby="board-title">
+          <div class="section-header"><div><p class="eyebrow">The workbench</p><h2 id="board-title">Pick your rabbit hole.</h2></div><button id="shuffle" class="utility">Surprise me ↗</button></div>
+          <div class="filters"><div class="filter-tabs" role="group" aria-label="Filter experiments"><button data-filter="all" aria-pressed="true">All experiments</button><button data-filter="interaction" aria-pressed="false">Interaction</button><button data-filter="sound" aria-pressed="false">Sound & senses</button><button data-filter="simulation" aria-pressed="false">Simulation</button></div><label class="search"><span class="sr-only">Search experiments</span><input id="search" type="search" placeholder="Find an experiment…"></label></div>
+          <p id="result-count" class="eyebrow" aria-live="polite"></p><div class="card-grid" id="card-grid"></div><p id="empty" hidden>No experiments match. Try another word or category.</p>
+          <noscript><p>Browse the <a href="./interaction/">interaction collection</a> or the <a href="./y2k-sensory/">sensory collection</a>.</p></noscript>
         </section>
       </main>
-    </div>
-
-    <!-- Application Script -->
-    <script src="./app.js"></script>
+      <footer><span>Built to ask better questions.</span><a href="/">Back to Jorge Guberte ↗</a></footer>
+    </div><script src="./catalog.js"></script><script src="./app.js"></script>
   </body>
 </html>

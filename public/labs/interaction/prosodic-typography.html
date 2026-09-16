@@ -285,13 +285,24 @@
       color: var(--text-faint);  
       padding: 0 4px;  
     }  
+    .type-tuner {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;color:#b8b8c0;font-size:12px;}
+    .type-tuner label {display:flex;gap:12px;align-items:center;}
+    .type-tuner button {background:#202024;color:#eee;border:1px solid #555;padding:10px;cursor:pointer;}
+    .prosodic-stage {--type-scale:1;}
+    .thesis-statement {font-size:calc(38px * var(--type-scale));}
+    .narrative-body {font-size:calc(15.5px * var(--type-scale));}
+    .metric-value {font-size:calc(18px * var(--type-scale));}
+    .prosodic-stage.flat .thesis-statement,.prosodic-stage.flat .narrative-body,.prosodic-stage.flat .metric-value {font:calc(16px * var(--type-scale))/1.6 sans-serif;letter-spacing:normal;color:#ddd;}
+    .prosodic-stage.flat .section-metrics {display:block;}
+    .prosodic-stage.flat .metric-card {margin-bottom:8px;background:none;border:0;}
+    .prosodic-stage.flat .metric-card::after {display:none;}
+    @media(max-width:600px){.controls,.footer-note{flex-direction:column;align-items:start;gap:16px}.payload-selector{flex-wrap:wrap}.prosodic-stage{padding:24px 18px}}
+    @media(prefers-reduced-motion:reduce){.section-thesis,.section-narrative,.section-metrics{animation:none;opacity:1;transform:none}}
   </style>  
+<link rel="stylesheet" href="../experiment.css">
 </head>  
 <body>
-<div style="position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 16px;background:rgba(9,9,11,.92);backdrop-filter:blur(10px);border-bottom:1px solid #27272a;font-family:'JetBrains Mono',monospace;font-size:11px;">
-  <span style="color:#71717a;">PROSODIC TYPOGRAPHY // rhythm in space, not time — compile payloads below</span>
-  <a href="./index.html" style="color:#ea580c;text-decoration:none;white-space:nowrap;">← Interaction Research</a>
-</div>
+
 
   <div class="wrapper">  
       
@@ -304,6 +315,7 @@
       <button class="btn-render" onclick="renderCurrentPayload()">Compilar Layout</button>  
     </div>
 
+    <div class="type-tuner"><label>Tamanho <input id="type-scale" type="range" min="80" max="125" value="100"> <output id="scale-value">100%</output></label><button id="type-compare" type="button" aria-pressed="false">Comparar sem hierarquia</button></div>
     <main class="prosodic-stage" id="stage">  
       <div class="empty-state">  
         // Selecione um payload e clique em "Compilar Layout" para renderizar  
@@ -352,6 +364,15 @@
       }  
     ];
 
+    document.getElementById('type-scale').addEventListener('input', e => {
+      document.getElementById('stage').style.setProperty('--type-scale', e.target.value / 100);
+      document.getElementById('scale-value').textContent = e.target.value + '%';
+    });
+    document.getElementById('type-compare').addEventListener('click', e => {
+      const flat = document.getElementById('stage').classList.toggle('flat');
+      e.currentTarget.setAttribute('aria-pressed', String(flat));
+      e.currentTarget.textContent = flat ? 'Restaurar hierarquia' : 'Comparar sem hierarquia';
+    });
     let currentPayloadIndex = 0;
 
     function selectPayload(index) {  
@@ -395,5 +416,6 @@
       renderCurrentPayload();  
     });  
   </script>  
+<script src="../catalog.js"></script><script src="../experiment.js"></script>
 </body>  
 </html>
