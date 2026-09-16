@@ -1,660 +1,225 @@
-<!DOCTYPE html>  
-<html lang="pt-BR">  
-<head>  
-  <meta charset="UTF-8" />  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
-  <title>Strange Attractor Collider 3D — Caos & Gravidade Espacial</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">  
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>  
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-
-  <style>  
-    :root {  
-      --bg: #050507;  
-      --panel-bg: rgba(14, 14, 18, 0.85);  
-      --border: #27272a;  
-      --text: #f4f4f5;  
-      --text-muted: #71717a;  
-      --text-faint: #3f3f46;  
-      --accent: #ea580c;  
-      --accent-glow: rgba(234, 88, 12, 0.4);  
-      --cyan: #06b6d4;  
-      --cyan-glow: rgba(6, 182, 212, 0.35);  
-      --purple: #a855f7;  
-      --emerald: #22c55e;  
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-
-    body {  
-      background-color: var(--bg);  
-      color: var(--text);  
-      font-family: 'Plus Jakarta Sans', sans-serif;  
-      width: 100vw;  
-      height: 100vh;  
-      overflow: hidden;  
-      display: flex;  
-      flex-direction: column;  
-      -webkit-font-smoothing: antialiased;  
-    }
-
-    #webglCanvas {  
-      position: absolute;  
-      inset: 0;  
-      width: 100%;  
-      height: 100%;  
-      z-index: 1;  
-      display: block;  
-      touch-action: none;  
-    }
-
-    /* HUD SUPERIOR */  
-    .hud-header {  
-      position: absolute;  
-      top: 16px;  
-      left: 20px;  
-      right: 20px;  
-      z-index: 10;  
-      display: flex;  
-      justify-content: space-between;  
-      align-items: center;  
-      pointer-events: none;  
-    }
-
-    .brand-group {  
-      pointer-events: auto;  
-      background: var(--panel-bg);  
-      backdrop-filter: blur(14px);  
-      border: 1px solid var(--border);  
-      border-radius: 8px;  
-      padding: 10px 18px;  
-      display: flex;  
-      flex-direction: column;  
-      gap: 2px;  
-    }
-
-    .brand-tag {  
-      font-family: 'JetBrains Mono', monospace;  
-      font-size: 10px;  
-      font-weight: 700;  
-      text-transform: uppercase;  
-      letter-spacing: 0.12em;  
-      color: var(--accent);  
-    }
-
-    .doc-title {  
-      font-family: 'Instrument Serif', Georgia, serif;  
-      font-size: 22px;  
-      color: #fff;  
-    }
-
-    .hud-actions {  
-      pointer-events: auto;  
-      display: flex;  
-      gap: 8px;  
-    }
-
-    .hud-btn {  
-      background: var(--panel-bg);  
-      backdrop-filter: blur(14px);  
-      border: 1px solid var(--border);  
-      color: var(--text-muted);  
-      font-family: 'JetBrains Mono', monospace;  
-      font-size: 11px;  
-      padding: 8px 14px;  
-      border-radius: 6px;  
-      cursor: pointer;  
-      transition: all 0.15s;  
-    }
-
-    .hud-btn:hover { border-color: var(--cyan); color: #fff; }  
-    .hud-btn.active {  
-      background: rgba(6, 182, 212, 0.15);  
-      border-color: var(--cyan);  
-      color: var(--cyan);  
-      font-weight: 600;  
-    }
-
-    /* PAINEL LATERAL TELEMÉTRICO */  
-    .hud-inspector {  
-      position: absolute;  
-      top: 86px;  
-      right: 20px;  
-      width: 320px;  
-      background: var(--panel-bg);  
-      backdrop-filter: blur(16px);  
-      border: 1px solid var(--border);  
-      border-radius: 10px;  
-      padding: 18px;  
-      z-index: 10;  
-      display: flex;  
-      flex-direction: column;  
-      gap: 12px;  
-      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.85);  
-      pointer-events: auto;  
-    }
-
-    .inspector-header {  
-      display: flex;  
-      justify-content: space-between;  
-      align-items: center;  
-      border-bottom: 1px solid var(--border);  
-      padding-bottom: 8px;  
-      font-family: 'JetBrains Mono', monospace;  
-      font-size: 10px;  
-      text-transform: uppercase;  
-      letter-spacing: 0.08em;  
-      color: var(--text-muted);  
-    }
-
-    .equation-title {  
-      font-family: 'Instrument Serif', Georgia, serif;  
-      font-size: 24px;  
-      color: #fff;  
-      line-height: 1.15;  
-    }
-
-    .math-box {  
-      background: rgba(0, 0, 0, 0.5);  
-      border: 1px solid rgba(255, 255, 255, 0.05);  
-      border-radius: 6px;  
-      padding: 10px 12px;  
-      font-family: 'JetBrains Mono', monospace;  
-      font-size: 11px;  
-      line-height: 1.6;  
-      color: var(--cyan);  
-    }
-
-    .metrics-list {  
-      display: flex;  
-      flex-direction: column;  
-      gap: 6px;  
-      font-family: 'JetBrains Mono', monospace;  
-      font-size: 11px;  
-    }
-
-    .metric-row {  
-      display: flex;  
-      justify-content: space-between;  
-      color: var(--text-muted);  
-    }
-
-    .metric-val {  
-      font-weight: 600;  
-      color: var(--text);  
-    }
-
-    /* RODAPÉ */  
-    .hud-footer {  
-      position: absolute;  
-      bottom: 16px;  
-      left: 20px;  
-      right: 20px;  
-      z-index: 10;  
-      display: flex;  
-      justify-content: space-between;  
-      font-family: 'JetBrains Mono', monospace;  
-      font-size: 11px;  
-      color: var(--text-faint);  
-      pointer-events: none;  
-    }  
-  </style>  
-<link rel="stylesheet" href="../experiment.css">
-<script src="../experiment.js" defer></script>
-</head>  
-<body>
-
-
-  <header class="hud-header">  
-    <div class="brand-group">  
-      <span class="brand-tag">// Dynamic Systems & Gravitational Warp</span>  
-      <h1 class="doc-title">Strange Attractor Collider</h1>  
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Strange Attractor — um instrumento de caos</title>
+    <meta
+      name="description"
+      content="Esculpa três sistemas caóticos em 3D. Arraste a gravidade, desenhe rastros, componha um drone e capture sua descoberta."
+    />
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="./attractor/instrument.css" />
+    <script src="./attractor/engine.js" defer></script>
+    <script src="./attractor/instrument.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#controls">Ir aos controles</a>
+    <div class="instrument">
+      <header class="masthead">
+        <a href="./index.html" class="back">↖ <span>Interaction Lab</span></a
+        ><span class="edition">EXPERIMENTO 07 <i>/</i> SISTEMAS DINÂMICOS</span
+        ><button id="share" class="subtle">Copiar configuração ↗</button>
+      </header>
+      <main class="workbench">
+        <section
+          class="chamber"
+          aria-label="Visualização tridimensional do atrator"
+        >
+          <div class="chamber-title">
+            <p class="eyebrow">
+              <span class="live-dot"></span> UM INSTRUMENTO DE CAOS
+            </p>
+            <h1>Strange<br /><em>Attractor.</em></h1>
+            <p id="subtitle">A borboleta do caos</p>
+          </div>
+          <canvas
+            id="field"
+            tabindex="0"
+            aria-label="Atrator 3D. Arraste o fundo para orbitar, os três nós para mover a gravidade. Use as setas para orbitar e mais ou menos para zoom."
+          ></canvas>
+          <div class="axes" aria-hidden="true">
+            <span>Y</span><span>↗ Z</span><span>└── X</span>
+          </div>
+          <div class="view-actions">
+            <button id="home-view" title="Restaurar câmera">↺ Vista</button
+            ><button id="capture" title="Salvar a composição como PNG">
+              ↓ PNG
+            </button>
+          </div>
+          <div class="chamber-footer">
+            <span id="model-label">LORENZ / σ 10 · ρ 28 · β 2.67</span
+            ><span id="running-label">EM MOVIMENTO</span>
+          </div>
+        </section>
+        <aside
+          id="controls"
+          class="console"
+          aria-label="Controles do instrumento"
+        >
+          <div class="console-top">
+            <span>PAINEL DE EXPLORAÇÃO</span><span class="serial">SA—007</span>
+          </div>
+          <section class="control-section">
+            <div class="section-head">
+              <h2>01 <span>Escolha um universo</span></h2>
+            </div>
+            <div class="model-list" role="group" aria-label="Atrator">
+              <button data-model="lorenz" aria-pressed="true">
+                <span class="model-glyph">∞</span
+                ><span>Lorenz<small>DUAS ASAS. NENHUMA REPETIÇÃO.</small></span
+                ><span class="radio-dot"></span></button
+              ><button data-model="aizawa" aria-pressed="false">
+                <span class="model-glyph">◎</span
+                ><span>Aizawa<small>UMA ESFERA DE TRAJETÓRIAS.</small></span
+                ><span class="radio-dot"></span></button
+              ><button data-model="rossler" aria-pressed="false">
+                <span class="model-glyph">ϟ</span
+                ><span>Rössler<small>ESPIRAL EM DESEQUILÍBRIO.</small></span
+                ><span class="radio-dot"></span>
+              </button>
+            </div>
+          </section>
+          <section class="control-section">
+            <div class="section-head">
+              <h2>02 <span>Modele o movimento</span></h2>
+              <button id="reset" class="text-button">Restaurar</button>
+            </div>
+            <label class="knob" for="speed"
+              >Tempo <output id="speed-out">1.00×</output></label
+            ><input
+              id="speed"
+              type="range"
+              min="0.1"
+              max="2"
+              step="0.05"
+              value="1"
+            /><label class="knob" for="gravity"
+              >Gravidade <output id="gravity-out">0.00</output></label
+            ><input
+              id="gravity"
+              type="range"
+              min="0"
+              max="2"
+              step="0.05"
+              value="0"
+            />
+            <p class="micro">
+              Arraste os nós coloridos no campo. A gravidade altera as equações
+              — e o desenho.
+            </p>
+            <label class="knob" for="trail"
+              >Memória do rastro
+              <output id="trail-out">64 passos</output></label
+            ><input
+              id="trail"
+              type="range"
+              min="12"
+              max="100"
+              step="4"
+              value="64"
+            />
+            <div class="palette-row">
+              <span>Cor do campo</span>
+              <div role="group" aria-label="Paleta">
+                <button
+                  data-palette="ember"
+                  class="swatch ember"
+                  aria-label="Âmbar"
+                  aria-pressed="true"
+                ></button
+                ><button
+                  data-palette="ice"
+                  class="swatch ice"
+                  aria-label="Glacial"
+                  aria-pressed="false"
+                ></button
+                ><button
+                  data-palette="violet"
+                  class="swatch violet"
+                  aria-label="Violeta"
+                  aria-pressed="false"
+                ></button>
+              </div>
+            </div>
+          </section>
+          <section class="control-section transport">
+            <button id="play" class="primary" aria-pressed="false">
+              Ⅱ Pausar</button
+            ><button
+              id="reseed"
+              title="Reiniciar trajetórias com outra semente"
+            >
+              ↻ Nova semente
+            </button>
+            <div class="audio-row">
+              <button id="audio" aria-pressed="false">♫ Ativar drone</button
+              ><label for="volume" class="sr-only">Volume do drone</label
+              ><input
+                id="volume"
+                type="range"
+                min="0"
+                max="0.15"
+                value="0.04"
+                step="0.01"
+                aria-label="Volume do drone"
+              />
+            </div>
+          </section>
+          <details class="science">
+            <summary>O que estou vendo?</summary>
+            <p>
+              Trajetórias de equações diferenciais integradas com Runge–Kutta de
+              quarta ordem. A projeção tem três dimensões: orbite para perceber
+              a profundidade.
+            </p>
+            <pre id="equations"></pre>
+            <p>
+              Com gravidade zero, vemos o sistema original. Os nós introduzem
+              uma força externa quando a gravidade aumenta. O som é uma
+              interpretação dos controles, não uma medição científica.
+            </p>
+            <label for="quality">Trajetórias simultâneas</label
+            ><select id="quality">
+              <option value="80">80 · leve</option>
+              <option value="160" selected>160 · equilibrado</option>
+              <option value="240">240 · denso</option>
+            </select>
+            <div class="well-controls">
+              <label for="well-select">Mover nó por teclado</label
+              ><select id="well-select">
+                <option value="0">Alfa · laranja</option>
+                <option value="1">Beta · ciano</option>
+                <option value="2">Gama · violeta</option>
+              </select>
+              <p>
+                Selecione o nó e use os botões. Arrastar no campo faz o mesmo.
+              </p>
+              <div class="nudge">
+                <button data-nudge="-1,0" aria-label="Mover nó para esquerda">
+                  ←</button
+                ><button data-nudge="0,1" aria-label="Mover nó para cima">
+                  ↑</button
+                ><button data-nudge="0,-1" aria-label="Mover nó para baixo">
+                  ↓</button
+                ><button data-nudge="1,0" aria-label="Mover nó para direita">
+                  →
+                </button>
+              </div>
+            </div>
+          </details>
+        </aside>
+      </main>
+      <footer class="bottom-bar">
+        <p>
+          <strong>Arraste para descobrir.</strong> Fundo: orbitar · nós:
+          deformar · roda / + −: zoom · espaço: pausar
+        </p>
+        <output id="feedback" aria-live="polite"
+          >Tudo acontece aqui, no seu navegador.</output
+        >
+      </footer>
     </div>
-
-    <div class="hud-actions">  
-      <button class="hud-btn active" id="btnLorenz" onclick="setAttractor('lorenz')">01. Lorenz (Borboleta)</button>  
-      <button class="hud-btn" id="btnAizawa" onclick="setAttractor('aizawa')">02. Aizawa (Tornado Esférico)</button>  
-      <button class="hud-btn" id="btnRossler" onclick="setAttractor('rossler')">03. Rössler (Banda Espiral)</button>  
-      <button class="hud-btn" onclick="toggleAudioDrone()" id="btnAudio">🔊 Áudio FM: ON</button>  
-      <button class="hud-btn" onclick="resetWells()">↺ Reset Gravidade</button>  
-    </div>  
-  </header>
-
-  <canvas id="webglCanvas"></canvas>
-
-  <aside class="hud-inspector">  
-    <div class="inspector-header">  
-      <span>Sistema Não-Linear Ativo</span>  
-      <span id="entropyBadge" style="color: var(--accent);">ENTROPIA: 0.84</span>  
-    </div>
-
-    <h2 class="equation-title" id="attractorName">Lorenz Strange Attractor</h2>
-
-    <div class="math-box" id="mathDisplay">  
-      dx/dt = σ(y - x)<br/>  
-      dy/dt = x(ρ - z) - y<br/>  
-      dz/dt = xy - βz  
-    </div>
-
-    <div class="metrics-list">  
-      <div class="metric-row">  
-        <span>Partículas Ativas:</span>  
-        <span class="metric-val" style="color: var(--cyan);">3.500 Vórtices</span>  
-      </div>  
-      <div class="metric-row">  
-        <span>Poços Gravitacionais:</span>  
-        <span class="metric-val" style="color: var(--accent);">3 Nós Tensores</span>  
-      </div>  
-      <div class="metric-row">  
-        <span>Curvatura de Fase:</span>  
-        <span class="metric-val" id="curvatureDisplay">Normalizada</span>  
-      </div>  
-    </div>  
-  </aside>
-
-  <footer class="hud-footer">  
-    <span>Arrasta os 3 nós coloridos (Laranja, Ciano, Roxo) para dobrar o espaço • Arrasta o fundo para orbitar</span>  
-    <span>Integração de Runge-Kutta a 60fps • Síntese Sonora FM Espacial</span>  
-  </footer>
-
-  <script>  
-    /* ==========================================================================  
-       MOTOR DE ÁUDIO FM AMBIENTE (WEB AUDIO API)  
-       ========================================================================== */  
-    let audioCtx = null;  
-    let isAudioActive = true;  
-    let carrierOsc, modOsc, modGain, masterGain, filter;
-
-    function initAudio() {  
-      if (!audioCtx) {  
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        // Operadora Portadora (Carrier)  
-        carrierOsc = audioCtx.createOscillator();  
-        carrierOsc.type = "sine";  
-        carrierOsc.frequency.setValueAtTime(65.41, audioCtx.currentTime); // C2 drone
-
-        // Operadora Moduladora (FM Modulator)  
-        modOsc = audioCtx.createOscillator();  
-        modOsc.type = "triangle";  
-        modOsc.frequency.setValueAtTime(110.0, audioCtx.currentTime); // A2
-
-        modGain = audioCtx.createGain();  
-        modGain.gain.setValueAtTime(80.0, audioCtx.currentTime);
-
-        modOsc.connect(modGain);  
-        modGain.connect(carrierOsc.frequency);
-
-        // Filtro Lowpass Ressonante  
-        filter = audioCtx.createBiquadFilter();  
-        filter.type = "lowpass";  
-        filter.frequency.setValueAtTime(450, audioCtx.currentTime);  
-        filter.Q.setValueAtTime(4.0, audioCtx.currentTime);
-
-        masterGain = audioCtx.createGain();  
-        masterGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-
-        carrierOsc.connect(filter);  
-        filter.connect(masterGain);  
-        masterGain.connect(audioCtx.destination);
-
-        carrierOsc.start();  
-        modOsc.start();  
-      }  
-      if (audioCtx.state === 'suspended') audioCtx.resume();  
-    }
-
-    function toggleAudioDrone() {  
-      initAudio();  
-      isAudioActive = !isAudioActive;  
-      document.getElementById('btnAudio').textContent = isAudioActive ? "🔊 Áudio FM: ON" : "🔈 Áudio FM: MUTE";  
-      if (masterGain) {  
-        masterGain.gain.setTargetAtTime(isAudioActive ? 0.08 : 0.0001, audioCtx.currentTime, 0.1);  
-      }  
-    }
-
-    function updateAudioParams(warpStress, primaryY) {  
-      if (!audioCtx || !isAudioActive) return;  
-      const baseFreq = 55 + Math.abs(primaryY) * 6;  
-      carrierOsc.frequency.setTargetAtTime(baseFreq, audioCtx.currentTime, 0.05);  
-      modGain.gain.setTargetAtTime(40 + warpStress * 250, audioCtx.currentTime, 0.05);  
-      filter.frequency.setTargetAtTime(250 + warpStress * 800, audioCtx.currentTime, 0.05);  
-    }
-
-    /* ==========================================================================  
-       CENA THREE.JS & ILUMINAÇÃO  
-       ========================================================================== */  
-    const canvas = document.getElementById('webglCanvas');  
-    const scene = new THREE.Scene();  
-    scene.background = new THREE.Color(0x050507);  
-    scene.fog = new THREE.FogExp2(0x050507, 0.015);
-
-    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);  
-    camera.position.set(0, 15, 45);
-
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });  
-    renderer.setSize(window.innerWidth, window.innerHeight);  
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);  
-    controls.enableDamping = true;  
-    controls.dampingFactor = 0.05;  
-    controls.minDistance = 10;  
-    controls.maxDistance = 120;
-
-    window.addEventListener('resize', () => {  
-      camera.aspect = window.innerWidth / window.innerHeight;  
-      camera.updateProjectionMatrix();  
-      renderer.setSize(window.innerWidth, window.innerHeight);  
-    });
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);  
-    scene.add(ambientLight);
-
-    /* ==========================================================================  
-       NUVEM DE 3.500 PARTÍCULAS (BUFFER GEOMETRY GPU)  
-       ========================================================================== */  
-    const PARTICLE_COUNT = 3500;  
-    const particlesGeo = new THREE.BufferGeometry();  
-    const particlePositions = new Float32Array(PARTICLE_COUNT * 3);  
-    const particleColors = new Float32Array(PARTICLE_COUNT * 3);
-
-    // Estado interno das partículas para integração de equações diferenciais  
-    const pState = [];
-
-    for (let i = 0; i < PARTICLE_COUNT; i++) {  
-      const x = (Math.random() - 0.5) * 20;  
-      const y = (Math.random() - 0.5) * 20;  
-      const z = (Math.random() - 0.5) * 20;
-
-      particlePositions[i * 3] = x;  
-      particlePositions[i * 3 + 1] = y;  
-      particlePositions[i * 3 + 2] = z;
-
-      // Gradiente espectral de cores  
-      const c = new THREE.Color().setHSL(0.55 + (i / PARTICLE_COUNT) * 0.45, 0.9, 0.6);  
-      particleColors[i * 3] = c.r;  
-      particleColors[i * 3 + 1] = c.g;  
-      particleColors[i * 3 + 2] = c.b;
-
-      pState.push({  
-        x: x || 0.1,  
-        y: y || 0.1,  
-        z: z || 0.1,  
-        speed: 0.8 + Math.random() * 0.6  
-      });  
-    }
-
-    particlesGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));  
-    particlesGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
-
-    // Material de partícula com blending aditivo  
-    const particleMat = new THREE.PointsMaterial({  
-      size: 0.45,  
-      vertexColors: true,  
-      transparent: true,  
-      opacity: 0.85,  
-      blending: THREE.AdditiveBlending,  
-      depthWrite: false  
-    });
-
-    const particleSystem = new THREE.Points(particlesGeo, particleMat);  
-    scene.add(particleSystem);
-
-    /* ==========================================================================  
-       POÇOS GRAVITACIONAIS ARRASTÁVEIS (GRAVITY WELLS)  
-       ========================================================================== */  
-    const wellsData = [  
-      { id: 0, name: "Poço Alfa (Singularidade)", color: 0xea580c, x: 12, y: 8, z: 0, mass: 28.0 },  
-      { id: 1, name: "Poço Beta (Vórtice Ciano)", color: 0x06b6d4, x: -14, y: -6, z: 8, mass: 22.0 },  
-      { id: 2, name: "Poço Gama (Horizonte Roxo)", color: 0xa855f7, x: 0, y: -12, z: -12, mass: 25.0 }  
-    ];
-
-    const wellMeshes = [];  
-    const sphereGeo = new THREE.SphereGeometry(1.2, 32, 32);
-
-    wellsData.forEach(d => {  
-      const mat = new THREE.MeshStandardMaterial({  
-        color: d.color,  
-        emissive: d.color,  
-        emissiveIntensity: 0.8,  
-        roughness: 0.2  
-      });  
-      const mesh = new THREE.Mesh(sphereGeo, mat);  
-      mesh.position.set(d.x, d.y, d.z);  
-      mesh.userData = {  
-        ...d,  
-        home: new THREE.Vector3(d.x, d.y, d.z),  
-        isDragging: false  
-      };
-
-      // Anéis orbitais de acoplamento ao redor de cada poço  
-      const ringGeo = new THREE.TorusGeometry(2.0, 0.04, 16, 64);  
-      const ringMat = new THREE.MeshBasicMaterial({ color: d.color, transparent: true, opacity: 0.4 });  
-      const ringMesh = new THREE.Mesh(ringGeo, ringMat);  
-      ringMesh.rotation.x = Math.PI / 3;  
-      ringMesh.raycast = () => {}; // Desativa raycast no anel para agarrar a esfera direto  
-      mesh.add(ringMesh);
-
-      scene.add(mesh);  
-      wellMeshes.push(mesh);  
-    });
-
-    /* ==========================================================================  
-       EQUAÇÕES DOS ATRATORES ESTRANHOS  
-       ========================================================================== */  
-    let currentAttractor = 'lorenz'; // 'lorenz' | 'aizawa' | 'rossler'
-
-    function computeAttractorDerivatives(x, y, z) {  
-      let dx = 0, dy = 0, dz = 0;
-
-      if (currentAttractor === 'lorenz') {  
-        const sigma = 10.0;  
-        const rho = 28.0;  
-        const beta = 8.0 / 3.0;
-
-        dx = sigma * (y - x);  
-        dy = x * (rho - z) - y;  
-        dz = x * y - beta * z;  
-      } else if (currentAttractor === 'aizawa') {  
-        const a = 0.95, b = 0.7, c = 0.6, d = 3.5, e = 0.25, f = 0.1;  
-        dx = (z - b) * x - d * y;  
-        dy = d * x + (z - b) * y;  
-        dz = c + a * z - (z * z * z) / 3 - (x * x + y * y) * (1 + e * z) + f * z * (x * x * x);  
-      } else if (currentAttractor === 'rossler') {  
-        const a = 0.2, b = 0.2, c = 5.7;  
-        dx = -y - z;  
-        dy = x + a * y;  
-        dz = b + z * (x - c);  
-      }
-
-      return { dx, dy, dz };  
-    }
-
-    function setAttractor(type) {  
-      currentAttractor = type;  
-      document.querySelectorAll('.hud-btn').forEach(b => {  
-        if (b.id && b.id.startsWith('btn')) b.classList.remove('active');  
-      });
-
-      if (type === 'lorenz') {  
-        document.getElementById('btnLorenz').classList.add('active');  
-        document.getElementById('attractorName').textContent = "Lorenz Strange Attractor";  
-        document.getElementById('mathDisplay').innerHTML = `dx/dt = σ(y - x)<br/>dy/dt = x(ρ - z) - y<br/>dz/dt = xy - βz`;  
-      } else if (type === 'aizawa') {  
-        document.getElementById('btnAizawa').classList.add('active');  
-        document.getElementById('attractorName').textContent = "Aizawa Spherical Tornado";  
-        document.getElementById('mathDisplay').innerHTML = `dx/dt = (z - b)x - dy<br/>dy/dt = dx + (z - b)y<br/>dz/dt = c + az - z³/3 - (x²+y²)(1+ez)`;  
-      } else if (type === 'rossler') {  
-        document.getElementById('btnRossler').classList.add('active');  
-        document.getElementById('attractorName').textContent = "Rössler Spiral Band";  
-        document.getElementById('mathDisplay').innerHTML = `dx/dt = -y - z<br/>dy/dt = x + ay<br/>dz/dt = b + z(x - c)`;  
-      }
-
-      // Reinicia posições para o novo espaço de fase  
-      pState.forEach((p, idx) => {  
-        p.x = (Math.random() - 0.5) * 8 + 0.1;  
-        p.y = (Math.random() - 0.5) * 8 + 0.1;  
-        p.z = (Math.random() - 0.5) * 8 + 0.1;  
-      });  
-    }
-
-    function resetWells() {  
-      wellMeshes.forEach(m => {  
-        m.position.copy(m.userData.home);  
-      });  
-    }
-
-    /* ==========================================================================  
-       POINTER EVENTS & ARRASTO 3D DE POÇOS GRAVITACIONAIS  
-       ========================================================================== */  
-    const raycaster = new THREE.Raycaster();  
-    const mouse = new THREE.Vector2();  
-    let draggedWell = null;
-
-    const dragPlane = new THREE.Plane();  
-    const planeIntersectPoint = new THREE.Vector3();
-
-    function updateMousePos(e) {  
-      const rect = canvas.getBoundingClientRect();  
-      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;  
-      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;  
-    }
-
-    canvas.addEventListener('pointerdown', (e) => {  
-      initAudio();  
-      updateMousePos(e);
-
-      raycaster.setFromCamera(mouse, camera);  
-      const intersects = raycaster.intersectObjects(wellMeshes, false);
-
-      if (intersects.length > 0) {  
-        draggedWell = intersects[0].object;  
-        draggedWell.userData.isDragging = true;
-
-        controls.enabled = false;  
-        canvas.setPointerCapture(e.pointerId);
-
-        const cameraDir = new THREE.Vector3();  
-        camera.getWorldDirection(cameraDir).negate();  
-        dragPlane.setFromNormalAndCoplanarPoint(cameraDir, draggedWell.position);
-
-        e.stopPropagation();  
-      }  
-    });
-
-    canvas.addEventListener('pointermove', (e) => {  
-      updateMousePos(e);
-
-      if (draggedWell) {  
-        raycaster.setFromCamera(mouse, camera);  
-        if (raycaster.ray.intersectPlane(dragPlane, planeIntersectPoint)) {  
-          draggedWell.position.copy(planeIntersectPoint);  
-        }  
-      } else {  
-        raycaster.setFromCamera(mouse, camera);  
-        const intersects = raycaster.intersectObjects(wellMeshes, false);  
-        canvas.style.cursor = intersects.length > 0 ? 'grab' : 'default';  
-      }  
-    });
-
-    function stopWellDrag(e) {  
-      if (draggedWell) {  
-        draggedWell.userData.isDragging = false;  
-        draggedWell = null;  
-        controls.enabled = true;  
-        canvas.style.cursor = 'default';  
-        if (e && e.pointerId) {  
-          try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}  
-        }  
-      }  
-    }
-
-    canvas.addEventListener('pointerup', stopWellDrag);  
-    canvas.addEventListener('pointercancel', stopWellDrag);
-
-    /* ==========================================================================  
-       LOOP PRINCIPAL: INTEGRAÇÃO FÍSICA RUNGE-KUTTA & RENDERIZAÇÃO 60FPS  
-       ========================================================================== */  
-    const clock = new THREE.Clock();
-
-    function animate() {  
-      requestAnimationFrame(animate);
-
-      const dt = Math.min(clock.getDelta(), 0.04);  
-      const timeScale = currentAttractor === 'aizawa' ? 0.8 : (currentAttractor === 'rossler' ? 0.5 : 0.015);
-
-      const posAttr = particlesGeo.attributes.position;  
-      let totalWarp = 0;
-
-      // 1. Atualização das 3.500 Partículas no Espaço de Fase  
-      for (let i = 0; i < PARTICLE_COUNT; i++) {  
-        const p = pState[i];
-
-        // Derivadas do Atrator Não-Linear  
-        const { dx, dy, dz } = computeAttractorDerivatives(p.x, p.y, p.z);
-
-        // Perturbação Gravitacional dos 3 Poços Interativos  
-        let gx = 0, gy = 0, gz = 0;
-
-        wellMeshes.forEach(w => {  
-          const diffX = w.position.x - p.x;  
-          const diffY = w.position.y - p.y;  
-          const diffZ = w.position.z - p.z;  
-          const distSq = diffX * diffX + diffY * diffY + diffZ * diffZ + 4.0; // Amortecimento  
-          const force = (w.userData.mass * 0.15) / distSq;
-
-          gx += diffX * force;  
-          gy += diffY * force;  
-          gz += diffZ * force;  
-        });
-
-        totalWarp += Math.hypot(gx, gy, gz);
-
-        // Integração de Euler amortecida  
-        p.x += (dx * timeScale + gx * 0.05) * p.speed;  
-        p.y += (dy * timeScale + gy * 0.05) * p.speed;  
-        p.z += (dz * timeScale + gz * 0.05) * p.speed;
-
-        // Reset de escape se a partícula fugir para o infinito  
-        if (Math.abs(p.x) > 60 || Math.abs(p.y) > 60 || Math.abs(p.z) > 60 || isNaN(p.x)) {  
-          p.x = (Math.random() - 0.5) * 4 + 0.1;  
-          p.y = (Math.random() - 0.5) * 4 + 0.1;  
-          p.z = (Math.random() - 0.5) * 4 + 0.1;  
-        }
-
-        // Escreve na GPU  
-        const scaleFactor = currentAttractor === 'aizawa' ? 6.5 : (currentAttractor === 'rossler' ? 1.5 : 0.85);  
-        posAttr.setXYZ(i, p.x * scaleFactor, p.y * scaleFactor, p.z * scaleFactor);  
-      }
-
-      posAttr.needsUpdate = true;
-
-      // 2. Rotação dos Anéis dos Poços  
-      wellMeshes.forEach((w, idx) => {  
-        w.children[0].rotation.z += 0.02 * (idx + 1);  
-        w.children[0].rotation.y += 0.015;  
-      });
-
-      // 3. Atualiza Áudio FM Sintetizado  
-      const avgWarp = totalWarp / PARTICLE_COUNT;  
-      updateAudioParams(avgWarp, wellMeshes[0].position.y);
-
-      // 4. Atualiza Telemetria  
-      document.getElementById('entropyBadge').textContent = `ENTROPIA: ${(0.65 + avgWarp * 0.2).toFixed(2)}`;  
-      document.getElementById('curvatureDisplay').textContent = avgWarp > 1.2 ? "Hiper-Distorcida" : "Nominal (Estável)";
-
-      controls.update();  
-      renderer.render(scene, camera);  
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {  
-      animate();  
-    });  
-  </script>  
-</body>  
+    <noscript>Ative JavaScript para explorar o instrumento.</noscript>
+  </body>
 </html>
