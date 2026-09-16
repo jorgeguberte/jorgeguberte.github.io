@@ -7,7 +7,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">  
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1\&family=JetBrains+Mono:wght@400;500;600;700\&family=Plus+Jakarta+Sans:wght@400;500;600;700\&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>  
     :root {  
@@ -322,12 +322,11 @@
       font-weight: 600;  
     }  
   </style>  
+<link rel="stylesheet" href="../experiment.css">
+<script src="../experiment.js" defer></script>
 </head>  
 <body>
-<div style="position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 16px;background:rgba(9,9,11,.92);backdrop-filter:blur(10px);border-bottom:1px solid #27272a;font-family:'JetBrains Mono',monospace;font-size:11px;">
-  <span style="color:#71717a;">SEMANTIC CHISEL // click a block, drag the handles to squeeze/fork/merge</span>
-  <a href="./index.html" style="color:#ea580c;text-decoration:none;white-space:nowrap;">← Interaction Research</a>
-</div>
+
 
   <div class="container">  
       
@@ -350,10 +349,10 @@
       <article class="morph-block focused" id="block-1" onclick="focusBlock(1)">  
           
         <div class="chisel-rig">  
-          <div class="handle handle-squeeze-left" onclick="toggleSqueeze(1, event)" title="Comprimir para Esqueleto Lógico">◄ COMPRIMIR</div>  
-          <div class="handle handle-split-top" onclick="toggleSplit(1, event)" title="Bifurcar Tese e Antítese">◫ BIFURCAR DIALÉTICA ◫</div>  
-          <div class="handle handle-squeeze-right" onclick="toggleSqueeze(1, event)" title="Comprimir para Esqueleto Lógico">COMPRIMIR ►</div>  
-          <div class="handle handle-merge-bottom" onclick="mergeWithNext(1, 2, event)" title="Fundir com o Parágrafo Seguinte">▼ FUNDIR COM BLOCO 02 ▼</div>  
+          <button type="button" class="handle handle-squeeze-left" onclick="toggleSqueeze(1, event)" title="Comprimir para Esqueleto Lógico">◄ COMPRIMIR</button>
+          <button type="button" class="handle handle-split-top" onclick="toggleSplit(1, event)" title="Bifurcar Tese e Antítese">◫ BIFURCAR DIALÉTICA ◫</button>
+          <button type="button" class="handle handle-squeeze-right" onclick="toggleSqueeze(1, event)" title="Comprimir para Esqueleto Lógico">COMPRIMIR ►</button>
+          <button type="button" class="handle handle-merge-bottom" onclick="mergeWithNext(1, 2, event)" title="Fundir com o Parágrafo Seguinte">▼ FUNDIR COM BLOCO 02 ▼</button>
         </div>
 
         <div class="block-tag">  
@@ -378,9 +377,9 @@
       <article class="morph-block" id="block-2" onclick="focusBlock(2)">  
           
         <div class="chisel-rig">  
-          <div class="handle handle-squeeze-left" onclick="toggleSqueeze(2, event)" title="Comprimir para Esqueleto Lógico">◄ COMPRIMIR</div>  
-          <div class="handle handle-split-top" onclick="toggleSplit(2, event)" title="Bifurcar Tese e Antítese">◫ BIFURCAR DIALÉTICA ◫</div>  
-          <div class="handle handle-squeeze-right" onclick="toggleSqueeze(2, event)" title="Comprimir para Esqueleto Lógico">COMPRIMIR ►</div>  
+          <button type="button" class="handle handle-squeeze-left" onclick="toggleSqueeze(2, event)" title="Comprimir para Esqueleto Lógico">◄ COMPRIMIR</button>
+          <button type="button" class="handle handle-split-top" onclick="toggleSplit(2, event)" title="Bifurcar Tese e Antítese">◫ BIFURCAR DIALÉTICA ◫</button>
+          <button type="button" class="handle handle-squeeze-right" onclick="toggleSqueeze(2, event)" title="Comprimir para Esqueleto Lógico">COMPRIMIR ►</button>
         </div>
 
         <div class="block-tag">  
@@ -449,7 +448,8 @@
 
     /* 1. GESTO: COMPRIMIR / SQUEEZE */  
     function toggleSqueeze(id, e) {  
-      e.stopPropagation();  
+      e.stopPropagation();
+      if (document.getElementById('block-1').classList.contains('state-merged')) resetAllBlocks();
       const block = document.getElementById(`block-${id}`);  
       const canvas = document.getElementById(`canvas-${id}`);  
       const pill = document.getElementById(`state-pill-${id}`);
@@ -468,7 +468,8 @@
 
     /* 2. GESTO: BIFURCAR / SPLIT */  
     function toggleSplit(id, e) {  
-      e.stopPropagation();  
+      e.stopPropagation();
+      if (document.getElementById('block-1').classList.contains('state-merged')) resetAllBlocks();
       const block = document.getElementById(`block-${id}`);  
       const canvas = document.getElementById(`canvas-${id}`);  
       const pill = document.getElementById(`state-pill-${id}`);
@@ -487,12 +488,14 @@
 
     /* 3. GESTO: FUNDIR / MERGE */  
     function mergeWithNext(id1, id2, e) {  
-      e.stopPropagation();  
+      e.stopPropagation();
+      if (document.getElementById('block-1').classList.contains('state-merged')) resetAllBlocks();
       const block1 = document.getElementById(`block-${id1}`);  
       const block2 = document.getElementById(`block-${id2}`);  
       const canvas1 = document.getElementById(`canvas-${id1}`);  
       const pill1 = document.getElementById(`state-pill-${id1}`);
 
+      block1.classList.remove('state-skeleton', 'state-split');
       block1.classList.add('state-merged');  
       pill1.textContent = "Síntese Fundida (Bloco 01 + 02)";  
       pill1.style.color = "var(--purple)";
@@ -505,7 +508,8 @@
       // Oculta suavemente o Bloco 2 que foi absorvido  
       block2.style.transition = "all 0.3s ease";  
       block2.style.opacity = "0.25";  
-      block2.style.pointerEvents = "none";  
+      block2.style.pointerEvents = "none";
+      block2.inert = true;
       block2.style.transform = "scale(0.98)";  
     }
 
@@ -518,7 +522,8 @@
 
         block.className = "morph-block" + (id === 1 ? " focused" : "");  
         block.style.opacity = "1";  
-        block.style.pointerEvents = "auto";  
+        block.style.pointerEvents = "auto";
+        block.inert = false;
         block.style.transform = "none";  
         canvas.innerHTML = originalContent[id];  
         pill.textContent = "Prosa Completa";  

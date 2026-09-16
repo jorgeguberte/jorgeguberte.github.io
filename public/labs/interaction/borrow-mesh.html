@@ -7,7 +7,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">  
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700\&family=Plus+Jakarta+Sans:wght@400;500;600;700\&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>  
     :root {  
@@ -19,9 +19,9 @@
       --text: #f4f4f5;  
       --text-muted: #71717a;  
       --text-faint: #3f3f46;  
-      --immut-color: #06b6d4;      /* Ciano: Empréstimo partilhado (\&T) */  
+      --immut-color: #06b6d4;      /* Ciano: Empréstimo partilhado (&T) */
       --immut-dim: rgba(6, 182, 212, 0.15);  
-      --mut-color: #ea580c;        /* Laranja: Empréstimo exclusivo (\&mut T) */  
+      --mut-color: #ea580c;        /* Laranja: Empréstimo exclusivo (&mut T) */
       --mut-dim: rgba(234, 88, 12, 0.15);  
       --danger: #ef4444;           /* Vermelho: Fricção / Aliasing violation */  
       --danger-glow: rgba(239, 68, 68, 0.35);  
@@ -334,12 +334,11 @@
       padding: 0 4px;  
     }  
   </style>  
+<link rel="stylesheet" href="../experiment.css">
+<script src="../experiment.js" defer></script>
 </head>  
 <body>
-<div style="position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 16px;background:rgba(9,9,11,.92);backdrop-filter:blur(10px);border-bottom:1px solid #27272a;font-family:'JetBrains Mono',monospace;font-size:11px;">
-  <span style="color:#71717a;">BORROW MESH // drag the lifetime handle ⇕ to resolve E0502</span>
-  <a href="./index.html" style="color:#ea580c;text-decoration:none;white-space:nowrap;">← Interaction Research</a>
-</div>
+
 
   <div class="container">  
       
@@ -364,9 +363,9 @@
     <div class="scenario-bar">  
       <div class="scenario-group">  
         <span style="color: var(--text-muted);">Cenários de Tensão:</span>  
-        <button class="scenario-btn active" id="btnScenConflict" onclick="loadScenario('conflict')">01. Conflito E0502 (\&T + \&mut T)</button>  
-        <button class="scenario-btn" id="btnScenResolved" onclick="loadScenario('resolved')">02. Escopo Encurtado (NLL Válido)</button>  
-        <button class="scenario-btn" id="btnScenMultiReader" onclick="loadScenario('multi')">03. Múltiplos Leitores (\&T Partilhado)</button>  
+        <button class="scenario-btn active" id="btnScenConflict" onclick="loadScenario('conflict', this)">01. Conflito E0502 (&T + &mut T)</button>
+        <button class="scenario-btn" id="btnScenResolved" onclick="loadScenario('resolved', this)">02. Escopo Encurtado (NLL Válido)</button>
+        <button class="scenario-btn" id="btnScenMultiReader" onclick="loadScenario('multi', this)">03. Múltiplos Leitores (&T Partilhado)</button>
       </div>
 
       <span style="color: var(--text-faint);">[Arrasta as alças na calha de linhas para modular o drop]</span>  
@@ -388,9 +387,9 @@
       <div class="code-stage">  
         <div class="code-line"><span class="kw">fn</span> <span class="fn">process_packet_pipeline</span>() {</div>  
         <div class="code-line">    <span class="kw">let mut</span> <span class="token token-root" id="rootBuffer">buffer</span>: <span class="type">Vec<u8></span> = <span class="type">Vec</span>::<span class="fn">new</span>();</div>  
-        <div class="code-line">    <span class="kw">let</span> <span class="token token-immut" id="refReader">reader</span> = &<span class="token" id="targetReader">buffer</span>;        <span class="comment">// Empréstimo Imutável (\&T)</span></div>  
+        <div class="code-line">    <span class="kw">let</span> <span class="token token-immut" id="refReader">reader</span> = &<span class="token" id="targetReader">buffer</span>;        <span class="comment">// Empréstimo Imutável (&T)</span></div>
         <div class="code-line">    <span class="fn">inspect_header</span>(<span class="token" id="useReader">reader</span>);</div>  
-        <div class="code-line">    <span class="kw">let</span> <span class="token token-mut" id="refWriter">writer</span> = &<span class="kw">mut</span> <span class="token" id="targetWriter">buffer</span>;   <span class="comment">// Empréstimo Mutável Exclusivo (\&mut T)</span></div>  
+        <div class="code-line">    <span class="kw">let</span> <span class="token token-mut" id="refWriter">writer</span> = &<span class="kw">mut</span> <span class="token" id="targetWriter">buffer</span>;   <span class="comment">// Empréstimo Mutável Exclusivo (&mut T)</span></div>
         <div class="code-line">    <span class="fn">mutate_payload</span>(<span class="token" id="useWriter">writer</span>);</div>  
         <div class="code-line" id="lineReaderLate">    <span class="fn">consume_cached</span>(<span class="token" id="useReaderLate">reader</span>);        <span class="comment" id="commentLate">// Leitura tardia conflitante</span></div>  
         <div class="code-line">}</div>  
@@ -452,19 +451,35 @@
     }
 
     /* CONTROLO DA ALÇA DE LIFETIME (DRAGGABLE NO GUTTER) */  
-    const dropHandle = document.getElementById('dropReaderHandle');  
+    const dropHandle = document.getElementById('dropReaderHandle');
+    dropHandle.tabIndex = 0;
+    dropHandle.setAttribute('role', 'slider');
+    dropHandle.setAttribute('aria-label', 'Reader drop line');
+    dropHandle.setAttribute('aria-valuemin', '4');
+    dropHandle.setAttribute('aria-valuemax', '7');
+    dropHandle.setAttribute('aria-orientation', 'vertical');
+    dropHandle.addEventListener('keydown', e => {
+      if (!['ArrowUp','ArrowDown','Home','End'].includes(e.key)) return;
+      e.preventDefault();
+      state.readerDropLine = e.key === 'Home' ? 4 : e.key === 'End' ? 7 : Math.max(4, Math.min(7, state.readerDropLine + (e.key === 'ArrowDown' ? 1 : -1)));
+      updateCodeView(); updateHandlePosition();
+    });
       
     function updateHandlePosition() {  
       // Cada linha tem ~30.8px de altura no line-height 2.2 com padding inicial de 24px  
       const lineY = 24 + (state.readerDropLine - 1) * 30.8 + 15;  
-      dropHandle.style.top = `${lineY - 8}px`;  
+      dropHandle.style.top = `${lineY - 8}px`;
+      dropHandle.setAttribute('aria-valuenow', state.readerDropLine);
     }  
     updateHandlePosition();
 
-    dropHandle.addEventListener('mousedown', (e) => {  
-      state.isDraggingDrop = true;  
-      window.addEventListener('mousemove', onHandleDrag);  
-      window.addEventListener('mouseup', onHandleStop);  
+    dropHandle.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      state.isDraggingDrop = true;
+      dropHandle.setPointerCapture(e.pointerId);
+      window.addEventListener('pointercancel', onHandleStop);
+      window.addEventListener('pointermove', onHandleDrag);
+      window.addEventListener('pointerup', onHandleStop);
     });
 
     function onHandleDrag(e) {  
@@ -482,9 +497,10 @@
     }
 
     function onHandleStop() {  
-      state.isDraggingDrop = false;  
-      window.removeEventListener('mousemove', onHandleDrag);  
-      window.removeEventListener('mouseup', onHandleStop);  
+      state.isDraggingDrop = false;
+      window.removeEventListener('pointercancel', onHandleStop);
+      window.removeEventListener('pointermove', onHandleDrag);
+      window.removeEventListener('pointerup', onHandleStop);
     }
 
     /* ATUALIZA O CÓDIGO E O TERMINAL COM BASE NA LINHA DE DROP */  
@@ -510,11 +526,11 @@
         statusEl.classList.add('alert');  
         diagOutput.className = "diag-output error";  
         diagOutput.innerHTML = `  
-          <span class="diag-error-code">error[E0502]</span>: cannot borrow `buffer` as mutable because it is also borrowed as immutable<br/>  
+          <span class="diag-error-code">error[E0502]</span>: cannot borrow <code>buffer</code> as mutable because it is also borrowed as immutable<br/>
            --> src/pipeline.rs:5:27<br/>  
             |<br/>  
-           3| let reader = \&buffer;              -- immutable borrow occurs here<br/>  
-           5| let writer = \&mut buffer;          ^^ mutable borrow occurs here<br/>  
+           3| let reader = &buffer;              -- immutable borrow occurs here<br/>
+           5| let writer = &mut buffer;          ^^ mutable borrow occurs here<br/>
            7| consume_cached(reader);            -- immutable borrow later used here  
         `;  
       } else {  
@@ -526,9 +542,9 @@
     }
 
     /* CENÁRIOS PRESET */  
-    function loadScenario(type) {  
+    function loadScenario(type, button) {
       document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));  
-      event.target.classList.add('active');
+      button.classList.add('active');
 
       if (type === 'conflict') {  
         state.readerDropLine = 7;  
@@ -567,7 +583,7 @@
         : `0.00 N (Livre)`;  
       document.getElementById('stressVal').style.color = isConflicting ? "var(--danger)" : "var(--success)";
 
-      /* 1. DESENHA O CABO MUTÁVEL (\&mut buffer -> writer) */  
+      /* 1. DESENHA O CABO MUTÁVEL (&mut buffer -> writer) */
       ctx.beginPath();  
       ctx.moveTo(root.x, root.y);  
       const cp1Wx = root.x + 80 + frictionJitter;  
@@ -582,7 +598,7 @@
       ctx.stroke();  
       ctx.shadowBlur = 0;
 
-      /* 2. DESENHA O CABO IMUTÁVEL (\&buffer -> reader) */  
+      /* 2. DESENHA O CABO IMUTÁVEL (&buffer -> reader) */
       ctx.beginPath();  
       ctx.moveTo(root.x, root.y);  
       const cp1Rx = root.x + 40 - frictionJitter;  

@@ -1,155 +1,376 @@
-<!DOCTYPE html>
-<html lang="pt-BR" data-sensory="balanced">
+<!doctype html>
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Labs — Jorge Guberte</title>
     <meta
       name="description"
-      content="A static playground for experiments, prototypes, interfaces, and weird ideas by Jorge Guberte."
+      content="Twelve hands-on experiments in sound, systems, and human–computer interaction. A playground by Jorge Guberte."
     />
     <link rel="canonical" href="https://jorgeguberte.com/labs/" />
-    <meta property="og:site_name" content="Jorge Guberte" />
-    <meta property="og:title" content="Labs — Jorge Guberte" />
-    <meta
-      property="og:description"
-      content="A static playground for experiments, prototypes, interfaces, and weird ideas by Jorge Guberte."
-    />
-    <meta property="og:url" content="https://jorgeguberte.com/labs/" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://jorgeguberte.com/og-card.svg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Labs — Jorge Guberte" />
-    <meta
-      name="twitter:description"
-      content="A static playground for experiments, prototypes, interfaces, and weird ideas by Jorge Guberte."
-    />
-    <meta name="twitter:image" content="https://jorgeguberte.com/og-card.svg" />
-    
-    <!-- Premium Fonts Google link -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    
+    <link rel="icon" href="/favicon.svg" />
     <link rel="stylesheet" href="./styles.css" />
-    <!-- Three.js for immersive 3D background grid on Labs Portal -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="./app.js" defer></script>
   </head>
   <body>
-    <!-- LAYER 1: CHAOS LAYER (z-index: 0, pointer-events none, hidden from assistants) -->
-    <div class="chaos-layer" aria-hidden="true">
-      <!-- 3D Interactive Background Canvas -->
-      <div id="canvas3d-container" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 1; transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1);"></div>
-
-      <!-- High-End Radial Orbs -->
-      <div class="orb orb-green"></div>
-      <div class="orb orb-blue"></div>
-      
-      <!-- Scanlines & Noise Texture -->
-      <div class="scanlines"></div>
-      <div class="noise-overlay"></div>
-    </div>
-
-    <!-- LAYER 2: FUNCTIONAL LAYER (z-index: 100+) -->
-    <div class="functional-layer">
-      <!-- Floating Header -->
+    <a class="skip" href="#experiments">Skip to experiments</a>
+    <div class="shell">
       <header class="topbar">
-        <a href="/" class="back-link">← home</a>
-        <nav class="top-links">
-          <a href="/about">about</a>
-          <a href="/writing">writing</a>
-          <a href="https://github.com/jorgeguberte" target="_blank" rel="noopener noreferrer">github</a>
+        <a class="wordmark" href="/">JG<span> / LABS</span></a>
+        <nav aria-label="Main navigation">
+          <a href="/">Home ↗</a
+          ><a href="https://github.com/jorgeguberte">GitHub ↗</a>
         </nav>
       </header>
-
-      <!-- Sensory Control Dock (Floating glass capsule matching the design skills) -->
-      <div class="sensory-dock transition-spring" id="sensory-dock">
-        <button class="dock-btn transition-spring" data-target="high-stim" title="ADHD: subtle motion to anchor scattered attention">
-          High-Stim
-        </button>
-        <button class="dock-btn transition-spring active" data-target="balanced" title="Padrão: Equilíbrio translúcido e foco focado">
-          Balanced
-        </button>
-        <button class="dock-btn transition-spring" data-target="calm" title="Autismo: Movimento zero e cores descansadas">
-          Calm Mode
-        </button>
-      </div>
-
-      <!-- Main Layout -->
       <main>
-        <!-- Hero Section (Variable Serif + Spacious whitespace) -->
-        <section class="hero transition-spring">
-          <p class="eyebrow">Prototypes // Labs</p>
-          <h1>Raw ideas, simulations, and other strange utilities.</h1>
-          <p class="lead">
-            This is where concepts at the start of their cognitive life cycle take shape. A static, focused playground where ideas about cognition, agent memory, and human-machine interaction get a body before they become real systems.
+        <section class="hero">
+          <div>
+            <p class="eyebrow">
+              <span class="status-dot"></span> Jorge Guberte’s experimental
+              corner
+            </p>
+            <h1>Serious curiosity.<br /><em>Playful machines.</em></h1>
+            <p class="lead">
+              What if a document had depth? A voice had a body?<br
+                class="desktop"
+              />
+              A line of code could be pulled by hand?
+            </p>
+            <a class="hero-link" href="#experiments"
+              >Find something to play with <span>↓</span></a
+            >
+          </div>
+          <div class="hero-object" aria-hidden="true">
+            <div class="orbit orbit-a"></div>
+            <div class="orbit orbit-b"></div>
+            <div class="orbit orbit-c"></div>
+            <span class="core">✳</span
+            ><span class="object-label">FIG. 001 / CURIOSITY ENGINE</span>
+          </div>
+        </section>
+        <div class="field-notes">
+          <span>12 working experiments</span
+          ><span>Sound · systems · interaction</span
+          ><span>Open a sketch. Pull a thread.</span>
+        </div>
+        <section id="experiments" aria-labelledby="collection-title">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">The collection</p>
+              <h2>Small worlds to get lost in.</h2>
+            </div>
+            <button id="surprise" class="quiet-button" hidden>
+              Surprise me ↗
+            </button>
+          </div>
+          <div class="tools" hidden>
+            <div class="filters" role="group" aria-label="Filter experiments">
+              <button data-filter="all" aria-pressed="true">Everything</button
+              ><button data-filter="Audio + objects" aria-pressed="false">
+                Audio + objects</button
+              ><button data-filter="Reading + reasoning" aria-pressed="false">
+                Reading + reasoning</button
+              ><button data-filter="Systems + motion" aria-pressed="false">
+                Systems + motion
+              </button>
+            </div>
+            <label class="search"
+              ><span class="sr-only">Search experiments</span
+              ><input
+                id="search"
+                type="search"
+                placeholder="Find an experiment…"
+            /></label>
+          </div>
+          <p id="results" class="results" aria-live="polite">
+            12 experiments · ready to explore
+          </p>
+          <div class="card-grid">
+            <a
+              class="experiment"
+              href="./y2k-sensory/minidisc-album.html"
+              data-category="Audio + objects"
+              data-title="minidisc player a little machine for listening. rotate the hardware, open the shutter, follow the lyrics."
+              ><div class="art art-disc" aria-hidden="true">
+                <span class="art-mark">◎</span
+                ><span class="art-index">EXP. 01</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Audio + objects</p>
+                <h3>MiniDisc player</h3>
+                <p>
+                  A little machine for listening. Rotate the hardware, open the
+                  shutter, follow the lyrics.
+                </p>
+                <span class="hint"
+                  >Drag to rotate · press play
+                  <span aria-hidden="true">→</span></span
+                >
+              </div></a
+            ><a
+              class="experiment"
+              href="./interaction/semantic-lod.html"
+              data-category="Reading + reasoning"
+              data-title="documents with depth one document. four distances. move from the headline into the evidence without leaving the page."
+              ><div class="art art-layers" aria-hidden="true">
+                <span class="art-mark">▱</span
+                ><span class="art-index">EXP. 02</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Reading + reasoning</p>
+                <h3>Documents with depth</h3>
+                <p>
+                  One document. Four distances. Move from the headline into the
+                  evidence without leaving the page.
+                </p>
+                <span class="hint"
+                  >Choose a depth · explore a block
+                  <span aria-hidden="true">→</span></span
+                >
+              </div></a
+            ><a
+              class="experiment"
+              href="./interaction/attractor-collider.html"
+              data-category="Systems + motion"
+              data-title="strange attractors a field of chaotic trajectories. place a gravity well and bend the system with your hands."
+              ><div class="art art-orbits" aria-hidden="true">
+                <span class="art-mark">◌</span
+                ><span class="art-index">EXP. 03</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Systems + motion</p>
+                <h3>Strange attractors</h3>
+                <p>
+                  A field of chaotic trajectories. Place a gravity well and bend
+                  the system with your hands.
+                </p>
+                <span class="hint"
+                  >Drag inside the field <span aria-hidden="true">→</span></span
+                >
+              </div></a
+            ><a
+              class="experiment"
+              href="./y2k-sensory/ai-hologram.html"
+              data-category="Audio + objects"
+              data-title="a voice with a body an animated hologram with browser speech and scripted conversational responses."
+              ><div class="art art-orb" aria-hidden="true">
+                <span class="art-mark">◌</span
+                ><span class="art-index">EXP. 04</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Audio + objects</p>
+                <h3>A voice with a body</h3>
+                <p>
+                  An animated hologram with browser speech and scripted
+                  conversational responses.
+                </p>
+                <span class="hint"
+                  >Type a message · enable voice
+                  <span aria-hidden="true">→</span></span
+                >
+              </div></a
+            ><a
+              class="experiment"
+              href="./interaction/semantic-chisel.html"
+              data-category="Reading + reasoning"
+              data-title="semantic chisel squeeze a paragraph to its essentials, split an argument, or merge two blocks into one."
+              ><div class="art art-chisel" aria-hidden="true">
+                <span class="art-mark">↗</span
+                ><span class="art-index">EXP. 05</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Reading + reasoning</p>
+                <h3>Semantic chisel</h3>
+                <p>
+                  Squeeze a paragraph to its essentials, split an argument, or
+                  merge two blocks into one.
+                </p>
+                <span class="hint"
+                  >Select a block · use its handles
+                  <span aria-hidden="true">→</span></span
+                >
+              </div></a
+            ><a
+              class="experiment"
+              href="./interaction/borrow-mesh.html"
+              data-category="Systems + motion"
+              data-title="tactile borrow mesh rust lifetimes become a physical relationship. move the drop point and watch a conflict emerge."
+              ><div class="art art-mesh" aria-hidden="true">
+                <span class="art-mark">▱</span
+                ><span class="art-index">EXP. 06</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Systems + motion</p>
+                <h3>Tactile borrow mesh</h3>
+                <p>
+                  Rust lifetimes become a physical relationship. Move the drop
+                  point and watch a conflict emerge.
+                </p>
+                <span class="hint"
+                  >Drag the lifetime handle
+                  <span aria-hidden="true">→</span></span
+                >
+              </div></a
+            ><a
+              class="experiment"
+              href="./interaction/ghost-diffs.html"
+              data-category="Reading + reasoning"
+              data-title="ghost diffs keep the original in view while exploring alternate versions of an argument."
+              ><div class="art art-ghost" aria-hidden="true">
+                <span class="art-mark">▱</span
+                ><span class="art-index">EXP. 07</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Reading + reasoning</p>
+                <h3>Ghost diffs</h3>
+                <p>
+                  Keep the original in view while exploring alternate versions
+                  of an argument.
+                </p>
+                <span class="hint"
+                  >Explore the inline alternatives
+                  <span aria-hidden="true">→</span></span
+                >
+              </div></a
+            ><a
+              class="experiment"
+              href="./interaction/prosodic-typography.html"
+              data-category="Reading + reasoning"
+              data-title="typography that speaks pace, emphasis, and tension become visible properties of a sentence."
+              ><div class="art art-type" aria-hidden="true">
+                <span class="art-mark">Aa</span
+                ><span class="art-index">EXP. 08</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Reading + reasoning</p>
+                <h3>Typography that speaks</h3>
+                <p>
+                  Pace, emphasis, and tension become visible properties of a
+                  sentence.
+                </p>
+                <span class="hint"
+                  >Adjust the expressive controls
+                  <span aria-hidden="true">→</span></span
+                >
+              </div></a
+            ><a
+              class="experiment"
+              href="./interaction/semantic-oscilloscope.html"
+              data-category="Systems + motion"
+              data-title="semantic oscilloscope a visual sketch of coherence: inspect how a changing signal changes the reading experience."
+              ><div class="art art-wave" aria-hidden="true">
+                <span class="art-mark">≋</span
+                ><span class="art-index">EXP. 09</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Systems + motion</p>
+                <h3>Semantic oscilloscope</h3>
+                <p>
+                  A visual sketch of coherence: inspect how a changing signal
+                  changes the reading experience.
+                </p>
+                <span class="hint"
+                  >Adjust the signal controls
+                  <span aria-hidden="true">→</span></span
+                >
+              </div></a
+            ><a
+              class="experiment"
+              href="./y2k-sensory/rhythmic.html"
+              data-category="Audio + objects"
+              data-title="rhythm & attention a visual metronome, a spinning disc, and text that follows the beat. set your own pace."
+              ><div class="art art-rhythm" aria-hidden="true">
+                <span class="art-mark">≋</span
+                ><span class="art-index">EXP. 10</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Audio + objects</p>
+                <h3>Rhythm & attention</h3>
+                <p>
+                  A visual metronome, a spinning disc, and text that follows the
+                  beat. Set your own pace.
+                </p>
+                <span class="hint"
+                  >Choose a tempo · start the beat
+                  <span aria-hidden="true">→</span></span
+                >
+              </div></a
+            ><a
+              class="experiment"
+              href="./y2k-sensory/ps1-agent.html"
+              data-category="Systems + motion"
+              data-title="ps1 agent core low-poly nodes, crunchy geometry, and a console from an alternative computing history."
+              ><div class="art art-ps1" aria-hidden="true">
+                <span class="art-mark">▱</span
+                ><span class="art-index">EXP. 11</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Systems + motion</p>
+                <h3>PS1 agent core</h3>
+                <p>
+                  Low-poly nodes, crunchy geometry, and a console from an
+                  alternative computing history.
+                </p>
+                <span class="hint"
+                  >Boot the console · explore
+                  <span aria-hidden="true">→</span></span
+                >
+              </div></a
+            ><a
+              class="experiment"
+              href="./y2k-sensory/index.html"
+              data-category="Audio + objects"
+              data-title="sensory playground a hands-on collection of interface textures, motion settings, and tactile controls."
+              ><div class="art art-sensory" aria-hidden="true">
+                <span class="art-mark">▱</span
+                ><span class="art-index">EXP. 12</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Audio + objects</p>
+                <h3>Sensory playground</h3>
+                <p>
+                  A hands-on collection of interface textures, motion settings,
+                  and tactile controls.
+                </p>
+                <span class="hint"
+                  >Try the controls · change the mood
+                  <span aria-hidden="true">→</span></span
+                >
+              </div></a
+            >
+          </div>
+          <p id="empty" hidden>
+            No experiments match. Try another word or choose Everything.
           </p>
         </section>
-
-        <!-- Bento Two-Up Section -->
-        <section class="grid two-up" style="margin-bottom: 4rem;">
-          <!-- Left Bento (span-8) -->
-          <div class="double-bezel col-8 transition-spring">
-            <div class="double-bezel-inner">
-              <div>
-                <p class="eyebrow">Sensory Manifesto // Accessibility</p>
-              <h2>Integrated Cognitive Design</h2>
-              <p style="margin-bottom: 1.5rem; font-size: 13px; font-weight: 300;">
-                The interface should adapt to the mind, not the other way around. Unifying high-craft aesthetics with active sensory modulation proves that ambitious visual design and cognitive accessibility are not enemies.
-              </p>
-              <ul class="bullet-list">
-                <li><strong>Dual-layer architecture:</strong> strict separation of decoration (chaos) and action (functional).</li>
-                <li><strong>AttentionGuard presets:</strong> instant saturation and motion modulation for ADHD/Autism.</li>
-                <li><strong>Physical attention anchors:</strong> reduced gaze drift through calm micro-interactions.</li>
-              </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right Bento (span-4) -->
-          <div class="double-bezel col-4 transition-spring">
-            <div class="double-bezel-inner" style="justify-content: space-between; height: 100%;">
-              <div>
-                <p class="eyebrow">System Status</p>
-                <h2>Active Signals</h2>
-              </div>
-              
-              <div class="status-stack">
-                <div class="status-item">
-                  <span class="status-dot live"></span>
-                  <div class="status-text">
-                    <h4>Sensory-Reactive Grid</h4>
-                    <p>This layout reacts dynamically to the Sensory Dock commands above.</p>
-                  </div>
-                </div>
-                <div class="status-item">
-                  <span class="status-dot building"></span>
-                  <div class="status-text">
-                    <h4>Temporal Persistence</h4>
-                    <p>Upcoming experiments will model forgetting and dynamic decay of local signals.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Section Header for Experiments -->
-        <section class="section-header" id="experiments">
-          <p class="eyebrow">Experiment Board // Active</p>
-          <h2>The Attention Lab</h2>
-        </section>
-
-        <!-- Grid of Experiments (Only our sensory lab featured) -->
-        <section class="grid card-grid" id="card-grid">
-          <!-- Populated dynamically via app.js -->
-        </section>
+        <aside class="closing">
+          <span class="eyebrow">Always a work in progress</span>
+          <p>
+            These are sketches you can touch.<br />Some become systems. Some
+            stay wonderfully strange.
+          </p>
+          <a href="./interaction/">Interaction research series ↗</a
+          ><a href="./y2k-sensory/">Sensory design playground ↗</a>
+        </aside>
       </main>
+      <footer>
+        <a href="/">Jorge Guberte</a
+        ><span>Built out of curiosity. Enjoy the detour.</span
+        ><a href="#">Back to top ↑</a>
+      </footer>
     </div>
-
-    <!-- Application Script -->
-    <script src="./app.js"></script>
   </body>
 </html>
