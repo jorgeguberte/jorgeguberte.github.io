@@ -1,0 +1,166 @@
+/* Shared wayfinding; each experiment keeps its own visual language. */
+body {
+  padding-top: 76px !important;
+}
+.lab-nav {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 20000;
+  min-height: 56px;
+  padding: 8px 22px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: #131613f5;
+  border-bottom: 1px solid #414a37;
+  color: #edf0df;
+  font:
+    12px/1.4 system-ui,
+    sans-serif;
+  backdrop-filter: blur(12px);
+}
+.lab-nav a {
+  color: #dbfa89;
+  text-decoration: none;
+  white-space: nowrap;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+.lab-nav select {
+  max-width: 260px;
+  min-width: 0;
+  width: 100%;
+  border: 1px solid #414a37;
+  background: #20251d;
+  color: #edf0df;
+  padding: 9px;
+  border-radius: 4px;
+  font: inherit;
+}
+.lab-nav label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  max-width: 340px;
+}
+.lab-nav .lab-next {
+  margin-left: auto;
+}
+.lab-tip {
+  border: 1px solid #414a37;
+  border-radius: 5px;
+  background: #20251d;
+  color: #c6cdbb;
+  padding: 10px 14px;
+  font:
+    12px/1.6 system-ui,
+    sans-serif;
+  width: min(100%, 1080px);
+  margin: 0 auto 20px;
+}
+.lab-tip summary {
+  cursor: pointer;
+  color: #dbfa89;
+  min-height: 24px;
+}
+.lab-tip p {
+  margin: 8px 0 0;
+}
+.lab-nav :focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+[role="slider"]:focus-visible {
+  outline: 2px solid #dbfa89;
+  outline-offset: 3px;
+}
+button.lod-pill {
+  font: inherit;
+  background: transparent;
+  border: 1px solid var(--border);
+  min-width: 38px;
+  min-height: 38px;
+}
+button.handle {
+  font: inherit;
+}
+#dropReaderHandle {
+  touch-action: none;
+}
+.morph-block:focus-within .chisel-rig {
+  opacity: 1;
+  pointer-events: auto;
+}
+.lab-collection-link {
+  color: #dbfa89 !important;
+}
+@media (max-width: 640px) {
+  .lab-nav {
+    padding: 6px 12px;
+    gap: 10px;
+    font-size: 11px;
+  }
+  .lab-nav label > span {
+    display: none;
+  }
+  .lab-nav select {
+    max-width: 190px;
+  }
+  .lab-next {
+    font-size: 0 !important;
+  }
+  .lab-next::after {
+    content: "→";
+    font-size: 18px;
+  }
+  .chisel-header,
+  .gestures-hint {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .chisel-stage {
+    padding: 12px !important;
+  }
+  .chisel-rig {
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 6px;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    margin-bottom: 16px;
+  }
+  .chisel-rig .handle {
+    position: static !important;
+    transform: none !important;
+    writing-mode: horizontal-tb !important;
+    min-height: 40px;
+    padding: 8px !important;
+    font-size: 10px !important;
+  }
+  .split-layout {
+    grid-template-columns: 1fr !important;
+    display: grid !important;
+  }
+  .block-tag {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .lab-tip {
+    margin-inline: 0;
+  }
+  .grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

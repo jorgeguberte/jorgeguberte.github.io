@@ -7,7 +7,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">  
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1\&family=JetBrains+Mono:wght@400;500;600\&family=Plus+Jakarta+Sans:wght@400;500;600;700\&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>  
     :root {  
@@ -288,12 +288,12 @@
 
     .depth-name { color: var(--accent); font-weight: 500; }  
   </style>  
+<link rel="stylesheet" href="../experiment.css">
+<script src="../experiment.js" defer>document.querySelectorAll('.lod-pill').forEach(p => p.setAttribute('aria-pressed', String(p.classList.contains('active'))));
+  </script>
 </head>  
 <body>
-<div style="position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 16px;background:rgba(9,9,11,.92);backdrop-filter:blur(10px);border-bottom:1px solid #27272a;font-family:'JetBrains Mono',monospace;font-size:11px;">
-  <span style="color:#71717a;">SEMANTIC LOD // scroll over a block to descend L1→L4</span>
-  <a href="./index.html" style="color:#ea580c;text-decoration:none;white-space:nowrap;">← Interaction Research</a>
-</div>
+
 
   <div class="container">  
       
@@ -323,10 +323,10 @@
         <div class="block-header">  
           <span class="block-topic">01. Captação de Recursos</span>  
           <div class="lod-stepper">  
-            <span class="lod-pill active" onclick="setBlockLOD(1, 1)">L1</span>  
-            <span class="lod-pill" onclick="setBlockLOD(1, 2)">L2</span>  
-            <span class="lod-pill" onclick="setBlockLOD(1, 3)">L3</span>  
-            <span class="lod-pill" onclick="setBlockLOD(1, 4)">L4</span>  
+            <button type="button" class="lod-pill active" onclick="setBlockLOD(1, 1)">L1</button>
+            <button type="button" class="lod-pill" onclick="setBlockLOD(1, 2)">L2</button>
+            <button type="button" class="lod-pill" onclick="setBlockLOD(1, 3)">L3</button>
+            <button type="button" class="lod-pill" onclick="setBlockLOD(1, 4)">L4</button>
           </div>  
         </div>
 
@@ -338,7 +338,7 @@
 
         <div class="depth-indicator">  
           <span>Resolução: <span class="depth-name" id="depth-name-1">L1 • Síntese Executiva</span></span>  
-          <span>Scroll para aprofundar ↕</span>  
+          <span>Alt + scroll para aprofundar · ou toque L1–L4</span>
         </div>  
       </article>
 
@@ -346,10 +346,10 @@
         <div class="block-header">  
           <span class="block-topic">02. Análise de Risco & Execução</span>  
           <div class="lod-stepper">  
-            <span class="lod-pill" onclick="setBlockLOD(2, 1)">L1</span>  
-            <span class="lod-pill active" onclick="setBlockLOD(2, 2)">L2</span>  
-            <span class="lod-pill" onclick="setBlockLOD(2, 3)">L3</span>  
-            <span class="lod-pill" onclick="setBlockLOD(2, 4)">L4</span>  
+            <button type="button" class="lod-pill" onclick="setBlockLOD(2, 1)">L1</button>
+            <button type="button" class="lod-pill active" onclick="setBlockLOD(2, 2)">L2</button>
+            <button type="button" class="lod-pill" onclick="setBlockLOD(2, 3)">L3</button>
+            <button type="button" class="lod-pill" onclick="setBlockLOD(2, 4)">L4</button>
           </div>  
         </div>
 
@@ -361,7 +361,7 @@
 
         <div class="depth-indicator">  
           <span>Resolução: <span class="depth-name" id="depth-name-2">L2 • Raciocínio Contextual</span></span>  
-          <span>Scroll para aprofundar ↕</span>  
+          <span>Alt + scroll para aprofundar · ou toque L1–L4</span>
         </div>  
       </article>
 
@@ -369,10 +369,10 @@
         <div class="block-header">  
           <span class="block-topic">03. Intervenção Territorial</span>  
           <div class="lod-stepper">  
-            <span class="lod-pill active" onclick="setBlockLOD(3, 1)">L1</span>  
-            <span class="lod-pill" onclick="setBlockLOD(3, 2)">L2</span>  
-            <span class="lod-pill" onclick="setBlockLOD(3, 3)">L3</span>  
-            <span class="lod-pill" onclick="setBlockLOD(3, 4)">L4</span>  
+            <button type="button" class="lod-pill active" onclick="setBlockLOD(3, 1)">L1</button>
+            <button type="button" class="lod-pill" onclick="setBlockLOD(3, 2)">L2</button>
+            <button type="button" class="lod-pill" onclick="setBlockLOD(3, 3)">L3</button>
+            <button type="button" class="lod-pill" onclick="setBlockLOD(3, 4)">L4</button>
           </div>  
         </div>
 
@@ -384,7 +384,7 @@
 
         <div class="depth-indicator">  
           <span>Resolução: <span class="depth-name" id="depth-name-3">L1 • Síntese Executiva</span></span>  
-          <span>Scroll para aprofundar ↕</span>  
+          <span>Alt + scroll para aprofundar · ou toque L1–L4</span>
         </div>  
       </article>
 
@@ -510,7 +510,8 @@
       // Atualiza os pills visuais  
       const pills = blockEl.querySelectorAll('.lod-pill');  
       pills.forEach((p, i) => {  
-        p.classList.toggle('active', i + 1 === lodLevel);  
+        p.classList.toggle('active', i + 1 === lodLevel);
+        p.setAttribute('aria-pressed', String(i + 1 === lodLevel));
       });  
     }
 
@@ -522,9 +523,20 @@
     /* NAVEGAÇÃO POR RODA DO RATO (WHEEL GESTURE IN-PLACE) */  
     document.querySelectorAll('.lod-block').forEach(block => {  
       let wheelTimeout = null;
+      let lastWheel = 0;
+      block.tabIndex = 0;
+      block.addEventListener('keydown', e => {
+        if (['1','2','3','4'].includes(e.key)) {
+          e.stopPropagation();
+          setBlockLOD(Number(block.id.replace('block-', '')), Number(e.key));
+        }
+      });
 
       block.addEventListener('wheel', (e) => {  
-        e.preventDefault(); // Impede o scroll de página enquanto estiver focado em modular o LOD
+        if (!e.altKey) return;
+        e.preventDefault();
+        if (performance.now() - lastWheel < 180) return;
+        lastWheel = performance.now();
 
         block.classList.add('active-wheel');  
         clearTimeout(wheelTimeout);  
@@ -552,10 +564,11 @@
     });
 
     window.addEventListener('keydown', (e) => {  
-      if (window.activeHoverBlock && ['1', '2', '3', '4'].includes(e.key)) {  
+      if (!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) && window.activeHoverBlock && ['1', '2', '3', '4'].includes(e.key)) {
         setBlockLOD(window.activeHoverBlock, parseInt(e.key));  
       }  
     });  
+  document.querySelectorAll('.lod-pill').forEach(p => p.setAttribute('aria-pressed', String(p.classList.contains('active'))));
   </script>  
 </body>  
 </html>
