@@ -39,7 +39,7 @@ function generateFeed() {
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .map((post) => {
-      const url = `${BASE_URL}/blog/${post.slug}`;
+      const url = `${BASE_URL}/writing/${post.slug}`;
       const date = new Date(post.date).toUTCString();
       return `    <item>
       <title>${escapeXml(post.title)}</title>

@@ -3,12 +3,28 @@ import { GetStaticPaths, GetStaticProps } from "next";
 import { posts } from "#site/content";
 import type { Post } from "#site/content";
 import { SeoHead } from "../../components/SeoHead";
+import { getBreadcrumbSchema, getArticleSchema } from "../../data/schema";
 
 interface PostPageProps {
   post: Post;
 }
 
 export default function PostPage({ post }: PostPageProps) {
+  const publishedIso = new Date(post.date).toISOString();
+  const breadcrumb = getBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Writing", path: "/writing" },
+    { name: post.title, path: `/writing/${post.slug}` },
+  ]);
+
+  const articleSchema = getArticleSchema({
+    title: post.title,
+    description: post.description,
+    path: `/writing/${post.slug}`,
+    publishedTime: publishedIso,
+    tags: post.tags,
+  });
+
   return (
     <>
       <SeoHead
@@ -16,7 +32,8 @@ export default function PostPage({ post }: PostPageProps) {
         description={post.description}
         path={`/writing/${post.slug}`}
         type="article"
-        publishedTime={new Date(post.date).toISOString()}
+        publishedTime={publishedIso}
+        jsonLd={[articleSchema, breadcrumb]}
       />
 
       <article className="shell max-w-3xl py-20 md:py-28">

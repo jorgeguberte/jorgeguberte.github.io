@@ -1,4 +1,30 @@
+# robots.txt for https://jorgeguberte.com
 User-agent: *
+Allow: /
+
+# Search Engine and AI / Answer Engine Optimization (AEO) permissions
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
 Allow: /
 
 Sitemap: https://jorgeguberte.com/sitemap.xml

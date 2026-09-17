@@ -1,13 +1,20 @@
 import { profile, workWithMe } from "../data/site-content";
 import { SeoHead } from "../components/SeoHead";
+import { getPersonSchema, getBreadcrumbSchema } from "../data/schema";
 
 export default function WorkWithMe() {
+  const breadcrumb = getBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Work With Me", path: "/work-with-me" },
+  ]);
+
   return (
     <>
       <SeoHead
-        title="Work with me — Jorge Guberte"
+        title="Work With Me — Jorge Guberte | Architecture Consulting & AI Systems"
         description="Architecture consulting, research collaboration, advisory, and principal-level roles — for teams where persistence, memory, or long-horizon behavior is core to the product."
         path="/work-with-me"
+        jsonLd={[getPersonSchema(), breadcrumb]}
       />
 
       <div className="shell py-24 md:py-36">

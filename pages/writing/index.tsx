@@ -2,18 +2,25 @@ import Link from "next/link";
 import { posts } from "#site/content";
 import { writingIntro, isPublicPost } from "../../data/site-content";
 import { SeoHead } from "../../components/SeoHead";
+import { getBreadcrumbSchema } from "../../data/schema";
 
 export default function WritingIndex() {
   const sortedPosts = [...posts]
     .filter(isPublicPost)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
+  const breadcrumb = getBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Writing", path: "/writing" },
+  ]);
+
   return (
     <>
       <SeoHead
-        title="Writing — Jorge Guberte"
-        description={writingIntro}
+        title="Writing & Essays — Jorge Guberte | AI Architecture & Systems"
+        description="Notes on memory, context, infrastructure, and the realities of building AI systems outside toy demos."
         path="/writing"
+        jsonLd={breadcrumb}
       />
 
       <div className="shell py-24 md:py-32">

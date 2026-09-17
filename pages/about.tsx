@@ -1,40 +1,22 @@
 import Link from "next/link";
 import { aboutPage, profile, experience, skillGroups } from "../data/site-content";
 import { SeoHead } from "../components/SeoHead";
-
-const personJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Person",
-  name: "Jorge Guberte",
-  jobTitle: "Principal AI Systems Architect",
-  email: "mailto:" + profile.email,
-  url: "https://jorgeguberte.com",
-  sameAs: [profile.github, profile.linkedin],
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "São Paulo",
-    addressCountry: "BR",
-  },
-  knowsAbout: [
-    "AI systems architecture",
-    "Agent orchestration",
-    "Agent memory architectures",
-    "Retrieval-augmented generation",
-    "Context engineering",
-    "Generative UI",
-  ],
-  alumniOf: [{ "@type": "CollegeOrUniversity", name: "University of São Paulo" }],
-};
+import { getPersonSchema, getBreadcrumbSchema } from "../data/schema";
 
 export default function About() {
+  const breadcrumb = getBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "About", path: "/about" },
+  ]);
+
   return (
     <>
       <SeoHead
-        title="About — Jorge Guberte"
+        title="About — Jorge Guberte | Principal AI Systems Architect"
         description="Principal AI Systems Architect in São Paulo. 12+ years of production systems; now building AI that persists — agent memory, orchestration, and generative UI."
         path="/about"
+        jsonLd={[getPersonSchema(), breadcrumb]}
       />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
 
       <article className="shell py-24 md:py-36">
         <header>

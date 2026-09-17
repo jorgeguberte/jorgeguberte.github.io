@@ -2,18 +2,34 @@ import Link from "next/link";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { systemProjects, SystemProject } from "../../data/site-content";
 import { SeoHead } from "../../components/SeoHead";
+import { getBreadcrumbSchema, getSoftwareSchema } from "../../data/schema";
 
 interface SystemPageProps {
   project: SystemProject;
 }
 
 export default function SystemPage({ project }: SystemPageProps) {
+  const breadcrumb = getBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Systems", path: "/systems" },
+    { name: project.name, path: `/systems/${project.slug}` },
+  ]);
+
+  const softwareSchema = getSoftwareSchema({
+    name: project.name,
+    description: `${project.oneLiner} ${project.description}`,
+    path: `/systems/${project.slug}`,
+    codeRepository: project.links.find((l) => l.label.toLowerCase().includes("github"))?.href,
+    applicationCategory: project.kind === "production" ? "BusinessApplication" : "DeveloperApplication",
+  });
+
   return (
     <>
       <SeoHead
-        title={`${project.name} — Systems — Jorge Guberte`}
+        title={`${project.name} — AI Systems Architecture — Jorge Guberte`}
         description={`${project.oneLiner} ${project.description}`}
         path={`/systems/${project.slug}`}
+        jsonLd={[softwareSchema, breadcrumb]}
       />
 
       <article className="shell py-20 md:py-28">

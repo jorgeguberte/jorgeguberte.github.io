@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SeoHead } from "../components/SeoHead";
+import { getPersonSchema, getBreadcrumbSchema } from "../data/schema";
 import {
   profile,
   proofStats,
@@ -10,12 +11,18 @@ import {
 } from "../data/site-content";
 
 export default function Cv() {
+  const breadcrumb = getBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "CV", path: "/cv" },
+  ]);
+
   return (
     <>
       <SeoHead
-        title="CV — Jorge Guberte"
+        title="Curriculum Vitae — Jorge Guberte | Principal AI Systems Architect"
         description="Principal AI Systems Architect. 12+ years of production systems, agent orchestration, cognitive memory architectures, and applied AI R&D. Printable CV."
         path="/cv"
+        jsonLd={[getPersonSchema(), breadcrumb]}
       />
 
       <div className="cv-root shell py-16 md:py-24">

@@ -1,14 +1,21 @@
 import Link from "next/link";
 import { systemsIntro, systemProjects } from "../../data/site-content";
 import { SeoHead } from "../../components/SeoHead";
+import { getBreadcrumbSchema } from "../../data/schema";
 
 export default function SystemsIndex() {
+  const breadcrumb = getBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Systems", path: "/systems" },
+  ]);
+
   return (
     <>
       <SeoHead
-        title="Systems — Jorge Guberte"
-        description="Built, shipped, running. The systems where the research gets tested."
+        title="Systems — Jorge Guberte | Production & Open Source AI Systems"
+        description="Built, shipped, running. Production B2G platforms, high-performance state branching, and embodied AI systems: Strata, Multiverse, and Pixie."
         path="/systems"
+        jsonLd={breadcrumb}
       />
 
       <div className="shell py-24 md:py-32">

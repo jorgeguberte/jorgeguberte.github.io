@@ -35,14 +35,20 @@ const nextConfig = {
       }),
 };
 
-async function generateFeed() {
+async function generateStaticAssets() {
   try {
     require('./scripts/generate-feed');
   } catch (err) {
     console.warn('[feed] Could not generate RSS feed:', err.message);
   }
+  try {
+    const { generateSitemap } = require('./scripts/generate-sitemap');
+    generateSitemap();
+  } catch (err) {
+    console.warn('[sitemap] Could not generate sitemap:', err.message);
+  }
 }
 
-buildVelite().then(() => generateFeed()).catch(console.error);
+buildVelite().then(() => generateStaticAssets()).catch(console.error);
 
 module.exports = nextConfig;

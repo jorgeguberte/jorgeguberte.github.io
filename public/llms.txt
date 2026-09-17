@@ -1,0 +1,32 @@
+# Jorge Guberte — Principal AI Systems Architect
+
+> Personal site and applied AI systems research lab: https://jorgeguberte.com
+
+Jorge Guberte is a Principal AI Systems Architect and Co-Founder & CTO of Hub Esfera based in São Paulo, Brazil. With 12+ years shipping production software and distributed systems, his work focuses on applied AI systems architecture: agent orchestration, cognitive memory architectures, temporal retrieval, context engineering, and generative UI.
+
+## Core Thesis
+"AI systems should retain context, adapt over time, and remain useful beyond a single interaction."
+Most AI products optimize for the single session and suffer total amnesia. Jorge Guberte designs and ships architectures that accumulate understanding, manage decay, maintain identity, and operate reliably in long-horizon production environments.
+
+## Production Systems
+- [Strata](https://jorgeguberte.com/systems/strata): Municipal intelligence platform (Hub Esfera · Production B2G). Embedded AI copilot on top of live public-data pipelines (BigQuery, PNCP, FNDE, INEP) materialized into an embedded DuckDB analytical layer. Deterministic LangGraph agent with skill-based reasoning, sandboxed read-only tools, and LangSmith observability. Live serving city profiles including Porto Alegre/RS.
+- [Multiverse](https://jorgeguberte.com/systems/multiverse): Open-source state management library with Git-style branching semantics (`multiverse-js`). Fork allocation benchmarked at 2.8M ops/s (430ns); LWW merge at 44.9K ops/s inside a 60fps frame window. MIT license. GitHub: https://github.com/jorgeguberte/multiverse
+- [Pixie](https://jorgeguberte.com/systems/pixie): Embodied 3D AI companion with bidirectional live voice streaming over Gemini Live API WebSockets (16kHz/24kHz PCM), Rapier physics locomotion, synchronous spatial tool execution, and audio-amplitude-driven lip-sync. Built with neurodivergent-first interaction constraints.
+- [Ayvu-Talian](https://github.com/jorgeguberte/ayvu-talian-base): 5.39M-parameter decoder-only transformer trained from scratch for Talian (Venetian minority language spoken in southern Brazil). End-to-end tokenizer, corpus curation, PyTorch training.
+
+## The Lab (Research Programs)
+- [EPCG (Emergent Personal Cognitive Graphs)](https://jorgeguberte.com/lab/epcg): Category-theoretic architecture for persistent agents. Falsified flat top-k retrieval (`retrieve(query) -> top-k`) as universal memory interface. Memory Access Model v0 decomposes recall into four typed operations (`EpisodicAt`, `StateAt`, `StateHistory`, `SemanticRetrieve`), beating flat retrieval by +50 percentage points in blind cross-domain validation (N=200, p < 10⁻⁷). External AMA-Bench pilots: EPCG-T 72.5% vs BM25 70.0% and LongContext 50.0%.
+- [LoomDB](https://jorgeguberte.com/lab/loomdb): Graph-based temporal memory engine modeled as a nonlinear dissipative dynamical system. Features asymptotic saturation, lazy decay with consolidated stability, sub-stochastic propagation (bounded energy), and evolutionary routing policies. Rust core compiled to WASM.
+- [Y2K Sensory](https://jorgeguberte.com/lab/y2k-sensory): Maximalist aesthetic unified with neurodivergent cognitive accessibility via dual-layer CSS architecture and AttentionGuard presets.
+
+## Links & Profiles
+- Website: https://jorgeguberte.com
+- Lab: https://jorgeguberte.com/lab
+- Systems: https://jorgeguberte.com/systems
+- Writing & Essays: https://jorgeguberte.com/writing
+- CV: https://jorgeguberte.com/cv
+- Work with me: https://jorgeguberte.com/work-with-me
+- GitHub: https://github.com/jorgeguberte
+- LinkedIn: https://www.linkedin.com/in/jorgeguberte
+- ORCID: https://orcid.org/0009-0001-1198-1065
+- Email: hey@jorgeguberte.com

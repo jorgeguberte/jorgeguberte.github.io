@@ -2,6 +2,7 @@ import Link from "next/link";
 import { posts } from "#site/content";
 import { MemoryField } from "../components/MemoryField";
 import { SeoHead } from "../components/SeoHead";
+import { getPersonSchema, getWebsiteSchema } from "../data/schema";
 import {
   isPublicPost,
   thesis,
@@ -24,6 +25,7 @@ export default function Home() {
         title="Jorge Guberte | Principal AI Systems Architect"
         description="12+ years shipping production systems. Agent orchestration, cognitive memory, RAG pipelines, generative UI — AI taken out of the chat box and into products that run."
         path="/"
+        jsonLd={[getWebsiteSchema(), getPersonSchema()]}
       />
 
       {/* Hero */}

@@ -1,14 +1,21 @@
 import Link from "next/link";
 import { labIntro, labPrograms } from "../../data/site-content";
 import { SeoHead } from "../../components/SeoHead";
+import { getBreadcrumbSchema } from "../../data/schema";
 
 export default function LabIndex() {
+  const breadcrumb = getBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Lab", path: "/lab" },
+  ]);
+
   return (
     <>
       <SeoHead
-        title="The Lab — Jorge Guberte"
-        description="Ongoing research programs in agent memory, cognitive architectures, and low-resource language modeling."
+        title="The Lab — Jorge Guberte | Applied AI Research & Memory Architectures"
+        description="Applied research programs in persistent agent memory (EPCG, LoomDB), cognitive architectures, temporal retrieval, and neurodivergent-first UI."
         path="/lab"
+        jsonLd={breadcrumb}
       />
 
       <div className="shell py-24 md:py-32">

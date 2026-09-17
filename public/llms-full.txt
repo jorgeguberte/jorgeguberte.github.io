@@ -1,0 +1,124 @@
+# Jorge Guberte — Full Architecture, Systems & Research Reference
+
+Personal site: https://jorgeguberte.com
+Identity: Jorge Guberte · Principal AI Systems Architect · Co-Founder & CTO Hub Esfera
+Location: São Paulo, Brazil · Remote-friendly
+Contact: hey@jorgeguberte.com · https://github.com/jorgeguberte · https://www.linkedin.com/in/jorgeguberte · ORCID: https://orcid.org/0009-0001-1198-1065
+
+---
+
+## 1. Professional Positioning & Thesis
+
+"AI systems should retain context, adapt over time, and remain useful beyond a single interaction."
+
+Twelve years building scalable platforms — now focused on applied AI systems architecture: agent orchestration, cognitive memory, RAG pipelines, and generative UI. Foundation models taken out of the chat box and into persistent, autonomous products that run in production.
+
+### Verifiable Proof Metrics
+- 12+ Years shipping software: distributed delivery platforms, cloud data pipelines, enterprise integrations.
+- Production B2G AI platform live: Strata serves municipal profiles in Brazil including Porto Alegre/RS.
+- 2.8M ops/s State-fork allocation: multiverse-js benchmarked at 430ns per fork; LWW merge at 44.9K ops/s inside 60fps frame budget.
+- +50pp Typed memory vs flat retrieval: Blind validation (N=200, p < 10⁻⁷) under EPCG Memory Access Model; external AMA-Bench pilots at 72.5% vs BM25 70.0% and LongContext 50.0%.
+
+---
+
+## 2. Production Systems & Open Source
+
+### Strata (Hub Esfera · Production B2G)
+- URL: https://jorgeguberte.com/systems/strata
+- Status: Live in production serving Brazilian city profiles (including Porto Alegre/RS).
+- Architecture:
+  - Multi-source public-data ingestion (BigQuery, PNCP, FNDE, INEP) transformed via data-flywheel pipelines into Parquet snapshots and agent-optimized Markdown.
+  - Embedded DuckDB analytical layer for ultra-low-latency in-memory SQL execution.
+  - Deterministic LangGraph agent with skill-based reasoning and sandboxed read-only tools.
+  - Full observability via LangSmith across education, procurement, and budget domains.
+  - Multi-tenant enterprise deployment on Cloud Run with Cloud SQL and Clerk RBAC.
+
+### Multiverse (multiverse-js · Open Source)
+- URL: https://jorgeguberte.com/systems/multiverse
+- GitHub: https://github.com/jorgeguberte/multiverse
+- Package: npm install multiverse
+- License: MIT
+- Status: Open source · benchmarked.
+- Architecture:
+  - Solves the Single-Timeline State Paradox in modern UI and multi-agent workflows.
+  - Git-style branching semantics for synchronous state: fork application state, explore alternate timelines, merge what works.
+  - Proxy lazy-evaluation with a CRDT-lite patch engine.
+  - Benchmarks: Fork allocation at 2.8M ops/s (430ns) — 118,000x mutation cost ratio; Last-Write-Wins (LWW) merge optimized to 44.9K ops/s (26µs) inside 60fps window.
+
+### Pixie (Embodied AI · Real-time Voice)
+- URL: https://jorgeguberte.com/systems/pixie
+- Status: Active R&D / Flagship embodied system.
+- Architecture:
+  - Real-time bidirectional voice streaming over Gemini Live API WebSockets (16kHz / 24kHz PCM).
+  - Physics-based locomotion with Rapier.
+  - Synchronous spatial tool execution in 3D WebGL / Three.js environment.
+  - Audio-amplitude-driven lip-sync without precomputed visemes.
+  - Observer mode building pointer heatmaps for context-aware spatial commentary.
+  - Neurodivergent-first interaction constraints: predictability, calm pacing, sensory gating.
+
+### Ayvu-Talian (Low-Resource NLP · Open Source)
+- URL: https://github.com/jorgeguberte/ayvu-talian-base
+- Status: Open source transformer from scratch.
+- Architecture:
+  - 5.39M-parameter decoder-only transformer trained from scratch for Talian (Venetian minority language spoken in southern Brazil).
+  - Complete pipeline owned end-to-end: corpus curation, custom tokenizer accommodating Portuguese code-switching and non-standardized orthography, PyTorch training, and inference.
+
+---
+
+## 3. The Lab (Applied Research Programs)
+
+### EPCG (Emergent Personal Cognitive Graphs)
+- URL: https://jorgeguberte.com/lab/epcg
+- Status: Empirically validated memory access model · external pilots on AMA-Bench.
+- Key Scientific Contribution:
+  - Falsified flat top-k vector retrieval (`retrieve(query) -> top-k`) as an adequate interface for agent memory.
+  - Memory Access Model v0: Decomposes memory access into four typed operations:
+    1. EpisodicAt(turn): discrete episodic event lookup.
+    2. StateAt(entity, dimension, T): point-in-time state validity.
+    3. StateHistory(entity, dimension, range): temporal state transitions.
+    4. SemanticRetrieve(query): open discovery.
+  - Blind validation: N=200 tasks across two domains; flat retrieval scored 19.5% vs 70.0% for typed access (+50.5 percentage points, p < 10⁻⁷) without LLM confounding.
+  - External AMA-Bench pilots: EPCG-T achieved 72.5% vs BM25 70.0% and LongContext 50.0%.
+  - Mathematical formalization: Category-theoretic composition (categorical layers, functorial bridges, monadic orchestration core).
+
+### LoomDB (Temporal Memory Engine)
+- URL: https://jorgeguberte.com/lab/loomdb
+- Status: Active research · Rust core compiled to WASM · paper in draft.
+- Core Architecture:
+  - Models memory as a nonlinear dissipative dynamical system over a mutable directed graph.
+  - Asymptotic saturation: a_v(t+1) = a_v(t) + (1 - a_v(t)) * alpha; energy remains mathematically bounded under infinite stimulation cycles.
+  - Lazy decay modulated by consolidated stability: reinforced traces resist forgetting; neglected memories fade sublinearly.
+  - Sub-stochastic propagation: outgoing transition weights sum to <= 1.0, guaranteeing global bounded signal.
+  - Evolutionary policy optimization: routing between semantic similarity and graph activation energy is determined by an evolvable program over query features.
+
+### Y2K Sensory (Cognitive Accessibility & Visual Maximalism)
+- URL: https://jorgeguberte.com/lab/y2k-sensory
+- Interactive Lab: https://jorgeguberte.com/labs/y2k-sensory/
+- Status: Public experiment.
+- Architecture:
+  - Dual-layer CSS architecture separating decorative animation from functional UI elements.
+  - AttentionGuard presets tailoring contrast, motion density, and sensory triggers for ADHD and autistic users.
+
+---
+
+## 4. Experience & Background
+
+### Hub Esfera (Sep 2024 — Present) · Co-Founder & Principal AI Architect
+Architected Strata B2G municipal platform. Embedded DuckDB layer, LangGraph deterministic orchestration, LangSmith telemetry, Cloud Run deployment.
+
+### Independent AI Systems Research (Jan 2023 — Present) · Lead Applied AI Architect
+R&D across EPCG, LoomDB, multiverse-js, Prosodia audio-intelligence pipeline (BullMQ, Modal GPU, Cloudflare R2), and Ayvu-Talian.
+
+### Bosch Digital (2023 · Contract) · Senior Developer Analyst
+Data integration and infrastructure modernization across complex SAP ecosystems and distributed backend services. Presented technical impact strategies directly to German headquarters.
+
+### Engineering Foundations (2006 — 2015)
+- SeePix (2014–15): Highly distributed digital signage delivery with edge isolation (PHP/Symfony).
+- Martin Luz (2012–13): Tech Lead on high-traffic seasonal platforms for Walmart and Sony; internal Agile/CI-CD adoption.
+- EgypTeam (2008–11): Cloud-native Python on Google App Engine; data pipelines for early RL environments.
+- Interactus (2006–07): Interactive multimedia for global campaigns, including Nike's Joga3/JogaBonito.
+
+### Education & Specialization
+- University of São Paulo (USP) (2026): Extension in Complex Networks with Python and AI/LLM.
+- UC San Diego / Coursera (2023): Data Structures & Algorithms Specialization.
+- Colégio Marcel Proust (2002): Technical Degree in Data Processing.

@@ -2,18 +2,34 @@ import Link from "next/link";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { labPrograms, LabProgram } from "../../data/site-content";
 import { SeoHead } from "../../components/SeoHead";
+import { getBreadcrumbSchema, getResearchProgramSchema } from "../../data/schema";
 
 interface ProgramPageProps {
   program: LabProgram;
 }
 
 export default function ProgramPage({ program }: ProgramPageProps) {
+  const breadcrumb = getBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Lab", path: "/lab" },
+    { name: program.name, path: `/lab/${program.slug}` },
+  ]);
+
+  const researchSchema = getResearchProgramSchema({
+    name: program.name,
+    description: program.description,
+    question: program.question,
+    path: `/lab/${program.slug}`,
+    themes: program.themes,
+  });
+
   return (
     <>
       <SeoHead
-        title={`${program.name} — The Lab — Jorge Guberte`}
+        title={`${program.name} — AI Research Lab — Jorge Guberte`}
         description={`${program.oneLiner} ${program.question}`}
         path={`/lab/${program.slug}`}
+        jsonLd={[researchSchema, breadcrumb]}
       />
 
       <article className="shell py-20 md:py-28">
