@@ -45,6 +45,13 @@ const footerGroups = [
     ],
   },
   {
+    label: "Experiments",
+    links: [
+      { label: "All experiments", href: "/labs/" },
+      { label: "Afterlight", href: "/afterlight" },
+    ],
+  },
+  {
     label: "Systems",
     links: [
       { label: "Pixie", href: "/systems/pixie" },
@@ -72,7 +79,7 @@ export function Footer() {
           </a>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
           {footerGroups.map((group) => (
             <div key={group.label}>
               <p className="kicker mb-5">{group.label}</p>

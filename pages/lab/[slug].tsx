@@ -11,7 +11,7 @@ interface ProgramPageProps {
 export default function ProgramPage({ program }: ProgramPageProps) {
   const breadcrumb = getBreadcrumbSchema([
     { name: "Home", path: "/" },
-    { name: "Lab", path: "/lab" },
+    { name: "Research", path: "/lab" },
     { name: program.name, path: `/lab/${program.slug}` },
   ]);
 
@@ -35,7 +35,7 @@ export default function ProgramPage({ program }: ProgramPageProps) {
       <article className="shell py-20 md:py-28">
         <nav className="mb-12">
           <Link href="/lab" className="link-quiet">
-            ← The Lab
+            ← Research
           </Link>
         </nav>
 

@@ -23,6 +23,9 @@ function generateSitemap() {
     { loc: "/labs/", priority: "0.7", changefreq: "monthly", lastmod: today },
     { loc: "/labs/y2k-sensory/", priority: "0.7", changefreq: "monthly", lastmod: today },
     { loc: "/labs/interaction/", priority: "0.7", changefreq: "monthly", lastmod: today },
+    { loc: "/afterlight", priority: "0.7", changefreq: "monthly", lastmod: today },
+    { loc: "/bits-overload", priority: "0.7", changefreq: "monthly", lastmod: today },
+    { loc: "/still", priority: "0.7", changefreq: "monthly", lastmod: today },
   ];
 
   // Read Velite posts if available

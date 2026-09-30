@@ -6,12 +6,26 @@
     <title>Labs — Jorge Guberte</title>
     <meta
       name="description"
-      content="Twelve hands-on experiments in sound, systems, and human–computer interaction. A playground by Jorge Guberte."
+      content="Fifteen hands-on experiments in sound, systems, and human–computer interaction. A playground by Jorge Guberte."
     />
     <link rel="canonical" href="https://jorgeguberte.com/labs/" />
     <link rel="icon" href="/favicon.svg" />
     <link rel="stylesheet" href="./styles.css" />
     <script src="./app.js" defer></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-07X8RKWCZK"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'analytics_storage': 'granted'
+      });
+      gtag('js', new Date());
+      gtag('config', 'G-07X8RKWCZK');
+    </script>
   </head>
   <body>
     <a class="skip" href="#experiments">Skip to experiments</a>
@@ -19,7 +33,7 @@
       <header class="topbar">
         <a class="wordmark" href="/">JG<span> / LABS</span></a>
         <nav aria-label="Main navigation">
-          <a href="/">Home ↗</a
+          <a href="/">Home ↗</a><a href="/lab/">Research ↗</a
           ><a href="https://github.com/jorgeguberte">GitHub ↗</a>
         </nav>
       </header>
@@ -50,9 +64,7 @@
           </div>
         </section>
         <div class="field-notes">
-          <span>12 working experiments</span
-          ><span>Sound · systems · interaction</span
-          ><span>Open a sketch. Pull a thread.</span>
+          <span>15 working experiments</span><span>Sound · systems · interaction</span><span>Open a sketch. Pull a thread.</span>
         </div>
         <section id="experiments" aria-labelledby="collection-title">
           <div class="section-title">
@@ -84,10 +96,57 @@
             /></label>
           </div>
           <p id="results" class="results" aria-live="polite">
-            12 experiments · ready to explore
+            15 experiments · ready to explore
           </p>
           <div class="card-grid">
             <a
+              class="experiment"
+              href="/afterlight"
+              data-category="Systems + motion"
+              data-title="afterlight an imagined evening held open blue hour twilight sky sunset colors gradient hand-tuned atmospheric study"
+              ><div class="art art-orb" aria-hidden="true">
+                <span class="art-mark">●</span><span class="art-index">EXP. 15</span><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Systems + motion</p>
+                <h3>Afterlight</h3>
+                <p>An imagined evening, held open. Move through the colors of blue hour and watch the sky leave in layers.</p>
+                <span class="hint">Dial the sky · choose a chapter <span aria-hidden="true">→</span></span>
+              </div></a
+            >
+            <a
+              class="experiment"
+              href="/still"
+              data-category="Systems + motion"
+              data-title="still focus room real task queue timer breaks notes local history export csv react bits"
+              ><div class="art art-layers" aria-hidden="true">
+                <span class="art-mark">✳</span
+                ><span class="art-index">EXP. 14</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Systems + motion</p>
+                <h3>STILL / Focus Room</h3>
+                <p>Plan one task, work in timed blocks, take breaks, and keep a private record of progress.</p>
+                <span class="hint">Plan · focus · reflect <span aria-hidden="true">→</span></span>
+              </div></a
+            ><a
+              class="experiment"
+              href="/bits-overload"
+              data-category="Systems + motion"
+              data-title="bits overload react bits maximalist interactive playground animated typography color frequency sparks and responsive cards"
+              ><div class="art art-orbits" aria-hidden="true">
+                <span class="art-mark">✳</span
+                ><span class="art-index">EXP. 13</span
+                ><span class="art-open">↗</span>
+              </div>
+              <div class="card-body">
+                <p class="meta">Systems + motion</p>
+                <h3>Bits Overload</h3>
+                <p>A maximalist playground made from ten React Bits effects. Change the frequency, intensity, and motion.</p>
+                <span class="hint">Move · hover · click <span aria-hidden="true">→</span></span>
+              </div></a
+            ><a
               class="experiment"
               href="./y2k-sensory/minidisc-album.html"
               data-category="Audio + objects"

@@ -22,7 +22,8 @@ export const profile = {
 export const navLinks = [
   { label: "Work", href: "/#work" },
   { label: "Experience", href: "/#experience" },
-  { label: "Lab", href: "/lab" },
+  { label: "Research", href: "/lab" },
+  { label: "Experiments", href: "/labs/" },
   { label: "Systems", href: "/systems" },
   { label: "Writing", href: "/writing" },
   { label: "About", href: "/about" },
@@ -323,7 +324,7 @@ export const labPrograms: LabProgram[] = [
       "Balancing visual identity with cognitive load across diverse attention profiles.",
     ],
     stack: "HTML/CSS \u00b7 Three.js",
-    link: { label: "Open Lab", href: "/labs/y2k-sensory/" },
+    link: { label: "Open experiment", href: "/labs/y2k-sensory/" },
   },
 ];
 

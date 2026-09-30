@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brochacho MiniDisc Virtual Player — ALL-ACCESS</title>
+  <title>Holographic Chrome — MiniDisc Player | Labs</title>
   <link rel="stylesheet" href="../tokens/colors.css">
   <link rel="stylesheet" href="../tokens/typography.css">
   <link rel="stylesheet" href="../tokens/motion.css">
@@ -285,6 +285,314 @@
       height: 100%;
       image-rendering: pixelated;
     }
+
+    /* === HOLOGRAPHIC CHROME POLISH === */
+    body {
+      background:
+        radial-gradient(ellipse at 18% 16%, rgba(0, 229, 255, 0.08), transparent 34rem),
+        radial-gradient(ellipse at 84% 70%, rgba(255, 0, 127, 0.07), transparent 34rem),
+        var(--void-pure);
+    }
+
+    .functional-layer {
+      max-width: 1200px;
+      padding: clamp(1rem, 2.5vw, 2rem) clamp(1rem, 3vw, 2rem);
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+    }
+
+    .header {
+      align-items: center;
+      padding: 1rem 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      background: linear-gradient(115deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015));
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22), inset 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .header h1 {
+      font-size: clamp(1rem, 2.4vw, 1.4rem);
+      letter-spacing: 0.12em;
+      line-height: 1.2;
+      background: linear-gradient(100deg, var(--acid-300), #f5ffff 55%, var(--blue-300));
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .header-copy { display: grid; gap: 0.35rem; }
+
+    .page-kicker, .stage-code, .stage-caption, .album-kicker, .section-index {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .page-kicker { color: var(--acid-300); }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.7rem 0.9rem;
+      border-color: rgba(255, 255, 255, 0.13);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .back-btn:hover { background: rgba(127, 255, 0, 0.08); }
+
+    .player-grid {
+      grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+      align-items: stretch;
+      gap: clamp(1rem, 2.4vw, 1.75rem);
+    }
+
+    .deck-panel, .panel-box {
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      background: linear-gradient(145deg, rgba(22, 27, 31, 0.93), rgba(10, 12, 15, 0.91));
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3), inset 0 1px rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(18px);
+    }
+
+    .deck-panel {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      justify-content: flex-start;
+      gap: 1.35rem;
+      padding: clamp(1rem, 2.3vw, 1.65rem);
+      border-radius: 26px;
+    }
+
+    .deck-panel::before {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 27%, rgba(0, 229, 255, 0.11), transparent 52%);
+      content: "";
+      pointer-events: none;
+    }
+
+    .disc-stage {
+      position: relative;
+      display: grid;
+      width: 100%;
+      min-height: 330px;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 21px;
+      background:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px),
+        radial-gradient(circle at 50% 48%, rgba(0, 229, 255, 0.14), rgba(15, 19, 23, 0.32) 44%, rgba(4, 6, 8, 0.86) 78%);
+      background-size: 30px 30px, 30px 30px, auto;
+      box-shadow: inset 0 0 65px rgba(0, 0, 0, 0.45);
+    }
+
+    .disc-stage::after {
+      position: absolute;
+      inset: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      content: "";
+      pointer-events: none;
+    }
+
+    #miniDiscContainer {
+      z-index: 1;
+      width: min(100%, 360px) !important;
+      height: 330px !important;
+      cursor: grab;
+      touch-action: pan-y;
+    }
+
+    #miniDiscContainer:active { cursor: grabbing; }
+    #miniDiscContainer canvas { display: block; }
+
+    .stage-code, .stage-caption {
+      position: absolute;
+      z-index: 2;
+      color: rgba(225, 247, 250, 0.72);
+      font-size: 0.58rem;
+      pointer-events: none;
+    }
+
+    .stage-code { top: 1rem; left: 1rem; }
+    .stage-caption { right: 1rem; bottom: 0.9rem; color: var(--acid-300); }
+
+    .album-meta { width: 100%; }
+
+    .album-kicker {
+      display: block;
+      margin-bottom: 0.55rem;
+      color: var(--acid-300);
+      font-size: 0.6rem;
+    }
+
+    .album-meta h2 {
+      font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+      letter-spacing: 0.025em;
+      line-height: 1.15;
+    }
+
+    .album-meta p {
+      margin-top: 0.4rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      letter-spacing: 0.09em;
+    }
+
+    .controls { gap: 0.9rem; margin-top: 0.1rem; }
+
+    .btn-media {
+      width: 48px;
+      height: 48px;
+      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.045);
+      font-size: 1rem;
+    }
+
+    .btn-media.play-pause {
+      width: 60px;
+      height: 60px;
+      color: #080b08;
+      box-shadow: 0 0 28px rgba(127, 255, 0, 0.22), inset 0 1px rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-media:focus-visible, .back-btn:focus-visible, .track-select:focus-visible {
+      outline: 2px solid var(--acid-300);
+      outline-offset: 3px;
+    }
+
+    .share-widget {
+      width: 100%;
+      margin-top: 0.1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.09);
+      gap: 1rem;
+      text-align: left;
+    }
+
+    .qr-box { flex: 0 0 68px; width: 68px; height: 68px; border-color: rgba(255,255,255,0.55); }
+
+    .share-widget h4 {
+      margin-bottom: 0.25rem;
+      color: var(--blue-300);
+      font-family: var(--font-mono);
+      letter-spacing: 0.08em;
+    }
+
+    .share-widget p { max-width: 24rem; line-height: 1.55; }
+
+    .control-panel { gap: 1rem; }
+
+    .panel-box {
+      padding: clamp(1rem, 2.2vw, 1.4rem);
+      border-radius: 22px;
+    }
+
+    .panel-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .panel-heading h3 {
+      color: var(--text-primary);
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .section-index { color: var(--text-muted); font-size: 0.58rem; white-space: nowrap; }
+
+    .track-list { gap: 0.5rem; }
+    .track-item { padding: 0; border: 0; background: none; }
+    .track-item:hover { border-color: transparent; background: none; }
+
+    .track-select {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 1rem;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.025);
+      color: var(--text-primary);
+      text-align: left;
+      cursor: pointer;
+      transition: var(--transition-base);
+    }
+
+    .track-select:hover { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.055); }
+    .track-item.active .track-select {
+      border-color: rgba(127, 255, 0, 0.42);
+      background: linear-gradient(105deg, rgba(127, 255, 0, 0.1), rgba(127, 255, 0, 0.025));
+      box-shadow: inset 3px 0 var(--acid-500);
+    }
+
+    .track-copy { display: flex; min-width: 0; align-items: center; gap: 0.9rem; }
+    .track-num { margin: 0; color: var(--acid-300); }
+    .track-title { overflow: hidden; font-size: 0.9rem; text-overflow: ellipsis; white-space: nowrap; }
+    .track-duration { flex: 0 0 auto; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.65rem; }
+
+    .lyrics-panel { flex: 1; display: flex; flex-direction: column; min-height: 250px; }
+
+    .lyrics-container {
+      flex: 1;
+      min-height: 220px;
+      height: auto;
+      padding: 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 15px;
+      background:
+        radial-gradient(ellipse at 100% 0%, rgba(0, 229, 255, 0.06), transparent 55%),
+        rgba(3, 5, 7, 0.62);
+      scrollbar-color: rgba(127,255,0,0.35) transparent;
+    }
+
+    .lyric-line { color: rgba(222, 230, 233, 0.46); line-height: 1.85; }
+    .lyric-line.active { color: var(--text-primary); }
+    .lyric-word.highlight { color: var(--acid-300); text-shadow: 0 0 14px rgba(127, 255, 0, 0.5); }
+
+    @media (max-width: 800px) {
+      .player-grid { grid-template-columns: minmax(0, 1fr); }
+      .deck-panel { max-width: 620px; width: 100%; margin: 0 auto; }
+      .control-panel { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; }
+      .lyrics-panel { min-height: 0; }
+    }
+
+    @media (max-width: 560px) {
+      .functional-layer { padding-inline: 0.85rem; }
+      .header { padding: 0.9rem; border-radius: 16px; }
+      .header h1 { font-size: 0.9rem; letter-spacing: 0.08em; }
+      .page-kicker { font-size: 0.55rem; }
+      .back-btn { padding: 0.6rem 0.7rem; font-size: 0.58rem; }
+      .disc-stage { min-height: 280px; }
+      #miniDiscContainer { height: 280px !important; }
+      .deck-panel { padding: 0.85rem; border-radius: 20px; }
+      .control-panel { grid-template-columns: 1fr; }
+      .panel-box { border-radius: 18px; }
+      .lyrics-panel { min-height: 270px; }
+      .lyrics-container { min-height: 210px; }
+      .share-widget { align-items: center; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+    }
   </style>
   
   <!-- Loading Three.js -->
@@ -302,24 +610,32 @@
 
   <div class="functional-layer">
     <header class="header">
-      <h1>💽 MiniDisc Virtual // Brochacho Records</h1>
-      <a href="../index.html" class="back-btn">← Sair</a>
+      <div class="header-copy">
+        <p class="page-kicker">LABS / SOUND OBJECT 01</p>
+        <h1>MINIDISC PLAYER // BROCHACHO RECORDS</h1>
+      </div>
+      <a href="../index.html" class="back-btn">← VOLTAR AOS LABS</a>
     </header>
 
     <main class="player-grid">
       <!-- 3D MiniDisc Deck -->
-      <section class="deck-panel">
-        <div id="miniDiscContainer" style="width: 250px; height: 250px; position: relative; cursor: grab;"></div>
+      <section class="deck-panel" aria-label="MiniDisc holográfico e controles">
+        <div class="disc-stage">
+          <span class="stage-code" aria-hidden="true">MD-74 / HOLO EDITION</span>
+          <div id="miniDiscContainer" aria-label="MiniDisc 3D interativo. Arraste para girar."></div>
+          <span class="stage-caption" aria-hidden="true">3D / ARRASTE PARA GIRAR</span>
+        </div>
         
         <div class="album-meta">
+          <span class="album-kicker">HOLOGRAPHIC CHROME (2026)</span>
           <h2 id="currentTrackTitle">Carregando Faixa...</h2>
-          <p id="currentAlbumArtist">Brochacho Records — Edição Limitada</p>
+          <p id="currentAlbumArtist">JAIRO // EXTERNAL BRAIN SYSTEMS</p>
         </div>
 
         <div class="controls">
-          <button class="btn-media" id="btnPrev">⏮</button>
-          <button class="btn-media play-pause" id="btnPlayPause">▶</button>
-          <button class="btn-media" id="btnNext">⏭</button>
+          <button class="btn-media" id="btnPrev" type="button" aria-label="Faixa anterior" title="Faixa anterior">⏮</button>
+          <button class="btn-media play-pause" id="btnPlayPause" type="button" aria-label="Reproduzir" title="Reproduzir">▶</button>
+          <button class="btn-media" id="btnNext" type="button" aria-label="Próxima faixa" title="Próxima faixa">⏭</button>
         </div>
 
         <!-- Share & QR -->
@@ -338,14 +654,20 @@
       <!-- Track List & Lyrics Panel -->
       <section class="control-panel">
         <div class="panel-box">
-          <h3 style="margin-bottom: 1rem; font-family: var(--font-display); font-size: var(--text-md); border-bottom: 1px dashed var(--border-subtle); padding-bottom: 0.5rem; color: var(--blue-300);">Alinhamento de Faixas</h3>
+          <div class="panel-heading">
+            <h3>Alinhamento de faixas</h3>
+            <span class="section-index">01 / TRACKLIST</span>
+          </div>
           <ul class="track-list" id="tracklistContainer">
             <!-- Rendered dynamically -->
           </ul>
         </div>
 
-        <div class="panel-box" style="flex: 1; display: flex; flex-direction: column;">
-          <h3 style="margin-bottom: 1rem; font-family: var(--font-display); font-size: var(--text-md); border-bottom: 1px dashed var(--border-subtle); padding-bottom: 0.5rem; color: var(--acid-500);">Letras Sincronizadas</h3>
+        <div class="panel-box lyrics-panel">
+          <div class="panel-heading">
+            <h3>Letras sincronizadas</h3>
+            <span class="section-index">02 / LIVE LYRICS</span>
+          </div>
           <div class="lyrics-container" id="lyricsBox">
             <!-- Lyrics rendered dynamically -->
           </div>
@@ -419,12 +741,14 @@
     // 2. INITIALIZE TRACKLIST UI
     function renderTracklist() {
       tracklistContainer.innerHTML = album.tracks.map((track, idx) => `
-        <li class="track-item ${idx === currentTrackIndex ? 'active' : ''}" onclick="selectTrack(${idx})">
-          <div>
-            <span class="track-num">${String(idx + 1).padStart(2, '0')}</span>
-            <strong>${track.title}</strong>
-          </div>
-          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">${track.duration}</span>
+        <li class="track-item ${idx === currentTrackIndex ? 'active' : ''}">
+          <button class="track-select" type="button" onclick="selectTrack(${idx})" aria-current="${idx === currentTrackIndex ? 'true' : 'false'}" aria-label="Selecionar faixa ${idx + 1}: ${track.title}">
+            <span class="track-copy">
+              <span class="track-num">${String(idx + 1).padStart(2, '0')}</span>
+              <strong class="track-title">${track.title}</strong>
+            </span>
+            <span class="track-duration">${track.duration}</span>
+          </button>
         </li>
       `).join('');
     }
@@ -518,11 +842,15 @@
       isPlaying = !isPlaying;
       if (isPlaying) {
         btnPlayPause.textContent = "⏸";
+        btnPlayPause.setAttribute('aria-label', 'Pausar');
+        btnPlayPause.setAttribute('title', 'Pausar');
         audio.play().then(() => {
           syncLyrics();
         });
       } else {
         btnPlayPause.textContent = "▶";
+        btnPlayPause.setAttribute('aria-label', 'Reproduzir');
+        btnPlayPause.setAttribute('title', 'Reproduzir');
         audio.pause();
         cancelAnimationFrame(lyricsAnimationFrame);
       }

@@ -6,13 +6,13 @@ import { getBreadcrumbSchema } from "../../data/schema";
 export default function LabIndex() {
   const breadcrumb = getBreadcrumbSchema([
     { name: "Home", path: "/" },
-    { name: "Lab", path: "/lab" },
+    { name: "Research", path: "/lab" },
   ]);
 
   return (
     <>
       <SeoHead
-        title="The Lab — Jorge Guberte | Applied AI Research & Memory Architectures"
+        title="Research — Jorge Guberte | Applied AI & Memory Architectures"
         description="Applied research programs in persistent agent memory (EPCG, LoomDB), cognitive architectures, temporal retrieval, and neurodivergent-first UI."
         path="/lab"
         jsonLd={breadcrumb}
@@ -21,7 +21,7 @@ export default function LabIndex() {
       <div className="shell py-24 md:py-32">
         <div className="mb-10 flex items-center gap-6">
           <span className="h-px w-12 bg-brass-500/70" />
-          <p className="kicker">The Lab</p>
+          <p className="kicker">Research</p>
         </div>
         <h1 className="display max-w-4xl text-5xl md:text-6xl">
           Research <em className="font-light text-brass-300">programs</em>, not
@@ -67,7 +67,12 @@ export default function LabIndex() {
         </div>
 
         <div className="mt-20 border-t border-ink-700 pt-12">
-          <p className="kicker mb-8">Experiments</p>
+          <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+            <p className="kicker">Experiments</p>
+            <Link href="/labs/" className="link-quiet">
+              Browse all experiments →
+            </Link>
+          </div>
           <div className="space-y-px">
             <Link
               href="/labs/y2k-sensory/"

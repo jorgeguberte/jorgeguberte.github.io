@@ -1,985 +1,1270 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PS1 Agent Core Simulator — Labs</title>
-  
-  <!-- Y2K Design Tokens -->
+  <meta name="theme-color" content="#070a0b">
+  <title>PS1 Agent Core — Simulador | Labs</title>
   <link rel="stylesheet" href="../tokens/colors.css">
   <link rel="stylesheet" href="../tokens/typography.css">
   <link rel="stylesheet" href="../tokens/motion.css">
-  
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      color-scheme: dark;
+      --core-alpha: var(--blue-300);
+      --core-beta: var(--acid-300);
+      --core-gamma: var(--pink-300);
+      --line: rgba(227, 244, 235, 0.12);
+      --surface: #0b1011;
+      --surface-raised: #111819;
+      --surface-deep: #070a0b;
+    }
 
+    *, *::before, *::after { box-sizing: border-box; }
+    html { min-width: 320px; scroll-behavior: smooth; }
     body {
-      background: var(--void-pure);
-      color: var(--text-primary);
+      min-width: 320px;
       min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(0, 191, 255, 0.1), transparent 38rem),
+        radial-gradient(ellipse at 100% 74%, rgba(255, 0, 170, 0.055), transparent 32rem),
+        #070a0b;
+      color: var(--text-primary);
       font-family: var(--font-functional);
-      overflow: hidden;
-      position: relative;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
-    /* === CRT TV FRAME CONTAINER === */
-    .viewport-container {
-      width: 100vw;
-      height: 100vh;
+    ::selection { color: #08100b; background: var(--acid-300); }
+    :focus-visible { outline: 2px solid var(--acid-300); outline-offset: 4px; }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; text-underline-offset: 0.2em; }
+
+    .game-shell {
+      width: min(1320px, calc(100% - 3rem));
+      margin: 0 auto;
+      padding: 2rem 0 3rem;
+    }
+
+    .game-heading {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(circle, #15151a 0%, #030305 100%);
-      padding: 1.5rem;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 2rem;
+      padding: 0.5rem 0 1.65rem;
+      border-bottom: 1px solid var(--line);
     }
 
-    .crt-monitor {
-      width: 100%;
-      max-width: 960px;
-      height: 100%;
-      max-height: 720px;
-      aspect-ratio: 4 / 3;
-      border: 12px solid #282830;
-      border-radius: 4px;
-      background: #000000;
+    .heading-copy { max-width: 50rem; }
+
+    .game-heading h1 {
+      margin: 0;
+      color: #f1f5ef;
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 5.2vw, 4.65rem);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 0.98;
+    }
+
+    .game-heading h1 span { color: var(--acid-300); }
+
+    .game-heading p {
+      max-width: 62ch;
+      margin: 0.85rem 0 0;
+      color: #b8c2bd;
+      font-size: clamp(0.88rem, 1.25vw, 1rem);
+    }
+
+    .edition-stamp {
+      display: grid;
+      min-width: 190px;
+      gap: 0.25rem;
+      justify-items: end;
+      padding-bottom: 0.2rem;
+      color: #b3c1bc;
+      font-size: 0.66rem;
+      letter-spacing: 0.09em;
+      text-align: right;
+      text-transform: uppercase;
+    }
+
+    .edition-stamp strong {
+      color: var(--blue-300);
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+    }
+
+    .game-board {
       position: relative;
-      box-shadow: 15px 15px 0px var(--void-pure), inset 0 0 40px rgba(0,0,0,0.9);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.72fr);
+      align-items: stretch;
+      gap: 1rem;
+      padding-top: 1rem;
     }
 
-    /* CRT bezel shading */
-    .crt-monitor::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.95);
-      pointer-events: none;
-      z-index: 50;
-    }
-
-    /* === LAYER 0: CRT FILTER EFFECTS === */
-    .crt-filters {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 40;
-      opacity: 0.15;
-    }
-
-    .scanlines {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        to bottom,
-        rgba(255, 255, 255, 0) 50%,
-        rgba(0, 0, 0, 0.4) 50%
-      );
-      background-size: 100% 6px;
-    }
-
-    .phosphor-glow {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at center, rgba(0, 255, 102, 0.05) 0%, transparent 80%);
-    }
-
-    /* === BOOT BIOS SCREEN === */
     .boot-overlay {
-      position: absolute;
+      position: fixed;
+      z-index: 9999;
       inset: 0;
-      background: #000000;
-      z-index: 999;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-
-    .boot-logo-container {
+      padding: 2rem;
+      background: #000;
       text-align: center;
-      cursor: pointer;
+      transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), visibility 1.2s;
     }
 
-    .boot-logo-gold {
-      font-size: 48px;
-      font-family: var(--font-chaos);
+    .boot-overlay.is-hiding { opacity: 0; visibility: hidden; pointer-events: none; }
+    .boot-overlay[hidden] { display: none; }
+    .boot-content { width: min(100%, 34rem); }
+    .boot-logo {
       color: #ffcc00;
-      text-shadow: 0px 4px 0px #806600, 0 0 20px rgba(255, 204, 0, 0.3);
-      letter-spacing: 0.1em;
-      margin-bottom: 0.5rem;
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 8vw, 5rem);
+      font-weight: 800;
+      letter-spacing: 0.09em;
+      line-height: 1;
+      text-shadow: 0 4px 0 #806600, 0 0 28px rgba(255, 204, 0, 0.34);
       animation: logo-drift 6s ease-in-out infinite alternate;
     }
 
-    @keyframes logo-drift {
-      from { transform: translateY(0) rotate(-1deg); }
-      to { transform: translateY(-10px) rotate(1deg); }
+    @keyframes logo-drift { to { transform: translateY(-8px) rotate(1deg); } }
+    .boot-version { margin-top: 0.7rem; color: var(--pink-300); font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.26em; }
+    .boot-copy { margin: 1.6rem 0 0; color: #aab8b0; font-family: var(--font-mono); font-size: 0.64rem; line-height: 1.9; text-transform: uppercase; }
+    .boot-button { min-height: 46px; margin-top: 1.6rem; padding: 0.65rem 1.4rem; border: 1px solid #ffcc00; border-radius: 6px; background: #ffcc00; color: #101006; cursor: pointer; font-family: var(--font-display); font-size: 0.76rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; transition: transform 140ms ease, background 140ms ease; }
+    .boot-button:hover { transform: translateY(-2px); background: #ffe266; }
+    .boot-overlay.is-hiding .boot-button { pointer-events: none; }
+
+    .arena-panel, .mission-panel {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.34);
     }
 
-    .boot-text-console {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--chrome-300);
-      margin-top: 1.5rem;
-      line-height: 1.8;
-      text-transform: uppercase;
-    }
+    .arena-panel { display: flex; flex-direction: column; }
 
-    .btn-boot {
-      background: #ffcc00;
-      border: 3px solid #ffffff;
-      color: #000000;
-      font-family: var(--font-functional);
-      font-weight: bold;
-      padding: 0.8rem 2rem;
-      cursor: pointer;
-      text-transform: uppercase;
-      box-shadow: 4px 4px 0px #000000;
-      margin-top: 2rem;
-      transition: all 0.15s ease;
-    }
-
-    .btn-boot:hover {
-      background: #ffffff;
-      box-shadow: 2px 2px 0px #000000;
-      transform: translate(2px, 2px);
-    }
-
-    /* === SCREEN HUD AND CONTROLS === */
-    .hud-layer {
-      position: absolute;
-      inset: 0;
-      z-index: 30;
-      pointer-events: none;
+    .arena-toolbar {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 1.5rem;
-      font-family: var(--font-functional);
-    }
-
-    .hud-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      width: 100%;
-    }
-
-    .hud-left {
-      background: rgba(0, 0, 0, 0.8);
-      border: 2px solid var(--chrome-400);
-      padding: 0.75rem;
-      box-shadow: 4px 4px 0 #000000;
-      pointer-events: auto;
-    }
-
-    .hud-left h2 {
-      font-size: 14px;
-      color: var(--blue-300);
-      border-bottom: 1px dashed var(--chrome-400);
-      padding-bottom: 0.25rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .hud-left p {
-      font-size: 10px;
-      color: var(--chrome-200);
-      margin-bottom: 0.2rem;
-    }
-
-    .hud-right {
-      background: rgba(0, 0, 0, 0.8);
-      border: 2px solid var(--chrome-400);
-      padding: 0.75rem;
-      box-shadow: 4px 4px 0 #000000;
-      text-align: right;
-    }
-
-    .hud-right div {
-      font-size: 10px;
-      color: var(--pink-300);
-      margin-bottom: 0.25rem;
-    }
-
-    .hud-bottom {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 1rem;
-      align-items: flex-end;
-      width: 100%;
-    }
-
-    .console-box {
-      background: rgba(0, 0, 0, 0.85);
-      border: 2px solid var(--chrome-400);
-      padding: 0.75rem;
-      box-shadow: 4px 4px 0 #000000;
-      pointer-events: auto;
-    }
-
-    .console-title {
-      font-size: 10px;
-      color: var(--acid-300);
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-      font-weight: bold;
-      border-bottom: 1px dashed var(--chrome-400);
-      padding-bottom: 0.2rem;
-    }
-
-    .console-logs {
-      height: 80px;
-      overflow-y: auto;
-      font-size: 9px;
-      line-height: 1.5;
-      color: var(--chrome-300);
-      margin-bottom: 0.5rem;
-    }
-
-    .console-input-row {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .console-input-row button {
-      background: transparent;
-      border: 1px solid var(--chrome-300);
-      color: var(--text-primary);
-      font-family: var(--font-functional);
-      font-size: 9px;
-      padding: 0.35rem 0.6rem;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: all 0.15s ease;
-    }
-
-    .console-input-row button:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: rgba(0, 255, 102, 0.05);
-    }
-
-    .control-deck {
-      background: rgba(0, 0, 0, 0.85);
-      border: 2px solid var(--chrome-400);
-      padding: 0.75rem;
-      box-shadow: 4px 4px 0 #000000;
-      pointer-events: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .control-deck-row {
-      display: flex;
-      justify-content: space-between;
+      min-height: 48px;
       align-items: center;
-      font-size: 10px;
-    }
-
-    .control-deck-row span {
-      color: var(--text-secondary);
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.55rem 1rem;
+      border-bottom: 1px solid var(--line);
+      background: #0d1314;
+      color: #bbc5c0;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
-    .control-deck-row input[type="range"] {
-      width: 120px;
-      height: 4px;
-      background: var(--chrome-500);
-      outline: none;
-      cursor: pointer;
+    .runtime-state {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      color: #d9e5df;
     }
 
-    .control-deck-row input[type="range"]::-webkit-slider-thumb {
-      width: 10px;
-      height: 14px;
-      background: var(--acid-500);
-      cursor: pointer;
+    .runtime-light {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #707c76;
+      box-shadow: 0 0 0 3px rgba(153, 170, 160, 0.12);
     }
 
-    .back-btn-hud {
+    .runtime-light.is-live { background: var(--acid-500); box-shadow: 0 0 12px rgba(127, 255, 0, 0.65); }
+    .runtime-light.is-error { background: var(--pink-300); box-shadow: 0 0 12px rgba(255, 107, 203, 0.5); }
+
+    .screen-coordinates {
+      overflow: hidden;
+      color: #a9b6b0;
+      font-variant-numeric: tabular-nums;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .sound-button {
+      display: inline-flex;
+      min-width: 40px;
+      min-height: 36px;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.55rem;
+      border: 1px solid transparent;
+      border-radius: 7px;
       background: transparent;
-      border: 2px solid var(--chrome-400);
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      font-family: var(--font-functional);
-      font-size: 9px;
-      padding: 0.35rem 0.8rem;
+      color: #c4d0ca;
       cursor: pointer;
-      text-decoration: none;
-      box-shadow: 3px 3px 0px #000000;
+      font-size: 0.62rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
     }
 
-    .back-btn-hud:hover {
-      border-color: var(--pink-500);
-      color: var(--pink-300);
-      box-shadow: 1px 1px 0px #000000;
-      transform: translate(2px, 2px);
-    }
+    .sound-button:hover { border-color: var(--line); background: #17201e; color: #f0f5ef; }
+    .sound-button svg { width: 16px; height: 16px; }
 
-    /* === THREE.JS CANVAS RENDER TARGET === */
-    #canvas-container {
-      position: absolute;
-      inset: 0;
-      z-index: 10;
+    .arena-stage {
+      position: relative;
       width: 100%;
-      height: 100%;
+      aspect-ratio: 16 / 10;
+      min-height: 320px;
+      max-height: 520px;
+      overflow: hidden;
+      background: #070b0c;
+      isolation: isolate;
     }
 
+    #canvas-container { position: absolute; inset: 0; z-index: 0; }
     #canvas-container canvas {
       display: block;
       width: 100% !important;
       height: 100% !important;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
+      cursor: crosshair;
+    }
+
+    .scanline-surface {
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.24) 50%);
+      background-size: 100% 4px;
+      opacity: 0.23;
+      pointer-events: none;
+    }
+
+    .arena-stage::after {
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 48%, rgba(0, 0, 0, 0.4) 100%);
+      content: "";
+      pointer-events: none;
+    }
+
+    .stage-readout {
+      position: absolute;
+      z-index: 2;
+      inset: auto 1rem 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      color: rgba(218, 237, 227, 0.72);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      pointer-events: none;
+      text-transform: uppercase;
+    }
+
+    .stage-readout strong { color: var(--acid-300); font-weight: 500; }
+
+    .core-selectors {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.55rem;
+      padding: 0.75rem;
+      border-top: 1px solid var(--line);
+      background: #0a0e0f;
+    }
+
+    .core-button {
+      --agent-color: var(--core-alpha);
+      position: relative;
+      display: grid;
+      min-width: 0;
+      min-height: 64px;
+      grid-template-columns: 34px minmax(0, 1fr);
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      background: #101617;
+      text-align: left;
+      cursor: pointer;
+      transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    }
+
+    .core-button[data-agent="ALPHA"] { --agent-color: var(--core-alpha); }
+    .core-button[data-agent="BETA"] { --agent-color: var(--core-beta); }
+    .core-button[data-agent="GAMMA"] { --agent-color: var(--core-gamma); }
+
+    .core-button:hover:not(:disabled) { border-color: color-mix(in srgb, var(--agent-color) 48%, transparent); background: #17201f; transform: translateY(-1px); }
+    .core-button:disabled { cursor: not-allowed; opacity: 0.58; }
+    .core-button.is-selected { border-color: color-mix(in srgb, var(--agent-color) 65%, transparent); background: #17201f; }
+    .core-button.is-selected::after {
+      position: absolute;
+      top: 0.55rem;
+      right: 0.55rem;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--agent-color);
+      box-shadow: 0 0 9px var(--agent-color);
+      content: "";
+    }
+
+    .core-button svg { width: 30px; height: 30px; color: var(--agent-color); }
+    .core-copy { display: grid; min-width: 0; gap: 0.08rem; }
+    .core-name { overflow: hidden; font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; text-overflow: ellipsis; }
+    .core-type { overflow: hidden; color: #aab6b0; font-size: 0.56rem; text-overflow: ellipsis; white-space: nowrap; }
+    .arena-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.7rem 1rem;
+      border-top: 1px solid var(--line);
+      color: #afbbb5;
+      font-size: 0.65rem;
+    }
+
+    .arena-footer p { margin: 0; }
+    .key-hint { color: #d8e1dc; white-space: nowrap; }
+    .key-hint strong { color: var(--acid-300); font-weight: 500; }
+
+    .mission-panel {
+      display: flex;
+      flex-direction: column;
+      padding: clamp(1rem, 2vw, 1.5rem);
+    }
+
+    .mission-head {
+      padding-bottom: 1.05rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .mission-head h2 {
+      margin: 0;
+      color: #f1f5ef;
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 2vw, 1.75rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.12;
+    }
+
+    .mission-head p {
+      margin: 0.55rem 0 0;
+      color: #bac4bf;
+      font-size: 0.76rem;
+      line-height: 1.55;
+    }
+
+    .mission-rule {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.85rem;
+      color: var(--blue-100);
+      font-size: 0.61rem;
+    }
+
+    .mission-rule svg { width: 14px; height: 14px; color: var(--blue-300); }
+
+    .target-section { padding: 1.05rem 0 0.9rem; }
+
+    .target-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.55rem;
+      color: #c1cec8;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .target-heading span:last-child { color: var(--acid-300); font-variant-numeric: tabular-nums; }
+
+    .target-display {
+      --agent-color: #a8a8a8;
+      display: grid;
+      min-height: 112px;
+      grid-template-columns: 64px minmax(0, 1fr);
+      align-items: center;
+      gap: 1rem;
+      padding: 0.85rem 1rem;
+      border: 1px solid rgba(226, 244, 232, 0.14);
+      border-radius: 10px;
+      background:
+        linear-gradient(112deg, color-mix(in srgb, var(--agent-color) 9%, #0c1112), #0b1011 72%);
+      transition: border-color 200ms ease, background-color 200ms ease;
+    }
+
+    .target-display.is-target { border-color: color-mix(in srgb, var(--agent-color) 56%, transparent); }
+    .target-glyph { display: grid; width: 58px; height: 58px; place-items: center; color: var(--agent-color); }
+    .target-glyph svg { width: 52px; height: 52px; }
+    .target-copy { min-width: 0; }
+    .target-copy strong {
+      display: block;
+      overflow: hidden;
+      color: var(--agent-color);
+      font-family: var(--font-display);
+      font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+      letter-spacing: 0.025em;
+      text-overflow: ellipsis;
+    }
+
+    .target-copy p { margin: 0.2rem 0 0; color: #bac4bf; font-size: 0.65rem; line-height: 1.45; }
+
+    .command-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+      padding-top: 0.15rem;
+    }
+
+    .command-button {
+      display: flex;
+      min-width: 0;
+      min-height: 58px;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.6rem 0.7rem;
+      border: 1px solid rgba(227, 244, 235, 0.12);
+      border-radius: 8px;
+      background: #101617;
+      color: #edf4ef;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+    }
+
+    .command-button:last-child { grid-column: 1 / -1; }
+    .command-button:hover { transform: translateY(-1px); background: #17201f; }
+    .command-button:active { transform: translateY(1px); }
+    .command-ping:hover { border-color: color-mix(in srgb, var(--blue-300) 65%, transparent); }
+    .command-overload:hover { border-color: color-mix(in srgb, var(--pink-300) 65%, transparent); }
+    .command-inject:hover { border-color: color-mix(in srgb, var(--acid-300) 65%, transparent); }
+    .command-icon {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      flex: 0 0 30px;
+      place-items: center;
+      border: 1px solid currentColor;
+      border-radius: 7px;
+      color: var(--blue-300);
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .command-overload .command-icon { color: var(--pink-300); }
+    .command-inject .command-icon { color: var(--acid-300); }
+    .command-button strong, .command-button small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .command-button strong { font-family: var(--font-display); font-size: 0.7rem; }
+    .command-button small { margin-top: 0.13rem; color: #aab6b0; font-size: 0.56rem; }
+
+    .console-panel {
+      min-height: 154px;
+      overflow: hidden;
+      border: 1px solid rgba(227, 244, 235, 0.1);
+      border-radius: 8px;
+      background: #080c0d;
+    }
+
+    .console-heading {
+      display: flex;
+      min-height: 34px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.45rem 0.65rem;
+      border-bottom: 1px solid rgba(227, 244, 235, 0.08);
+      color: #bac7c0;
+      font-size: 0.57rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .console-live { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--acid-300); }
+    .console-live i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+    .console-logs { display: grid; max-height: 150px; gap: 0.32rem; overflow: auto; padding: 0.6rem 0.65rem; color: #aebbb4; font-family: var(--font-mono); font-size: 0.55rem; line-height: 1.45; scrollbar-color: #35443c transparent; scrollbar-width: thin; }
+    .console-logs p { display: grid; grid-template-columns: 3.15rem 3.1rem minmax(0, 1fr); gap: 0.42rem; margin: 0; }
+    .console-logs time { color: #65746c; font-variant-numeric: tabular-nums; }
+    .console-logs p > span:last-child { overflow-wrap: anywhere; }
+    .log-system { color: #8e9d95; }
+    .log-alpha { color: var(--blue-300); }
+    .log-beta { color: var(--acid-300); }
+    .log-gamma { color: var(--pink-300); }
+
+    .camera-hint { margin: 0.45rem 0 0; color: #899890; font-size: 0.57rem; line-height: 1.45; }
+
+    .visual-settings {
+      margin-top: auto;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .visual-settings summary {
+      display: flex;
+      min-height: 34px;
+      align-items: center;
+      gap: 0.55rem;
+      color: #d2ddd7;
+      cursor: pointer;
+      font-size: 0.65rem;
+      list-style: none;
+    }
+
+    .visual-settings summary::-webkit-details-marker { display: none; }
+    .visual-settings summary::before { color: var(--blue-300); content: "+"; font-size: 1rem; }
+    .visual-settings[open] summary::before { content: "−"; }
+    .visual-settings label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 0.75rem;
+      color: #b9c4be;
+      font-size: 0.63rem;
+    }
+
+    .visual-settings output { color: var(--blue-100); font-variant-numeric: tabular-nums; }
+    .visual-settings input[type="range"] {
+      width: 100%;
+      height: 4px;
+      margin: 0.55rem 0 0.25rem;
+      accent-color: var(--acid-500);
+      cursor: pointer;
+    }
+
+    @media (max-width: 920px) {
+      .game-board { grid-template-columns: minmax(0, 1fr); }
+      .mission-panel { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(240px, 0.9fr); column-gap: 1.25rem; }
+      .mission-head { grid-column: 1; grid-row: 1; border: 0; }
+      .target-section { grid-column: 2; grid-row: 1; padding-top: 0; }
+      .command-grid { grid-column: 1; grid-row: 2; align-content: start; }
+      .console-panel { grid-column: 2; grid-row: 2 / span 2; }
+      .visual-settings { grid-column: 1 / -1; grid-row: 4; }
+    }
+
+    @media (max-width: 640px) {
+      .game-shell { width: min(100% - 1.25rem, 38rem); padding-top: 1.25rem; }
+      .game-heading { align-items: flex-start; gap: 1rem; padding-bottom: 1.1rem; }
+      .game-heading h1 { font-size: clamp(2rem, 10vw, 3rem); }
+      .game-heading p { max-width: 42ch; font-size: 0.78rem; }
+      .edition-stamp { min-width: auto; padding-top: 0.25rem; font-size: 0.55rem; }
+      .edition-stamp strong { font-size: 0.7rem; }
+      .game-board { gap: 0.75rem; padding-top: 0.75rem; }
+      .arena-toolbar { min-height: 42px; padding-inline: 0.7rem; font-size: 0.55rem; }
+      .screen-coordinates { display: none; }
+      .arena-stage { min-height: 290px; aspect-ratio: 4 / 3; }
+      .stage-readout { inset-inline: 0.7rem; font-size: 0.52rem; }
+      .core-selectors { gap: 0.35rem; padding: 0.55rem; }
+      .core-button { min-height: 60px; grid-template-columns: 25px minmax(0, 1fr); gap: 0.42rem; padding: 0.5rem 0.42rem; }
+      .core-button svg { width: 25px; height: 25px; }
+      .core-name { font-size: 0.68rem; }
+      .core-type { font-size: 0.49rem; }
+      .arena-footer { align-items: flex-start; flex-direction: column; gap: 0.3rem; padding: 0.6rem 0.75rem; font-size: 0.58rem; }
+      .mission-panel { display: flex; padding: 1rem; }
+      .mission-head { border-bottom: 1px solid var(--line); padding-bottom: 0.8rem; }
+      .target-section { padding-top: 0.9rem; }
+      .target-display { min-height: 94px; grid-template-columns: 52px minmax(0, 1fr); padding: 0.7rem; }
+      .target-glyph, .target-glyph svg { width: 46px; height: 46px; }
+      .command-grid { margin-top: 0.35rem; }
+      .console-panel { min-height: 130px; }
+      .console-logs { max-height: 136px; }
+      .visual-settings { margin-top: 0.5rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
-<link rel="stylesheet" href="../experiment.css">
-<script src="../experiment.js" defer></script>
+  <link rel="stylesheet" href="../experiment.css">
+  <script src="../experiment.js" defer></script>
 </head>
 <body>
+  <main class="game-shell">
+    <header class="game-heading">
+      <div class="heading-copy">
+        <h1>PS1 Agent <span>Core.</span></h1>
+        <p>Escolha um núcleo, mande um comando e observe a resposta. Um pequeno simulador de agentes perdido nos anos 90.</p>
+      </div>
+      <div class="edition-stamp" aria-label="Simulador de agentes em estética PlayStation 1">
+        <strong>PS1 / AGENT CORE</strong>
+        <span>Simulador interativo</span>
+      </div>
+    </header>
 
-  <div class="viewport-container">
-    <div class="crt-monitor">
-      
-      <!-- BIOS BOOT SCREEN OVERLAY -->
-      <div class="boot-overlay" id="bootOverlay">
-        <div class="boot-logo-container" id="bootAction">
-          <div class="boot-logo-gold">JAIRO</div>
-          <div style="font-family: var(--font-mono); font-size: 12px; color: var(--pink-500); letter-spacing: 0.3em; margin-bottom: 2rem;">AGENT SYSTEM v1.99</div>
-          
-          <div class="boot-text-console">
-            BIOS Version 1.02 // (C) 1996 Brochacho Records<br>
-            Checking AI Cores: ALPHA, BETA, GAMMA... READY<br>
-            Audio Engine: WEB_AUDIO_API... SYNCED
-          </div>
-          
-          <button class="btn-boot" id="btnBoot">Boot Console</button>
+    <div class="game-board">
+      <section class="arena-panel" aria-label="Campo de jogo 3D">
+        <div class="arena-toolbar">
+          <span class="runtime-state"><span class="runtime-light" id="runtimeLight" aria-hidden="true"></span><span id="runtimeStatus">CAMPO ONLINE</span></span>
+          <span class="screen-coordinates" id="screenCoordinates">RENDER 320×200 / JITTER 64</span>
+        <button class="sound-button" id="soundToggle" type="button" aria-label="Ativar sons do simulador" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M11 5 6 9H3v6h3l5 4V5Z"></path>
+              <path d="M16 9a5 5 0 0 1 0 6"></path>
+              <path d="M19 6a9 9 0 0 1 0 12"></path>
+            </svg>
+            <span id="soundLabel">Som off</span>
+          </button>
         </div>
-      </div>
 
-      <!-- CRT TV EFFECT LAYER -->
-      <div class="crt-filters">
-        <div class="scanlines"></div>
-        <div class="phosphor-glow"></div>
-      </div>
-
-      <!-- HUD OVERLAY HUD -->
-      <div class="hud-layer">
-        
-        <!-- Top HUD Row -->
-        <div class="hud-top">
-          <div class="hud-left">
-            <h2>PS1_SIM_CONSOLE // V.96</h2>
-            <p>ACTIVE CORE: <span id="hud-active-core" style="color: var(--acid-500)">ALPHA</span></p>
-            <p>CAMERA POS: <span id="hud-cam-pos" style="color: var(--blue-300)">0.00, 2.50, 6.00</span></p>
-            <p>STATUS: <span style="color: var(--primary)">DOCKING_OK</span></p>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end;">
-            <a href="../index.html" class="back-btn-hud">← Voltar</a>
-            <div class="hud-right">
-              <div>RENDER: 320x240 px</div>
-              <div>JITTER: <span id="hud-jitter-level">64</span>px</div>
-              <div>BPM: 140</div>
-            </div>
+        <div class="arena-stage" id="arenaStage">
+          <div id="canvas-container" role="img" aria-label="Campo tridimensional com três núcleos selecionáveis. Clique em um núcleo para focá-lo."></div>
+          <div class="scanline-surface" aria-hidden="true"></div>
+          <div class="stage-readout" aria-hidden="true">
+            <span id="cameraReadout">CAM // 0.00 / 2.50 / 6.00</span>
+            <strong id="stageStatus">FOCO // ALPHA</strong>
           </div>
         </div>
 
-        <!-- Bottom HUD Row -->
-        <div class="hud-bottom">
-          <!-- Terminal log box -->
-          <div class="console-box">
-            <div class="console-title">Controle do Núcleo de Agentes</div>
-            <div class="console-logs" id="terminal-logs">
-              <!-- Logs appended dynamically -->
-            </div>
-            <div class="console-input-row">
-              <button id="btn-ping">Ping Node</button>
-              <button id="btn-overload">Overload</button>
-              <button id="btn-inject">Inject Mem</button>
-            </div>
-          </div>
-
-          <!-- Slider controllers -->
-          <div class="control-deck">
-            <div class="control-deck-row">
-              <span>Vertex Jitter (Jitter PS1)</span>
-              <input type="range" min="0" max="256" value="64" id="slider-jitter">
-            </div>
-            <div class="control-deck-row">
-              <span>Res. do Render (Pixelation)</span>
-              <input type="range" min="120" max="640" step="120" value="320" id="slider-resolution">
-            </div>
-            <div class="control-deck-row" style="font-size: 8px; color: var(--text-muted); justify-content: flex-start; gap: 0.5rem;">
-              <span>[WASD / Setas] Mover Câmera</span>
-              <span>[Mouse] Orbitar Câmera</span>
-            </div>
-          </div>
+        <div class="core-selectors" role="group" aria-label="Escolher um núcleo de agente">
+          <button class="core-button is-selected" data-agent="ALPHA" type="button" aria-pressed="true" aria-label="Focar núcleo Alpha" disabled>
+            <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+              <path d="M20 4 36 33H4L20 4Z" stroke="currentColor" stroke-width="2"></path>
+              <path d="m20 15 7 13H13l7-13Z" stroke="currentColor" stroke-width="1.5"></path>
+            </svg>
+            <span class="core-copy"><span class="core-name">ALPHA</span><span class="core-type">CRYSTAL NODE</span></span>
+          </button>
+          <button class="core-button" data-agent="BETA" type="button" aria-pressed="false" aria-label="Focar núcleo Beta" disabled>
+            <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+              <path d="M8 8h24v24H8z" stroke="currentColor" stroke-width="2"></path>
+              <path d="M14 14h12v12H14zM20 8v6m0 12v6M8 20h6m12 0h6" stroke="currentColor" stroke-width="1.5"></path>
+            </svg>
+            <span class="core-copy"><span class="core-name">BETA</span><span class="core-type">FRAME NODE</span></span>
+          </button>
+          <button class="core-button" data-agent="GAMMA" type="button" aria-pressed="false" aria-label="Focar núcleo Gamma" disabled>
+            <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+              <path d="m20 3 15 17-15 17L5 20 20 3Z" stroke="currentColor" stroke-width="2"></path>
+              <path d="m20 11 8 9-8 9-8-9 8-9Z" stroke="currentColor" stroke-width="1.5"></path>
+            </svg>
+            <span class="core-copy"><span class="core-name">GAMMA</span><span class="core-type">PRISM NODE</span></span>
+          </button>
         </div>
 
+        <div class="arena-footer">
+          <p id="sceneHelp">Clique em um núcleo para focá-lo. Os comandos atuam no núcleo ativo.</p>
+          <span class="key-hint">CÂMERA <strong>WASD / SETAS</strong></span>
+        </div>
+      </section>
+
+      <aside class="mission-panel" id="missionPanel" aria-label="Controles do simulador">
+        <header class="mission-head">
+          <h2>Console de controle</h2>
+          <p>Direcione um comando ao núcleo ativo e veja como ele reage no campo.</p>
+          <div class="mission-rule">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M3 10h14M10 3v14M5 5l10 10m0-10L5 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
+            </svg>
+            <span>SYSTEM READY <span aria-hidden="true">·</span> 3 AGENTES ONLINE</span>
+          </div>
+        </header>
+
+        <section class="target-section" aria-label="Núcleo ativo">
+          <div class="target-heading"><span>Foco atual</span><span id="selectedState">ONLINE</span></div>
+          <div class="target-display is-target" id="targetDisplay">
+            <div class="target-glyph" id="targetGlyph" aria-hidden="true">
+              <svg viewBox="0 0 40 40" fill="none"><path d="M20 4 36 33H4L20 4Z" stroke="currentColor" stroke-width="2"></path><path d="m20 15 7 13H13l7-13Z" stroke="currentColor" stroke-width="1.5"></path></svg>
+            </div>
+            <div class="target-copy">
+              <strong id="targetName">ALPHA</strong>
+              <p id="targetHint">CRYSTAL NODE · pronto para receber comandos.</p>
+            </div>
+          </div>
+        </section>
+
+        <div class="command-grid" role="group" aria-label="Comandos para o núcleo ativo">
+          <button class="command-button command-ping" id="btn-ping" type="button" disabled>
+            <span class="command-icon" aria-hidden="true">↗</span>
+            <span><strong>Ping node</strong><small>Enviar pulso de sinal</small></span>
+          </button>
+          <button class="command-button command-overload" id="btn-overload" type="button" disabled>
+            <span class="command-icon" aria-hidden="true">ϟ</span>
+            <span><strong>Overload</strong><small>Forçar sobrecarga</small></span>
+          </button>
+          <button class="command-button command-inject" id="btn-inject" type="button" disabled>
+            <span class="command-icon" aria-hidden="true">▤</span>
+            <span><strong>Inject memory</strong><small>Gravar setores de memória</small></span>
+          </button>
+        </div>
+
+        <section class="console-panel" aria-label="Terminal do sistema">
+          <div class="console-heading"><span>Terminal / event log</span><span class="console-live"><i aria-hidden="true"></i> LIVE</span></div>
+          <div class="console-logs" id="terminal-logs" role="log" aria-live="polite" aria-relevant="additions">
+            <p><time>--:--:--</time><span class="log-system">BIOS</span><span>Waiting for boot command...</span></p>
+          </div>
+        </section>
+
+        <details class="visual-settings">
+          <summary>Imagem &amp; câmera</summary>
+          <label for="slider-resolution"><span>Resolução do render</span><output id="resolutionValue">320 px</output></label>
+          <input id="slider-resolution" type="range" min="120" max="640" step="40" value="320" disabled>
+          <label for="slider-jitter"><span>Vertex jitter</span><output id="jitterValue">64 px</output></label>
+          <input id="slider-jitter" type="range" min="0" max="256" step="4" value="64" disabled>
+          <p class="camera-hint">WASD / setas: mover câmera · mouse: selecionar núcleo</p>
+        </details>
+      </aside>
+      <div class="boot-overlay" id="bootOverlay" role="dialog" aria-modal="true" aria-labelledby="bootTitle">
+        <div class="boot-content">
+          <div class="boot-logo" id="bootTitle">JAIRO</div>
+          <div class="boot-version">AGENT SYSTEM v1.99</div>
+          <p class="boot-copy">BIOS Version 1.02 // (C) 1996 Brochacho Records<br>Checking AI Cores: ALPHA, BETA, GAMMA... READY<br>Audio Engine: WEB_AUDIO_API... SYNCED</p>
+          <button class="boot-button" id="btnBoot" type="button">Boot Console <span aria-hidden="true">↗</span></button>
+        </div>
       </div>
-
-      <!-- THREE.JS CONTAINER -->
-      <div id="canvas-container"></div>
-
     </div>
-  </div>
+  </main>
 
-  <!-- Three.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
   <script>
-    // ==========================================
-    // 1. PROCEDURAL RETRO AUDIO SYSTEM (Web Audio)
-    // ==========================================
-    let audioCtx = null;
+    (function () {
+      const coreData = [
+        { name: 'ALPHA', type: 'CRYSTAL NODE', color: 0x00bfff, css: 'var(--core-alpha)', x: -1.8, geometry: 'crystal' },
+        { name: 'BETA', type: 'FRAME NODE', color: 0x7fff00, css: 'var(--core-beta)', x: 0, geometry: 'frame' },
+        { name: 'GAMMA', type: 'PRISM NODE', color: 0xff00aa, css: 'var(--core-gamma)', x: 1.8, geometry: 'prism' }
+      ];
 
-    function initAudio() {
-      if (audioCtx) return;
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
+      const iconMarkup = {
+        ALPHA: '<svg viewBox="0 0 40 40" fill="none"><path d="M20 4 36 33H4L20 4Z" stroke="currentColor" stroke-width="2"/><path d="m20 15 7 13H13l7-13Z" stroke="currentColor" stroke-width="1.5"/></svg>',
+        BETA: '<svg viewBox="0 0 40 40" fill="none"><path d="M8 8h24v24H8z" stroke="currentColor" stroke-width="2"/><path d="M14 14h12v12H14zM20 8v6m0 12v6M8 20h6m12 0h6" stroke="currentColor" stroke-width="1.5"/></svg>',
+        GAMMA: '<svg viewBox="0 0 40 40" fill="none"><path d="m20 3 15 17-15 17L5 20 20 3Z" stroke="currentColor" stroke-width="2"/><path d="m20 11 8 9-8 9-8-9 8-9Z" stroke="currentColor" stroke-width="1.5"/></svg>'
+      };
 
-    // Classic PS1 Synth Boot Sound (Procedural recreation)
-    function playPS1BootSound() {
-      initAudio();
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+      let selectedAgent = 'ALPHA';
+      let soundEnabled = false;
+      let audioContext = null;
+      let consoleBooted = false;
+      const pageStartedAt = Date.now();
+
+      const bootOverlay = document.getElementById('bootOverlay');
+      const bootButton = document.getElementById('btnBoot');
+      const runtimeLight = document.getElementById('runtimeLight');
+      const runtimeStatus = document.getElementById('runtimeStatus');
+      const stageStatus = document.getElementById('stageStatus');
+      const cameraReadout = document.getElementById('cameraReadout');
+      const screenCoordinates = document.getElementById('screenCoordinates');
+      const targetDisplay = document.getElementById('targetDisplay');
+      const targetGlyph = document.getElementById('targetGlyph');
+      const targetName = document.getElementById('targetName');
+      const targetHint = document.getElementById('targetHint');
+      const selectedState = document.getElementById('selectedState');
+      const coreButtons = Array.from(document.querySelectorAll('.core-button'));
+      const commandButtons = Array.from(document.querySelectorAll('.command-button'));
+      const sliderResolution = document.getElementById('slider-resolution');
+      const sliderJitter = document.getElementById('slider-jitter');
+      const resolutionValue = document.getElementById('resolutionValue');
+      const jitterValue = document.getElementById('jitterValue');
+      const soundToggle = document.getElementById('soundToggle');
+      const soundLabel = document.getElementById('soundLabel');
+      const arenaStage = document.getElementById('arenaStage');
+      const logsContainer = document.getElementById('terminal-logs');
+
+      function setRuntime(state, message) {
+        runtimeStatus.textContent = message;
+        runtimeLight.classList.toggle('is-live', state === 'live');
+        runtimeLight.classList.toggle('is-error', state === 'error');
       }
 
-      const now = audioCtx.currentTime;
-
-      // Sound 1: Deep cosmic ambient low-end sweep (bass drone)
-      const oscBass = audioCtx.createOscillator();
-      const gainBass = audioCtx.createGain();
-      oscBass.type = 'sawtooth';
-      oscBass.frequency.setValueAtTime(55, now); // Low A
-      oscBass.frequency.exponentialRampToValueAtTime(32.7, now + 5.0); // Drop to low C
-
-      // Filter to make it warm, dark and foggy
-      const filterBass = audioCtx.createBiquadFilter();
-      filterBass.type = 'lowpass';
-      filterBass.frequency.setValueAtTime(120, now);
-      filterBass.frequency.exponentialRampToValueAtTime(60, now + 6.0);
-
-      oscBass.connect(gainBass);
-      gainBass.connect(filterBass);
-      filterBass.connect(audioCtx.destination);
-
-      gainBass.gain.setValueAtTime(0.01, now);
-      gainBass.gain.exponentialRampToValueAtTime(0.6, now + 1.5);
-      gainBass.gain.exponentialRampToValueAtTime(0.001, now + 7.5);
-
-      oscBass.start(now);
-      oscBass.stop(now + 8.0);
-
-      // Sound 2: High metallic digital bell layer (representing the CD checking chime)
-      setTimeout(() => {
-        const nowChime = audioCtx.currentTime;
-        const oscChime1 = audioCtx.createOscillator();
-        const oscChime2 = audioCtx.createOscillator();
-        const gainChime = audioCtx.createGain();
-
-        oscChime1.type = 'triangle';
-        oscChime1.frequency.setValueAtTime(440, nowChime); // Middle A
-        oscChime1.frequency.exponentialRampToValueAtTime(659.25, nowChime + 0.4); // Slide to E
-        oscChime1.frequency.setValueAtTime(880, nowChime + 1.2); // High A
-
-        oscChime2.type = 'sine';
-        oscChime2.frequency.setValueAtTime(445, nowChime); // Ring modulation effect
-        oscChime2.frequency.exponentialRampToValueAtTime(662, nowChime + 0.4);
-
-        // Echo/Delay node for the metallic chime
-        const delay = audioCtx.createDelay();
-        delay.delayTime.setValueAtTime(0.3, nowChime);
-
-        const delayGain = audioCtx.createGain();
-        delayGain.gain.setValueAtTime(0.4, nowChime);
-
-        oscChime1.connect(gainChime);
-        oscChime2.connect(gainChime);
-        gainChime.connect(audioCtx.destination);
-
-        // Connect echo feedback loop
-        gainChime.connect(delay);
-        delay.connect(delayGain);
-        delayGain.connect(audioCtx.destination);
-        delayGain.connect(delay); // Feedback
-
-        gainChime.gain.setValueAtTime(0.01, nowChime);
-        gainChime.gain.exponentialRampToValueAtTime(0.25, nowChime + 0.2);
-        gainChime.gain.exponentialRampToValueAtTime(0.001, nowChime + 4.5);
-
-        oscChime1.start(nowChime);
-        oscChime2.start(nowChime);
-        oscChime1.stop(nowChime + 5.0);
-        oscChime2.stop(nowChime + 5.0);
-      }, 1500);
-    }
-
-    // Play retro beep sound for buttons
-    function playBeep(freq, type, duration) {
-      if (!audioCtx) return;
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-
-      osc.type = type || 'sine';
-      osc.frequency.setValueAtTime(freq || 600, now);
-      if (type === 'sawtooth') {
-        osc.frequency.exponentialRampToValueAtTime(100, now + duration);
+      function appendLog(message, kind) {
+        const elapsed = Math.floor((Date.now() - pageStartedAt) / 1000);
+        const timestamp = '00:' + String(Math.floor(elapsed / 60)).padStart(2, '0') + ':' + String(elapsed % 60).padStart(2, '0');
+        const row = document.createElement('p');
+        const time = document.createElement('time');
+        const label = document.createElement('span');
+        const text = document.createElement('span');
+        time.textContent = timestamp;
+        label.className = 'log-' + (kind || selectedAgent.toLowerCase());
+        label.textContent = kind === 'system' ? 'SYSTEM' : selectedAgent;
+        text.textContent = message;
+        row.append(time, label, text);
+        logsContainer.appendChild(row);
+        logsContainer.scrollTop = logsContainer.scrollHeight;
+        while (logsContainer.children.length > 28) logsContainer.removeChild(logsContainer.firstElementChild);
       }
 
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-      osc.start(now);
-      osc.stop(now + duration + 0.1);
-    }
-
-    // ==========================================
-    // 2. GLSL CUSTOM SHADERS (PS1 Graphics Engine)
-    // ==========================================
-    const ps1VertexShader = `
-      uniform float u_jitter;
-      uniform float u_time;
-      uniform float u_scale;
-      varying vec2 vUv;
-      varying vec3 vNormal;
-
-      void main() {
-        vUv = uv;
-        vNormal = normalMatrix * normal;
-        
-        // Custom scale for expansion animations
-        vec3 scaledPosition = position * u_scale;
-
-        vec4 mvPosition = modelViewMatrix * vec4(scaledPosition, 1.0);
-        vec4 clipPosition = projectionMatrix * mvPosition;
-
-        // Snapping in clip space to simulate lack of sub-pixel precision!
-        if (u_jitter > 0.0) {
-          vec3 ndc = clipPosition.xyz / clipPosition.w;
-          ndc.xy = floor(ndc.xy * u_jitter) / u_jitter;
-          clipPosition.xyz = ndc * clipPosition.w;
-        }
-
-        gl_Position = clipPosition;
+      function playTone(frequency, duration, waveform) {
+        if (!soundEnabled || !audioContext) return;
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const now = audioContext.currentTime;
+        oscillator.type = waveform || 'triangle';
+        oscillator.frequency.setValueAtTime(frequency, now);
+        if (waveform === 'sawtooth') oscillator.frequency.exponentialRampToValueAtTime(100, now + duration);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+        oscillator.start(now);
+        oscillator.stop(now + duration + 0.1);
       }
-    `;
 
-    const ps1FragmentShader = `
-      uniform float u_time;
-      uniform vec3 u_color;
-      uniform float u_glitch;
-      varying vec2 vUv;
-      varying vec3 vNormal;
-
-      void main() {
-        // Flat face-lighting (gouraud-like / low-poly shading feel)
-        vec3 normal = normalize(vNormal);
-        vec3 lightDirection = normalize(vec3(0.5, 1.0, 0.7));
-        float light = dot(normal, lightDirection) * 0.4 + 0.6;
-        
-        // Add subtle dithering pattern emulation
-        float dither = mod(gl_FragCoord.x + gl_FragCoord.y, 2.0) * 0.03;
-        
-        vec3 finalColor = u_color * light + vec3(dither);
-
-        // Simula noise/glitch bands
-        if (u_glitch > 0.0) {
-          float noise = sin(gl_FragCoord.y * 0.5 + u_time * 20.0) * u_glitch * 0.15;
-          finalColor += vec3(noise);
-        }
-
-        gl_FragColor = vec4(finalColor, 1.0);
+      function prepareAudio() {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return false;
+        if (!audioContext) audioContext = new AudioContextClass();
+        if (audioContext.state === 'suspended') audioContext.resume();
+        return true;
       }
-    `;
 
-    // ==========================================
-    // 3. THREE.JS 3D SCENE CONFIGURATION
-    // ==========================================
-    let scene, camera, renderer;
-    let agentAlpha, agentBeta, agentGamma;
-    let selectedAgent = 'ALPHA';
-    let currentJitter = 64.0;
-    let renderResolution = 320;
-    let clock = new THREE.Clock();
+      function playPS1BootSound() {
+        if (!prepareAudio()) return false;
+        const now = audioContext.currentTime;
+        const bass = audioContext.createOscillator();
+        const bassGain = audioContext.createGain();
+        const bassFilter = audioContext.createBiquadFilter();
+        bass.type = 'sawtooth';
+        bass.frequency.setValueAtTime(55, now);
+        bass.frequency.exponentialRampToValueAtTime(32.7, now + 5);
+        bassFilter.type = 'lowpass';
+        bassFilter.frequency.setValueAtTime(120, now);
+        bassFilter.frequency.exponentialRampToValueAtTime(60, now + 6);
+        bass.connect(bassGain);
+        bassGain.connect(bassFilter);
+        bassFilter.connect(audioContext.destination);
+        bassGain.gain.setValueAtTime(0.01, now);
+        bassGain.gain.exponentialRampToValueAtTime(0.6, now + 1.5);
+        bassGain.gain.exponentialRampToValueAtTime(0.001, now + 7.5);
+        bass.start(now);
+        bass.stop(now + 8);
 
-    // UI elements
-    const bootOverlay = document.getElementById('bootOverlay');
-    const btnBoot = document.getElementById('btnBoot');
-    const logsContainer = document.getElementById('terminal-logs');
-    const hudActiveCore = document.getElementById('hud-active-core');
-    const hudCamPos = document.getElementById('hud-cam-pos');
-    const hudJitterLevel = document.getElementById('hud-jitter-level');
-    const sliderJitter = document.getElementById('slider-jitter');
-    const sliderResolution = document.getElementById('slider-resolution');
+        window.setTimeout(function () {
+          const chimeTime = audioContext.currentTime;
+          const first = audioContext.createOscillator();
+          const second = audioContext.createOscillator();
+          const chimeGain = audioContext.createGain();
+          const delay = audioContext.createDelay();
+          const delayGain = audioContext.createGain();
+          first.type = 'triangle';
+          first.frequency.setValueAtTime(440, chimeTime);
+          first.frequency.exponentialRampToValueAtTime(659.25, chimeTime + 0.4);
+          first.frequency.setValueAtTime(880, chimeTime + 1.2);
+          second.type = 'sine';
+          second.frequency.setValueAtTime(445, chimeTime);
+          second.frequency.exponentialRampToValueAtTime(662, chimeTime + 0.4);
+          delay.delayTime.setValueAtTime(0.3, chimeTime);
+          delayGain.gain.setValueAtTime(0.4, chimeTime);
+          first.connect(chimeGain);
+          second.connect(chimeGain);
+          chimeGain.connect(audioContext.destination);
+          chimeGain.connect(delay);
+          delay.connect(delayGain);
+          delayGain.connect(audioContext.destination);
+          delayGain.connect(delay);
+          chimeGain.gain.setValueAtTime(0.01, chimeTime);
+          chimeGain.gain.exponentialRampToValueAtTime(0.25, chimeTime + 0.2);
+          chimeGain.gain.exponentialRampToValueAtTime(0.001, chimeTime + 4.5);
+          first.start(chimeTime);
+          second.start(chimeTime);
+          first.stop(chimeTime + 5);
+          second.stop(chimeTime + 5);
+        }, 1500);
+        return true;
+      }
 
-    const btnPing = document.getElementById('btn-ping');
-    const btnOverload = document.getElementById('btn-overload');
-    const btnInject = document.getElementById('btn-inject');
+      function enableSimulatorControls() {
+        soundToggle.disabled = false;
+        coreButtons.forEach(function (button) { button.disabled = false; });
+        commandButtons.forEach(function (button) { button.disabled = false; });
+        sliderResolution.disabled = false;
+        sliderJitter.disabled = false;
+      }
 
-    // Terminal Logging utility
-    function appendLog(message, colorClass) {
-      colorClass = colorClass || '';
-      const timestamp = new Date().toLocaleTimeString();
-      const div = document.createElement('div');
-      div.className = colorClass;
-      div.innerHTML = `<span style="color: var(--text-muted)">${timestamp}</span> > ${message}`;
-      logsContainer.appendChild(div);
-      logsContainer.scrollTop = logsContainer.scrollHeight;
-    }
-
-    // Main system boot
-    btnBoot.addEventListener('click', () => {
-      // 1. Play chime audio
-      playPS1BootSound();
-
-      // 2. Animate HUD mount
-      bootOverlay.style.opacity = '0';
-      setTimeout(() => {
-        bootOverlay.style.display = 'none';
-        initThreeEngine();
-        appendLog('PS1 CORE INITIALIZED successfully.', 'style-acid');
-        appendLog('Ready for remote neural connection.', 'style-acid');
-      }, 1200);
-    });
-
-    function initThreeEngine() {
-      const container = document.getElementById('canvas-container');
-      const width = container.clientWidth;
-      const height = container.clientHeight;
-
-      // 1. Scene with toxic green retro fog
-      scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x0a140f, 0.08);
-
-      // 2. Camera
-      camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 100);
-      camera.position.set(0, 2.5, 6);
-      camera.lookAt(0, 0, 0);
-
-      // 3. Renderer with absolute low-res pixels (locked grid)
-      renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
-      setLowResolutionViewport(renderResolution);
-      container.appendChild(renderer.domElement);
-
-      // 4. Lights
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
-      scene.add(ambientLight);
-
-      const dirLight = new THREE.DirectionalLight(0x00ffaa, 0.85);
-      dirLight.position.set(2, 4, 3);
-      scene.add(dirLight);
-
-      // 5. Low-Poly Grid Floor
-      const gridGeometry = new THREE.PlaneGeometry(16, 16, 12, 12);
-      // Custom material for floor wireframe with vertex jitter
-      const floorMaterial = new THREE.ShaderMaterial({
-        uniforms: {
-          u_jitter: { value: currentJitter },
-          u_time: { value: 0 },
-          u_scale: { value: 1.0 },
-          u_color: { value: new THREE.Color(0x054422) },
-          u_glitch: { value: 0.0 }
-        },
-        vertexShader: ps1VertexShader,
-        fragmentShader: ps1FragmentShader,
-        wireframe: true
-      });
-      const gridFloor = new THREE.Mesh(gridGeometry, floorMaterial);
-      gridFloor.rotation.x = -Math.PI / 2;
-      scene.add(gridFloor);
-
-      // 6. Creating the Low-Poly Agent Nodes (Shader Materials)
-      
-      // Node A: Alpha (Icosahedron - Low Poly Sphere)
-      const alphaMat = new THREE.ShaderMaterial({
-        uniforms: {
-          u_jitter: { value: currentJitter },
-          u_time: { value: 0 },
-          u_scale: { value: 1.0 },
-          u_color: { value: new THREE.Color(0x00bfff) }, // Cyan
-          u_glitch: { value: 0.0 }
-        },
-        vertexShader: ps1VertexShader,
-        fragmentShader: ps1FragmentShader
-      });
-      agentAlpha = new THREE.Mesh(new THREE.IcosahedronGeometry(0.75, 0), alphaMat);
-      agentAlpha.position.set(-1.8, 0.8, 0);
-      scene.add(agentAlpha);
-
-      // Node B: Beta (Cube Box Monitor)
-      const betaMat = new THREE.ShaderMaterial({
-        uniforms: {
-          u_jitter: { value: currentJitter },
-          u_time: { value: 0 },
-          u_scale: { value: 1.0 },
-          u_color: { value: new THREE.Color(0x7fff00) }, // Acid Green
-          u_glitch: { value: 0.0 }
-        },
-        vertexShader: ps1VertexShader,
-        fragmentShader: ps1FragmentShader
-      });
-      agentBeta = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), betaMat);
-      agentBeta.position.set(0, 0.8, -0.5);
-      scene.add(agentBeta);
-
-      // Node C: Gamma (Octahedron Double Cone)
-      const gammaMat = new THREE.ShaderMaterial({
-        uniforms: {
-          u_jitter: { value: currentJitter },
-          u_time: { value: 0 },
-          u_scale: { value: 1.0 },
-          u_color: { value: new THREE.Color(0xff00aa) }, // Pink
-          u_glitch: { value: 0.0 }
-        },
-        vertexShader: ps1VertexShader,
-        fragmentShader: ps1FragmentShader
-      });
-      agentGamma = new THREE.Mesh(new THREE.OctahedronGeometry(0.75, 0), gammaMat);
-      agentGamma.position.set(1.8, 0.8, 0);
-      scene.add(agentGamma);
-
-      // Raycaster to select agents by clicking
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-
-      renderer.domElement.addEventListener('click', (event) => {
-        // Calculate relative mouse coordinates inside canvas element
-        const rect = renderer.domElement.getBoundingClientRect();
-        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects([agentAlpha, agentBeta, agentGamma]);
-
-        if (intersects.length > 0) {
-          const clicked = intersects[0].object;
-          if (clicked === agentAlpha) selectAgent('ALPHA');
-          else if (clicked === agentBeta) selectAgent('BETA');
-          else if (clicked === agentGamma) selectAgent('GAMMA');
-        }
-      });
-
-      // Initialize Camera Controls (Tank movement or Orbit mouse tilt)
-      initCameraControls();
-
-      // Start rendering loop
-      renderLoop();
-    }
-
-    function selectAgent(name) {
-      selectedAgent = name;
-      hudActiveCore.textContent = name;
-      if (name === 'ALPHA') hudActiveCore.style.color = 'var(--blue-300)';
-      else if (name === 'BETA') hudActiveCore.style.color = 'var(--acid-300)';
-      else if (name === 'GAMMA') hudActiveCore.style.color = 'var(--pink-300)';
-
-      playBeep(400, 'sine', 0.08);
-      appendLog(`Core focalized: AGENT_${name}`, 'style-cyan');
-    }
-
-    function setLowResolutionViewport(res) {
-      renderResolution = res;
-      // Locks actual WebGL drawing buffer to a tiny low-res square
-      const aspect = 4 / 3;
-      renderer.setSize(res, Math.floor(res / aspect), false);
-    }
-
-    // Camera move variables
-    let moveForward = false, moveBackward = false, rotateLeft = false, rotateRight = false;
-
-    function initCameraControls() {
-      // Listen for WASD / Arrows
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') moveForward = true;
-        if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') moveBackward = true;
-        if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') rotateLeft = true;
-        if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') rotateRight = true;
-      });
-
-      window.addEventListener('keyup', (e) => {
-        if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') moveForward = false;
-        if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') moveBackward = false;
-        if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') rotateLeft = false;
-        if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') rotateRight = false;
-      });
-    }
-
-    function getActiveAgent() {
-      if (selectedAgent === 'ALPHA') return agentAlpha;
-      if (selectedAgent === 'BETA') return agentBeta;
-      if (selectedAgent === 'GAMMA') return agentGamma;
-    }
-
-    // ==========================================
-    // 4. INTERACTION ACTIONS
-    // ==========================================
-
-    // Action 1: Ping Agent
-    btnPing.addEventListener('click', () => {
-      const agent = getActiveAgent();
-      if (!agent) return;
-
-      playBeep(880, 'sine', 0.25);
-      appendLog(`SIGNAL_PING dispatched to Agent_${selectedAgent}.`, 'style-cyan');
-
-      // Expand mesh scale and reset it slowly
-      agent.material.uniforms.u_scale.value = 1.6;
-      agent.material.uniforms.u_glitch.value = 1.5;
-    });
-
-    // Action 2: Overload Node
-    btnOverload.addEventListener('click', () => {
-      const agent = getActiveAgent();
-      if (!agent) return;
-
-      playBeep(120, 'sawtooth', 0.5);
-      appendLog(`CRITICAL OVERLOAD: Injecting thermal vector to Agent_${selectedAgent}!`, 'style-pink');
-
-      // Glitch mesh warp and flash color
-      agent.material.uniforms.u_glitch.value = 4.0;
-      agent.material.uniforms.u_scale.value = 0.5;
-      
-      const originalColor = agent.material.uniforms.u_color.value.clone();
-      agent.material.uniforms.u_color.value.setHex(0xff0000); // Burn Red
-
-      setTimeout(() => {
-        agent.material.uniforms.u_color.value.copy(originalColor);
-        agent.material.uniforms.u_scale.value = 1.0;
-      }, 500);
-    });
-
-    // Action 3: Inject Memory lines
-    btnInject.addEventListener('click', () => {
-      const agent = getActiveAgent();
-      if (!agent) return;
-
-      playBeep(520, 'triangle', 0.3);
-      appendLog(`WRITING MEMORY SECTORS to core...`, 'style-acid');
-      appendLog(`[0x8f22] INTR_RETR_MEMORY = OK`, 'style-muted');
-      appendLog(`[0x90a3] SYSTEM_EVALUATION = STABLE`, 'style-muted');
-
-      // Pulsing scale jitter
-      let cycles = 0;
-      const interval = setInterval(() => {
-        agent.material.uniforms.u_scale.value = 0.9 + Math.random() * 0.3;
-        cycles++;
-        if (cycles > 10) {
-          clearInterval(interval);
-          agent.material.uniforms.u_scale.value = 1.0;
-          appendLog(`Inject cycle completed.`, 'style-acid');
-        }
-      }, 60);
-    });
-
-    // Sliders event listeners
-    sliderJitter.addEventListener('input', (e) => {
-      currentJitter = parseFloat(e.target.value);
-      hudJitterLevel.textContent = currentJitter.toFixed(0);
-
-      // Update uniforms on all shaders
-      if (agentAlpha) {
-        agentAlpha.material.uniforms.u_jitter.value = currentJitter;
-        agentBeta.material.uniforms.u_jitter.value = currentJitter;
-        agentGamma.material.uniforms.u_jitter.value = currentJitter;
-        scene.traverse((node) => {
-          if (node.material && node.material.uniforms && node.material.uniforms.u_jitter) {
-            node.material.uniforms.u_jitter.value = currentJitter;
+      soundToggle.addEventListener('click', function () {
+        if (!soundEnabled) {
+          if (!prepareAudio()) {
+            appendLog('Web Audio API unavailable in this browser.', 'system');
+            return;
           }
+          soundEnabled = true;
+          soundToggle.setAttribute('aria-label', 'Desativar sons do simulador');
+          soundLabel.textContent = 'Som on';
+          playTone(660, 0.11, 'sine');
+        } else {
+          soundEnabled = false;
+          soundToggle.setAttribute('aria-label', 'Ativar sons do simulador');
+          soundLabel.textContent = 'Som off';
+        }
+      });
+
+      bootButton.addEventListener('click', function () {
+        if (consoleBooted) return;
+        consoleBooted = true;
+        setRuntime('live', 'INICIALIZANDO BIOS');
+        selectedState.textContent = 'BOOTING';
+        stageStatus.textContent = 'BOOT SEQUENCE';
+        const hasAudio = playPS1BootSound();
+        soundEnabled = hasAudio;
+        soundLabel.textContent = hasAudio ? 'Som on' : 'Som off';
+        soundToggle.setAttribute('aria-label', hasAudio ? 'Desativar sons do simulador' : 'Ativar sons do simulador');
+        bootButton.disabled = true;
+        bootOverlay.classList.add('is-hiding');
+        window.setTimeout(function () {
+          bootOverlay.hidden = true;
+          bootButton.blur();
+          enableSimulatorControls();
+          initThreeEngine();
+          appendLog('PS1 CORE INITIALIZED successfully.', 'system');
+          appendLog('Ready for remote neural connection.', 'system');
+        }, 1200);
+      });
+
+      function renderSelectedAgent() {
+        const core = coreData.find(function (item) { return item.name === selectedAgent; });
+        if (!core) return;
+        coreButtons.forEach(function (button) {
+          const isSelected = button.dataset.agent === selectedAgent;
+          button.classList.toggle('is-selected', isSelected);
+          button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+        });
+        targetDisplay.style.setProperty('--agent-color', core.css);
+        targetGlyph.innerHTML = iconMarkup[core.name];
+        targetName.textContent = core.name;
+        targetHint.textContent = core.type + ' · pronto para receber comandos.';
+        selectedState.textContent = consoleBooted ? 'ONLINE' : 'STANDBY';
+        stageStatus.textContent = 'FOCO // ' + core.name;
+      }
+
+      coreButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          selectAgent(button.dataset.agent);
+        });
+      });
+
+      window.addEventListener('keydown', function (event) {
+        if (!consoleBooted || !camera || event.altKey || event.ctrlKey || event.metaKey) return;
+        if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLButtonElement) return;
+        if (event.key === 'w' || event.key === 'W' || event.key === 'ArrowUp') cameraInput.moveForward = true;
+        if (event.key === 's' || event.key === 'S' || event.key === 'ArrowDown') cameraInput.moveBackward = true;
+        if (event.key === 'a' || event.key === 'A' || event.key === 'ArrowLeft') cameraInput.rotateLeft = true;
+        if (event.key === 'd' || event.key === 'D' || event.key === 'ArrowRight') cameraInput.rotateRight = true;
+        if (event.key.startsWith('Arrow')) event.preventDefault();
+      });
+
+      window.addEventListener('keyup', function (event) {
+        if (event.key === 'w' || event.key === 'W' || event.key === 'ArrowUp') cameraInput.moveForward = false;
+        if (event.key === 's' || event.key === 'S' || event.key === 'ArrowDown') cameraInput.moveBackward = false;
+        if (event.key === 'a' || event.key === 'A' || event.key === 'ArrowLeft') cameraInput.rotateLeft = false;
+        if (event.key === 'd' || event.key === 'D' || event.key === 'ArrowRight') cameraInput.rotateRight = false;
+      });
+
+      let scene, camera, renderer, clock, gridFloor;
+      let currentJitter = parseFloat(sliderJitter.value);
+      let renderResolution = parseInt(sliderResolution.value, 10);
+      let sceneAgents = [];
+      const cameraInput = { moveForward: false, moveBackward: false, rotateLeft: false, rotateRight: false };
+
+      function selectAgent(name) {
+        if (!coreData.some(function (core) { return core.name === name; })) return;
+        selectedAgent = name;
+        renderSelectedAgent();
+        playTone(400, 0.08, 'sine');
+        appendLog('Core focalized: AGENT_' + name + '.', name.toLowerCase());
+      }
+
+      function getActiveAgent() {
+        return sceneAgents.find(function (agent) { return agent.data.name === selectedAgent; });
+      }
+
+      function pingNode() {
+        const agent = getActiveAgent();
+        if (!agent) return;
+        agent.mesh.material.uniforms.u_scale.value = 1.6;
+        agent.mesh.material.uniforms.u_glitch.value = 1.5;
+        playTone(880, 0.25, 'sine');
+        appendLog('SIGNAL_PING dispatched to Agent_' + selectedAgent + '.');
+      }
+
+      function overloadNode() {
+        const agent = getActiveAgent();
+        if (!agent) return;
+        playTone(120, 0.5, 'sawtooth');
+        appendLog('CRITICAL OVERLOAD: Injecting thermal vector to Agent_' + selectedAgent + '!');
+        const material = agent.mesh.material;
+        material.uniforms.u_glitch.value = 4;
+        material.uniforms.u_scale.value = 0.5;
+        if (agent.restoreTimer) window.clearTimeout(agent.restoreTimer);
+        const originalColor = material.uniforms.u_color.value.clone();
+        material.uniforms.u_color.value.setHex(0xff0000);
+        agent.restoreTimer = window.setTimeout(function () {
+          material.uniforms.u_color.value.copy(originalColor);
+          material.uniforms.u_scale.value = 1;
+          agent.restoreTimer = null;
+        }, 500);
+      }
+
+      function injectMemory() {
+        const agent = getActiveAgent();
+        if (!agent) return;
+        playTone(520, 0.3, 'triangle');
+        appendLog('WRITING MEMORY SECTORS to core...');
+        appendLog('[0x8f22] INTR_RETR_MEMORY = OK');
+        appendLog('[0x90a3] SYSTEM_EVALUATION = STABLE');
+        if (agent.injectTimer) window.clearInterval(agent.injectTimer);
+        let cycles = 0;
+        agent.injectTimer = window.setInterval(function () {
+          agent.mesh.material.uniforms.u_scale.value = 0.9 + Math.random() * 0.3;
+          cycles += 1;
+          if (cycles > 10) {
+            window.clearInterval(agent.injectTimer);
+            agent.injectTimer = null;
+            agent.mesh.material.uniforms.u_scale.value = 1;
+            appendLog('Inject cycle completed.');
+          }
+        }, 60);
+      }
+
+      document.getElementById('btn-ping').addEventListener('click', pingNode);
+      document.getElementById('btn-overload').addEventListener('click', overloadNode);
+      document.getElementById('btn-inject').addEventListener('click', injectMemory);
+
+      function setLowResolutionViewport(resolution) {
+        renderResolution = parseInt(resolution, 10);
+        resolutionValue.textContent = renderResolution + ' px';
+        updateRenderReadout();
+        if (!renderer) return;
+        resizeScene();
+      }
+
+      function updateRenderReadout() {
+        const width = arenaStage.clientWidth;
+        const height = arenaStage.clientHeight;
+        const aspect = width && height ? width / height : 1.6;
+        const rasterHeight = Math.max(1, Math.round(renderResolution / aspect));
+        screenCoordinates.textContent = 'RENDER ' + renderResolution + '×' + rasterHeight + ' / JITTER ' + currentJitter;
+      }
+
+      function resizeScene() {
+        if (!renderer || !camera) return;
+        const width = arenaStage.clientWidth;
+        const height = arenaStage.clientHeight;
+        if (!width || !height) return;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        const rasterHeight = Math.max(1, Math.round(renderResolution / camera.aspect));
+        renderer.setSize(renderResolution, rasterHeight, false);
+        screenCoordinates.textContent = 'RENDER ' + renderResolution + '×' + rasterHeight + ' / JITTER ' + currentJitter;
+      }
+
+      sliderResolution.addEventListener('input', function (event) {
+        setLowResolutionViewport(event.target.value);
+      });
+
+      sliderJitter.addEventListener('input', function (event) {
+        currentJitter = parseFloat(event.target.value);
+        jitterValue.textContent = currentJitter === 0 ? 'off' : currentJitter + ' px';
+        sceneAgents.forEach(function (agent) {
+          agent.mesh.material.uniforms.u_jitter.value = currentJitter;
+        });
+        if (gridFloor) gridFloor.material.uniforms.u_jitter.value = currentJitter;
+        updateRenderReadout();
+      });
+
+      function createAgentMaterial(color) {
+        return new THREE.ShaderMaterial({
+          uniforms: {
+            u_jitter: { value: currentJitter },
+            u_time: { value: 0 },
+            u_scale: { value: 1 },
+            u_color: { value: new THREE.Color(color) },
+            u_glitch: { value: 0 }
+          },
+          vertexShader: [
+            'uniform float u_jitter;',
+            'uniform float u_time;',
+            'uniform float u_scale;',
+            'varying vec2 vUv;',
+            'varying vec3 vNormal;',
+            'void main() {',
+            '  vUv = uv;',
+            '  vNormal = normalMatrix * normal;',
+            '  vec3 scaledPosition = position * u_scale;',
+            '  vec4 mvPosition = modelViewMatrix * vec4(scaledPosition, 1.0);',
+            '  vec4 clip = projectionMatrix * mvPosition;',
+            '  if (u_jitter > 0.0) {',
+            '    vec3 ndc = clip.xyz / clip.w;',
+            '    ndc.xy = floor(ndc.xy * u_jitter) / u_jitter;',
+            '    clip.xyz = ndc * clip.w;',
+            '  }',
+            '  gl_Position = clip;',
+            '}'
+          ].join('\n'),
+          fragmentShader: [
+            'uniform float u_time;',
+            'uniform vec3 u_color;',
+            'uniform float u_glitch;',
+            'varying vec3 vNormal;',
+            'void main() {',
+            '  vec3 normal = normalize(vNormal);',
+            '  vec3 lightDirection = normalize(vec3(0.5, 1.0, 0.7));',
+            '  float light = dot(normal, lightDirection) * 0.4 + 0.6;',
+            '  float dither = mod(gl_FragCoord.x + gl_FragCoord.y, 2.0) * 0.03;',
+            '  vec3 finalColor = u_color * light + vec3(dither);',
+            '  if (u_glitch > 0.0) {',
+            '    float noise = sin(gl_FragCoord.y * 0.5 + u_time * 20.0) * u_glitch * 0.15;',
+            '    finalColor += vec3(noise);',
+            '  }',
+            '  gl_FragColor = vec4(finalColor, 1.0);',
+            '}'
+          ].join('\n'),
+          side: THREE.DoubleSide
         });
       }
-    });
 
-    sliderResolution.addEventListener('input', (e) => {
-      const res = parseInt(e.target.value);
-      setLowResolutionViewport(res);
-      appendLog(`RENDER RESOLUTION shifted: ${res}x${Math.floor(res/(4/3))}`, 'style-cyan');
-    });
+      function createSceneAgent(data, index) {
+        let geometry;
+        if (data.geometry === 'crystal') geometry = new THREE.IcosahedronGeometry(0.75, 0);
+        else if (data.geometry === 'frame') geometry = new THREE.BoxGeometry(0.9, 0.9, 0.9);
+        else geometry = new THREE.OctahedronGeometry(0.75, 0);
 
-    // ==========================================
-    // 5. MAIN ANIMATION & RENDERING LOOP
-    // ==========================================
-    function renderLoop() {
-      requestAnimationFrame(renderLoop);
+        const mesh = new THREE.Mesh(geometry, createAgentMaterial(data.color));
+        mesh.position.set(data.x, 0.8, index === 1 ? -0.5 : 0);
+        mesh.userData.agentName = data.name;
+        scene.add(mesh);
 
-      const delta = clock.getDelta();
-      const time = clock.getElapsedTime();
-
-      // 1. Rotate the low-poly meshes
-      if (agentAlpha) {
-        agentAlpha.rotation.y += 0.8 * delta;
-        agentAlpha.rotation.x += 0.4 * delta;
-        // Float slightly up and down
-        agentAlpha.position.y = 0.8 + Math.sin(time * 2.0) * 0.08;
-
-        // Dampen expand animations back to normal scale
-        agentAlpha.material.uniforms.u_scale.value += (1.0 - agentAlpha.material.uniforms.u_scale.value) * 0.1;
-        agentAlpha.material.uniforms.u_glitch.value += (0.0 - agentAlpha.material.uniforms.u_glitch.value) * 0.1;
-        agentAlpha.material.uniforms.u_time.value = time;
+        return {
+          data: data,
+          mesh: mesh,
+          baseY: mesh.position.y,
+          phase: index * 1.8,
+          restoreTimer: null,
+          injectTimer: null
+        };
       }
 
-      if (agentBeta) {
-        agentBeta.rotation.y -= 0.5 * delta;
-        agentBeta.position.y = 0.8 + Math.sin(time * 1.5 + 1.0) * 0.06;
-
-        agentBeta.material.uniforms.u_scale.value += (1.0 - agentBeta.material.uniforms.u_scale.value) * 0.1;
-        agentBeta.material.uniforms.u_glitch.value += (0.0 - agentBeta.material.uniforms.u_glitch.value) * 0.1;
-        agentBeta.material.uniforms.u_time.value = time;
-      }
-
-      if (agentGamma) {
-        agentGamma.rotation.y += 0.6 * delta;
-        agentGamma.rotation.z -= 0.4 * delta;
-        agentGamma.position.y = 0.8 + Math.sin(time * 2.5 + 2.0) * 0.1;
-
-        agentGamma.material.uniforms.u_scale.value += (1.0 - agentGamma.material.uniforms.u_scale.value) * 0.1;
-        agentGamma.material.uniforms.u_glitch.value += (0.0 - agentGamma.material.uniforms.u_glitch.value) * 0.1;
-        agentGamma.material.uniforms.u_time.value = time;
-      }
-
-      // 2. Camera controls tank-movement
-      if (camera) {
-        // Handle rotation
-        if (rotateLeft) camera.rotation.y += 1.2 * delta;
-        if (rotateRight) camera.rotation.y -= 1.2 * delta;
-
-        // Handle forward/backward along local camera look direction
-        if (moveForward || moveBackward) {
-          const moveDirection = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-          moveDirection.y = 0; // Lock to floor plane
-          moveDirection.normalize();
-
-          const speed = 3.5 * delta;
-          if (moveForward) camera.position.addScaledVector(moveDirection, speed);
-          if (moveBackward) camera.position.addScaledVector(moveDirection, -speed);
+      function initThreeEngine() {
+        const container = document.getElementById('canvas-container');
+        if (!window.THREE) {
+          container.setAttribute('aria-label', 'O modo 3D não está disponível. Use os controles do simulador.');
+          setRuntime('error', 'MODO 3D INDISPONÍVEL');
+          stageStatus.textContent = 'SIMULATOR READY';
+          appendLog('3D engine unavailable. UI controls remain active.', 'system');
+          return;
         }
 
-        // Clamp camera positions so we don't fly off too far
-        camera.position.x = Math.max(-7, Math.min(camera.position.x, 7));
-        camera.position.z = Math.max(2, Math.min(camera.position.z, 9));
+        try {
+          scene = new THREE.Scene();
+          scene.background = new THREE.Color(0x0a140f);
+          scene.fog = new THREE.FogExp2(0x0a140f, 0.08);
 
-        // Update camera position text on HUD
-        hudCamPos.textContent = `${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)}`;
+          const width = arenaStage.clientWidth;
+          const height = arenaStage.clientHeight;
+          camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 100);
+          camera.position.set(0, 2.5, 6);
+          camera.lookAt(0, 0, 0);
+
+          renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
+          renderer.setPixelRatio(1);
+          renderer.setClearColor(0x0a140f, 1);
+          container.appendChild(renderer.domElement);
+          resizeScene();
+
+          scene.add(new THREE.AmbientLight(0xffffff, 0.15));
+          const keyLight = new THREE.DirectionalLight(0x00ffaa, 0.85);
+          keyLight.position.set(2, 4, 3);
+          scene.add(keyLight);
+
+          const floorGeometry = new THREE.PlaneGeometry(16, 16, 12, 12);
+          const floorMaterial = createAgentMaterial(0x054422);
+          floorMaterial.wireframe = true;
+          gridFloor = new THREE.Mesh(floorGeometry, floorMaterial);
+          gridFloor.rotation.x = -Math.PI / 2;
+          scene.add(gridFloor);
+
+          sceneAgents = coreData.map(createSceneAgent);
+
+          const raycaster = new THREE.Raycaster();
+          const pointer = new THREE.Vector2();
+          renderer.domElement.addEventListener('click', function (event) {
+            const rect = renderer.domElement.getBoundingClientRect();
+            pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(pointer, camera);
+            const intersections = raycaster.intersectObjects(sceneAgents.map(function (agent) { return agent.mesh; }), false);
+            if (intersections.length) selectAgent(intersections[0].object.userData.agentName);
+          });
+
+          clock = new THREE.Clock();
+          setRuntime('live', 'CAMPO ONLINE');
+          renderSelectedAgent();
+          window.addEventListener('resize', resizeScene);
+          if (window.ResizeObserver) {
+            const observer = new ResizeObserver(resizeScene);
+            observer.observe(arenaStage);
+          }
+          renderLoop();
+        } catch (error) {
+          container.innerHTML = '';
+          container.setAttribute('aria-label', 'O modo 3D não iniciou. Use os controles do simulador.');
+          setRuntime('error', 'MODO 3D INDISPONÍVEL');
+          stageStatus.textContent = 'SIMULATOR READY';
+          appendLog('3D engine failed to start. UI controls remain active.', 'system');
+        }
       }
 
-      renderer.render(scene, camera);
-    }
+      function renderLoop() {
+        requestAnimationFrame(renderLoop);
+        if (!renderer || !scene || !camera) return;
+        const delta = Math.min(clock.getDelta(), 0.05);
+        const elapsed = clock.elapsedTime;
+
+        if (cameraInput.rotateLeft) camera.rotation.y += 1.2 * delta;
+        if (cameraInput.rotateRight) camera.rotation.y -= 1.2 * delta;
+        if (cameraInput.moveForward || cameraInput.moveBackward) {
+          const moveDirection = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+          moveDirection.y = 0;
+          moveDirection.normalize();
+          const speed = 3.5 * delta;
+          if (cameraInput.moveForward) camera.position.addScaledVector(moveDirection, speed);
+          if (cameraInput.moveBackward) camera.position.addScaledVector(moveDirection, -speed);
+        }
+        camera.position.x = Math.max(-7, Math.min(camera.position.x, 7));
+        camera.position.z = Math.max(2, Math.min(camera.position.z, 9));
+        cameraReadout.textContent = 'CAM // ' + camera.position.x.toFixed(2) + ' / ' + camera.position.y.toFixed(2) + ' / ' + camera.position.z.toFixed(2);
+
+        sceneAgents.forEach(function (agent, index) {
+          const uniforms = agent.mesh.material.uniforms;
+          if (index === 0) {
+            agent.mesh.rotation.y += 0.8 * delta;
+            agent.mesh.rotation.x += 0.4 * delta;
+            agent.mesh.position.y = 0.8 + Math.sin(elapsed * 2) * 0.08;
+          } else if (index === 1) {
+            agent.mesh.rotation.y -= 0.5 * delta;
+            agent.mesh.position.y = 0.8 + Math.sin(elapsed * 1.5 + 1) * 0.06;
+          } else {
+            agent.mesh.rotation.y += 0.6 * delta;
+            agent.mesh.rotation.z -= 0.4 * delta;
+            agent.mesh.position.y = 0.8 + Math.sin(elapsed * 2.5 + 2) * 0.1;
+          }
+          uniforms.u_time.value = elapsed;
+          uniforms.u_scale.value += (1 - uniforms.u_scale.value) * 0.1;
+          uniforms.u_glitch.value += (0 - uniforms.u_glitch.value) * 0.1;
+        });
+
+        renderer.render(scene, camera);
+      }
+
+      sliderJitter.value = String(currentJitter);
+      jitterValue.textContent = currentJitter + ' px';
+      updateRenderReadout();
+      renderSelectedAgent();
+    }());
   </script>
-
-  <!-- CSS color helpers for logs -->
-  <style>
-    .style-acid { color: var(--acid-300); font-weight: bold; }
-    .style-cyan { color: var(--blue-300); }
-    .style-pink { color: var(--pink-300); font-weight: bold; }
-    .style-muted { color: var(--text-muted); }
-  </style>
-
 </body>
 </html>
